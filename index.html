@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>edu10 Avaliações - Gerador de Provas</title>
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #f44336;
+            --background-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--background-color);
+        }
+        .login-box {
+            width: 350px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .login-box h2 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .login-box p {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-warning {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #303f9f; }
+        .btn-secondary { background-color: #757575; color: white; }
+        .btn-secondary:hover { background-color: #616161; }
+        .btn-danger { background-color: var(--secondary-color); color: white; }
+        .btn-danger:hover { background-color: #d32f2f; }
+        .btn-success { background-color: #4CAF50; color: white; }
+        .btn-success:hover { background-color: #45a049; }
+        .btn-warning { background-color: #ff9800; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8em; }
+
+
+        #main-interface {
+            display: none;  
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #user-role-display {
+            font-size: 0.6em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        #user-info-display {
+            font-size: 0.9em;
+            margin-left: 10px;
+            font-weight: 300;
+        }
+
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background: #2b3990;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .nav-menu li a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .nav-menu li a:hover, .nav-menu li a.active {
+            background-color: var(--secondary-color);
+        }
+        .nav-menu li a i {
+            margin-right: 8px;
+        }
+
+        .page-section {
+            display: none;  
+            padding: 30px;
+            flex-grow: 1;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .page-section h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .page-section form label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .page-section form input[type="text"],
+        .page-section form input[type="email"],
+        .page-section form input[type="password"],
+        .page-section form input[type="date"],
+        .page-section form input[type="number"],
+        .page-section form select,
+        .page-section form textarea,
+        .modal-content form input:not([type="file"]),
+        .modal-content form select,
+        .modal-content form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .indicator-card {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .indicator-card h3 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .indicator-card p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .exam-list li, #questions-bank-list li, .user-list li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .exam-list li .exam-info, .question-item-info {
+            flex-grow: 1;
+            padding-right: 15px;
+        }
+        .exam-list li:last-child, #questions-bank-list li:last-child, .user-list li:last-child { border-bottom: none; }
+        .user-list li span, .exam-list li span { font-weight: bold; }
+        
+        #questions-bank-list li {
+            display: flex;
+            align-items: center;
+        }
+        #questions-bank-list li input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.5);  
+        }
+        .question-item-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .question-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-container input, .filter-container select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        
+        .alert-error, .alert-success, .alert-info {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .alert-error { background-color: #fce4e4; color: #cc0000; border: 1px solid #f09595; }
+        .alert-success { background-color: #e6f6e6; color: #008000; border: 1px solid #a3d9a3; }
+        .alert-info { background-color: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
+        
+        #exam-preview {
+            border: 1px solid #ddd;
+            padding: 20px; 
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 210mm;   
+            margin: 20px auto;  
+            min-height: 297mm;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        #exam-content-print {
+            padding: 10px;
+        }
+        #exam-content-print .exam-header-print {
+            border: 1px solid #000;
+            padding: 0; 
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 20% 80%; 
+            font-size: 10pt;
+        }
+        #exam-content-print .exam-header-print table {
+             width: 100%; 
+             border-collapse: collapse; 
+             font-size: 10pt;
+        }
+        #exam-content-print .exam-header-print table,
+        #exam-content-print .exam-header-print td {
+            border: 1px solid #000;
+        }
+        #exam-content-print .exam-header-print td {
+            padding: 3px 5px;
+        }
+        #exam-content-print .exam-header-print .logo-area {
+            border: 1px solid #000; 
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+        #exam-content-print .exam-header-print .logo-area img {
+            max-width: 100%;
+            max-height: 50px;
+            height: auto;
+        }
+        #exam-content-print .questions-wrapper {
+             column-count: 1; 
+             gap: 20px;
+        }
+        #exam-content-print .question-item-print {
+             border: 1px solid #ddd;
+             padding: 10px;
+             margin-bottom: 15px;
+        }
+        #exam-content-print .q-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             background-color: #fff8e1; 
+             padding: 5px;
+             margin: -10px -10px 10px -10px;
+             border-bottom: 1px solid #ccc;
+        }
+        #exam-content-print .q-header strong {
+             font-size: 12pt;
+             color: #3f51b5;
+        }
+        #exam-content-print .q-enunciado {
+             font-size: 11pt;
+             margin-bottom: 10px;
+        }
+        #exam-content-print .alternative-list-print {
+             list-style: none;
+             padding: 0;
+             margin: 0;
+        }
+        #exam-content-print .alternative-list-print li label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11pt;
+        }
+        #exam-content-print .alternative-list-print input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        
+        #exam-questions-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px dotted #ccc;
+        }
+        #exam-questions-list li label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            flex-grow: 1;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        #exam-questions-list li input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+            transform: scale(1.0);
+        }
+
+        footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75em;
+            color: #777;
+            border-top: 1px solid #eee;
+            margin-top: auto;
+        }
+
+
+        .modal {
+            display: none;  
+            position: fixed;    
+            z-index: 1000;  
+            left: 0;
+            top: 0;
+            width: 100%;    
+            height: 100%;   
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.4);   
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;    
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 900px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-content h3 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 5px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #modal-question-view .question-view-grid,
+        #modal-question-edit .question-view-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .alternatives-list label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        .alternatives-list input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-image-preview {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+        .image-preview-edit {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 5px 0;
+        }
+
+
+        /* =======================================================================
+           3. ESTILOS DE IMPRESSÃO (PDF PERFEITO - Fiel ao Anexo + Páginação + ANTI-FRAUDE)
+           ======================================================================= */
+        
+        #print-area-container {
+            display: none; 
+            font-family: 'Times New Roman', serif;
+        }
+
+        /* Classe de Ruído Anti-Fraude (Invisível mas quebra copiar/colar) */
+        .af-garbage {
+            position: absolute;
+            opacity: 0;
+            color: transparent;
+            font-size: 1px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+            z-index: -999;
+        }
+        /* Ajuste Responsivo da Interface (Tela) */
+@media screen and (max-width: 768px) {
+    .exam-header-print {
+        display: flex !important;
+        flex-direction: column;
+        border: 1px solid #000;
+    }
+    .exam-header-print .logo-area {
+        border-bottom: 1px solid #000;
+        padding: 10px;
+    }
+    .exam-header-print div:last-child {
+        border-left: none !important;
+    }
+    /* Faz a tabela interna da prova virar blocos no celular */
+    .exam-header-print table, 
+    .exam-header-print tr, 
+    .exam-header-print td {
+        display: block;
+        width: 100% !important;
+        border: none !important;
+        border-bottom: 1px solid #eee !important;
+    }
+}
+@media print {
+    /* Força o navegador a imprimir cores e imagens de fundo */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Garante que o cabeçalho mantenha o tom de azul da sua marca */
+    .q-header strong {
+        color: #3f51b5 !important; /* Seu azul original */
+    }
+
+    .q-number-box {
+        color: #f44336 !important; /* Seu vermelho/laranja original */
+        border-color: #000 !important;
+    }
+
+    /* Ícones do FontAwesome costumam sumir na impressão, aqui garantimos a cor */
+    .fa-book-open {
+        color: #ff9800 !important;
+    }
+
+    /* Mantém as bordas visíveis */
+    .exam-header-print, .header-table-container, td {
+        border-color: #000 !important;
+    }
+}
+/* Ajuste Fixo para Impressão (iOS e Windows) */
+@media print {
+    #print-area-container {
+        display: block !important;
+    }
+    
+    .exam-header-print {
+        display: -webkit-grid !important; /* Safari/iOS */
+        display: grid !important;
+        grid-template-columns: 20% 80% !important;
+        -webkit-grid-template-columns: 20% 80% !important;
+        width: 100% !important;
+        border: 1px solid #000 !important;
+    }
+
+    /* Evita que a questão seja cortada entre páginas no iOS */
+    .question-item-print {
+        page-break-inside: avoid !important;
+        -webkit-column-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        position: relative !important;
+        margin-bottom: 20px !important;
+    }
+
+    .questions-wrapper {
+        column-count: var(--print-col-count, 1);
+        -webkit-column-count: var(--print-col-count, 1);
+        gap: 1cm;
+    }
+}
+        @media print {
+            @page {
+                size: A4;
+                margin: 18mm 15mm 15mm 18mm; 
+                
+                @bottom-right {
+                    content: "Página " counter(page) " de " counter(pages);
+                    font-size: 9pt;
+                    font-family: 'Times New Roman', serif;
+                    color: #000;
+                }
+                
+                @bottom-left {
+                    content: "By Atecseven tecnologia - www.atecseven.com.br - CNPJ 63.373.374/0001-72";
+                    font-size: 8pt;
+                    font-family: 'Times New Roman', serif;
+                    color: #555;
+                }
+            }
+            
+            body {
+                background: none;
+                color: black;
+                margin: 0;
+                padding: 0;
+                font-size: 11pt;    
+                line-height: 1.4;
+            }
+
+            body > *:not(#print-area-container) {
+                display: none !important;
+            }
+            
+            #print-area-container {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .exam-header-print {
+                border: 1px solid #000; 
+                padding: 0;
+                margin-bottom: 15px;
+                display: grid !important;
+                grid-template-columns: 20% 80% !important; 
+                break-after: avoid; 
+                page-break-after: avoid;
+            }
+            .exam-header-print .logo-area {
+                border: none !important; 
+                border-right: 1px solid #000 !important; 
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+            }
+            .exam-header-print .logo-area img {
+                max-width: 100%;
+                max-height: 70px;
+            }
+            .exam-header-print table {
+                border-collapse: collapse;
+                width: 100%;
+                height: 100%;
+            }
+            .exam-header-print table, .exam-header-print td {
+                border: none;
+            }
+            .exam-header-print td {
+                border-top: 1px solid #000; 
+                border-left: 1px solid #000;
+                padding: 3px 5px;
+                font-size: 9pt;
+                vertical-align: top;
+            }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr:first-child > td {
+                 border-top: none !important;
+             }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr > td:first-child {
+                border-left: none !important;
+            }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr:nth-child(4) > td:first-child {
+                border-left: none !important;
+            }
+
+            
+            .instructions-text {
+                font-size: 9pt;
+                margin-bottom: 10px; 
+                padding: 5px 10px;
+                border: 1px solid #000;
+                text-align: justify;
+            }
+
+            .questions-wrapper {
+                column-count: var(--print-col-count, 1); 
+                column-gap: 15mm;
+                column-rule: 1px solid #ccc;
+                page-break-after: auto;
+            }
+            .question-item-print {
+                margin-bottom: 10px;
+                padding: 0; 
+                border: none;
+                break-inside: avoid-column; 
+                page-break-inside: avoid;
+            }
+            .q-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: transparent; 
+                padding: 3px 0;
+                margin: 0 0 5px 0;
+                border-bottom: 1px dotted #ccc; 
+            }
+            .q-header strong {
+                font-size: 11pt;
+                font-weight: bold;
+                color: #333;
+            }
+            .q-enunciado {
+                font-size: 10.5pt;
+                margin: 5px 0 5px 5px; 
+                text-align: justify;
+            }
+            
+            .image-preview { 
+                max-width: 60%; 
+                height: auto; 
+                margin: 8px 0; 
+            }
+
+            .discursiva-answer-space {
+                border: 1px dashed #aaa;    
+                margin-top: 5px !important; 
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="login-screen">
+        <div class="login-box">
+            <img src="img/logo-edu10.jpeg" alt="" width="150px" height="50px">
+            <!--<h2><i class="fas fa-school"></i> edu10 Avaliações</h2>-->
+            <p>Acesse com seu e-mail e senha.</p>
+            <input type="email" id="login-user" placeholder="E-mail">
+            <input type="password" id="login-password" placeholder="Senha">
+            <button class="btn-primary" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+            <button class="btn-secondary" onclick="openModal('modal-request-access')" style="margin-top: 10px; width: 100%;"><i class="fas fa-user-plus"></i> Solicitar Acesso</button>
+            <div id="login-message" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div id="main-interface">
+        <header>
+            <div style="display: flex; align-items: center;">
+                <img src="img/logo-edu10-removebg-preview.png" alt="" width="150px" height="50px">
+                
+                <span id="user-info-display"></span>
+            </div>
+            <div>
+                <span id="user-role-display"></span>
+                <button class="btn-danger" onclick="simularLogout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </header>
+
+        <nav>
+            <ul class="nav-menu">
+                <li><a id="nav-dashboard" href="#" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a id="nav-createquestion" href="#" onclick="showPage('create-question')"><i class="fas fa-plus-circle"></i> Criar Questão</a></li>
+                <li><a id="nav-bank" href="#" onclick="showPage('bank')"><i class="fas fa-database"></i> Banco de Questões</a></li>
+                <li><a id="nav-createexam" href="#" onclick="showPage('create-exam')"><i class="fas fa-file-export"></i> Gerar Prova</a></li>
+                <li><a id="nav-myexams" href="#" onclick="showPage('my-exams')"><i class="fas fa-clipboard-list"></i> Minhas Provas</a></li>
+                <li id="nav-admin" style="display: none;"><a id="nav-admin" href="#" onclick="showPage('admin')"><i class="fas fa-user-shield"></i> Administração</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="dashboard" class="page-section">
+                <h2><i class="fas fa-tachometer-alt"></i> Resumo do Sistema</h2>
+                <div class="dashboard-grid">
+                    <div class="indicator-card">
+                        <p>Total de Questões</p>
+                        <h3 id="dash-total-questoes">0</h3>
+                    </div>
+                    <div class="indicator-card">
+                        <p>Total de Provas Geradas</p>
+                        <h3 id="dash-total-provas">0</h3>
+                    </div>
+                    <div class="indicator-card" style="background-color: #00bcd4;">
+                        <p>Usuários Padrão</p>
+                        <h3 id="dash-total-padrao">0</h3>
+                    </div>
+                    <div class="indicator-card" style="background-color: #ff9800;">
+                        <p>Usuários ADM</p>
+                        <h3 id="dash-total-adm">0</h3>
+                    </div>
+                    <div class="indicator-card" style="background-color: var(--secondary-color);">
+                        <p>Usuários Pendentes</p>
+                        <h3 id="dash-total-pendentes">0</h3>
+                    </div>
+                </div>
+            </section>
+
+            <section id="create-question" class="page-section">
+                <h2><i class="fas fa-plus-circle"></i> Cadastrar Nova Questão</h2>
+                <div class="alert-info"><i class="fas fa-info-circle"></i> O upload de todas as imagens agora utiliza o ImgAtecsevenServer.</div>
+                <form id="form-create-question">
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label for="modalidade">Modalidade de Ensino:</label>
+                            <select id="modalidade" required>
+                                <option value="Ensino Fundamental I">Ensino Fundamental I</option>
+                                <option value="Ensino Fundamental II">Ensino Fundamental II</option>
+                                <option value="Ensino Médio">Ensino Médio</option>
+                            </select>
+
+                            <label for="componente">Componente Curricular:</label>
+                            <input type="text" id="componente" placeholder="Ex: Matemática, Português, Ciências" required>
+                            
+                            <label for="habilidade">Habilidade BNCC (D-XX):</label>
+                            <input type="text" id="habilidade" placeholder="Ex: D 33">
+                            
+                            <label for="tipo">Tipo de Questão:</label>
+                            <select id="tipo" onchange="toggleAlternatives(this.value)" required>
+                                <option value="Múltipla Escolha">Múltipla Escolha</option>
+                                <option value="Discursiva">Discursiva</option>
+                            </select>
+                            
+                            <div id="linhas-discursiva-group" style="display: none;">
+                                <label for="linhas-discursiva">Linhas para Resposta Discursiva (padrão 4):</label>
+                                <input type="number" id="linhas-discursiva" min="1" max="20" value="4">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="enunciado">Enunciado da Questão (Texto):</label>
+                            <textarea id="enunciado" rows="5" required></textarea>
+                            
+                            <label for="enunciado-imagem">Imagem/Mídia para o Enunciado (Upload):</label>
+                            <input type="file" id="enunciado-imagem" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div id="alternatives-section">
+                        <h3>Alternativas (Múltipla Escolha)</h3>
+                        <div id="alternatives-inputs" class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            </div>
+                        
+                        <label for="resposta-correta">Resposta Correta:</label>
+                        <select id="resposta-correta" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-primary" onclick="handleCreateQuestion()"><i class="fas fa-save"></i> Salvar Questão no Banco</button>
+                    <div id="question-creation-message" style="margin-top: 20px;"></div>
+                </form>
+            </section>
+
+            <section id="bank" class="page-section">
+                <h2><i class="fas fa-database"></i> Banco de Questões</h2>
+                <div class="filter-container">
+                    <input type="text" id="filter-bank-text" placeholder="Filtrar por Componente, Habilidade ou Enunciado..." onkeyup="filterQuestions()">
+                    <select id="filter-bank-modalidade" onchange="filterQuestions()">
+                       
+                        <option value="Ensino Fundamental I">Ensino Fundamental I</option>
+                        <option value="Ensino Fundamental II">Ensino Fundamental II</option>
+                        <option value="Ensino Médio">Ensino Médio</option>
+                    </select>
+                </div>
+                
+                <button type="button" class="btn-success" onclick="selectAllQuestions(true)"><i class="fas fa-check-double"></i> Selecionar Todas</button>
+                <button type="button" class="btn-secondary" onclick="selectAllQuestions(false)"><i class="fas fa-times-circle"></i> Desmarcar Todas</button>
+                <button type="button" class="btn-success" onclick="sendSelectedToExam()" style="margin-bottom: 20px;"><i class="fas fa-paper-plane"></i> Enviar Selecionadas para a Prova</button>
+
+                <ul id="questions-bank-list" class="exam-list">
+                    <li>Carregando questões...</li>
+                </ul>
+            </section>
+            
+            <section id="create-exam" class="page-section">
+                <h2><i class="fas fa-file-export"></i> Gerar Nova Prova</h2>
+                <form id="form-create-exam">
+                    <h3>1. Detalhes do Cabeçalho</h3>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label for="cabecalho-escola">Nome da Instituição/Escola:</label>
+                            <input type="text" id="cabecalho-escola" required>
+
+                            <label for="cabecalho-disciplina-select">Disciplina:</label>
+                            <select id="cabecalho-disciplina-select" required onchange="filterQuestionsForExam()">
+                                <option value="">Selecione a Disciplina</option>
+                            </select>
+                            
+                            <label for="cabecalho-professor">Professor:</label>
+                            <input type="text" id="cabecalho-professor" required disabled>
+                            
+                            <label for="cabecalho-periodo">Período/Etapa (Ex: 1º Período):</label>
+                            <select id="cabecalho-periodo" required>
+                                <option value="1º PERÍODO">1º PERÍODO</option>
+                                <option value="2º PERÍODO">2º PERÍODO</option>
+                                <option value="3º PERÍODO">3º PERÍODO</option>
+                                <option value="4º PERÍODO">4º PERÍODO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cabecalho-logo-file">Logo da Escola:</label>
+                            <input type="file" id="cabecalho-logo-file" accept="image/*">
+                            
+                            <label for="cabecalho-turma">Turma:</label>
+                            <input type="text" id="cabecalho-turma" required>
+
+                            <label for="cabecalho-turno">Turno:</label>
+                            <select id="cabecalho-turno">
+                                <option value="Matutino">Matutino</option>
+                                <option value="Vespertino">Vespertino</option>
+                                <option value="Noturno">Noturno</option>
+                            </select>
+                            
+                            <label for="cabecalho-data-prova">Data da Prova (para o cabeçalho):</label>
+                            <input type="date" id="cabecalho-data-prova" required>
+                        </div>
+                    </div>
+                    
+                    <label for="layout">Layout da Prova na Impressão/PDF:</label>
+                    <select id="layout">
+                        <option value="1">1 Coluna (Recomendado)</option>
+                        <option value="2">2 Colunas (Fiel ao Modelo Anexo)</option>
+                    </select>
+                    
+                    <label for="instrucoes">Instruções Gerais (Aparecerão na prova):</label>
+                    <textarea id="instrucoes" rows="3">Leia atentamente todas as questões antes de responder. Use caneta azul ou preta e evite rasuras.</textarea>
+
+                    <h3 style="margin-top: 30px;">3. Questões Selecionadas</h3>
+                    <div id="selected-questions-from-bank" class="alert-info" style="margin-bottom: 20px; display: none;">
+                        <i class="fas fa-info-circle"></i> **Questões carregadas do Banco.** Clique em "Gerar Prova" para finalizar.
+                    </div>
+                    
+                    <button type="button" class="btn-warning" onclick="shuffleSelectedQuestions()" style="margin-bottom:10px;"><i class="fas fa-random"></i> Embaralhar Questões</button>
+
+                    <div id="exam-questions-list" style="border: 1px solid #ddd; padding: 15px; max-height: 400px; overflow-y: auto;">
+                        <p>Selecione uma disciplina acima ou use o Banco de Questões para carregar as questões.</p>
+                    </div>
+
+                    <button type="button" class="btn-primary" onclick="handleCreateExam()"><i class="fas fa-bolt"></i> Gerar Prova e Gabarito</button>
+                    <div id="exam-creation-message" style="margin-top: 20px;"></div>
+                </form>
+            </section>
+
+            <section id="my-exams" class="page-section">
+                <h2><i class="fas fa-clipboard-list"></i> Minhas Provas Geradas</h2>
+                <div class="filter-container">
+                    <input type="text" id="filter-exams-text" placeholder="Filtrar por Disciplina, Turma ou Data/Hora de Geração..." onkeyup="filterExams()">
+                </div>
+                <ul id="my-exams-list" class="exam-list">
+                    <li>Carregando provas...</li>
+                </ul>
+                
+                <div id="exam-details-view" style="margin-top: 40px; border-top: 1px solid #ddd; display: none;">
+                    <h3 id="selected-exam-name"></h3>
+                    <div id="exam-actions" style="margin-bottom: 20px;">
+                        <button class="action-button btn-primary" onclick="visualizarProvaDetalhe()"><i class="fas fa-eye"></i> Pré-Visualizar</button>
+                        <button class="action-button btn-secondary" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar Cabeçalho</button>
+                        <button class="action-button btn-danger" onclick="deleteExam()"><i class="fas fa-trash"></i> Excluir</button>
+                        
+                        <div style="margin-top: 15px;">
+                            <button class="action-button btn-primary" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> Exportar Prova (PDF)</button>
+                            <button class="action-button btn-secondary" onclick="baixarGabarito()"><i class="fas fa-file-alt"></i> Baixar Gabarito (TXT)</button>
+                        </div>
+                    </div>
+                    
+                    <div id="exam-preview" style="display: none; border: 1px solid #ddd; padding: 20px; max-width: 210mm; margin: 20px auto; background: white;">
+                        <div id="exam-content-print">
+                            </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="admin" class="page-section">
+                <h2><i class="fas fa-user-shield"></i> Painel de Administração</h2>
+                
+                <h3 style="margin-top: 30px;"><i class="fas fa-user-plus"></i> Criar Novo Usuário</h3>
+                <form id="form-create-user" onsubmit="return false;">
+                    <input type="text" id="new-user-name" placeholder="Nome Completo" required>
+                    <input type="email" id="new-user-email" placeholder="E-mail do novo usuário" required>
+                    <input type="password" id="new-user-password" placeholder="Senha inicial" required>
+                    <select id="new-user-role" required>
+                        <option value="Padrão">Padrão (Professor)</option>
+                        <option value="ADM">ADM (Administrador)</option>
+                    </select>
+                    <button type="button" class="btn-primary" onclick="handleCreateUser()"><i class="fas fa-user-check"></i> Criar Usuário</button>
+                    <div id="create-user-message" style="margin-top: 10px;"></div>
+                </form>
+                
+                <h3 style="margin-top: 30px;"><i class="fas fa-search"></i> Filtrar Usuários</h3>
+                <div class="filter-container">
+                    <input type="text" id="filter-users-text" placeholder="Buscar por Email..." onkeyup="filterUsers()">
+                </div>
+
+
+                <h3 style="margin-top: 30px;"><i class="fas fa-user-clock"></i> Usuários Pendentes</h3>
+                <ul id="pending-users-list" class="user-list">
+                    <li>Nenhum usuário pendente.</li>
+                </ul>
+
+                <h3 style="margin-top: 30px;"><i class="fas fa-users"></i> Usuários Ativos/Aprovados</h3>
+                <ul id="active-users-list" class="user-list">
+                    <li>Nenhum usuário ativo.</li>
+                </ul>
+            </section>
+            
+        </main>
+        
+        <footer>
+            By Atecseven tecnologia - www.atecseven.com.br - CNPJ 63.373.374/0001-72
+        </footer>
+    </div>
+    
+    <div id="print-area-container">
+        </div>
+
+    <div id="modal-request-access" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" onclick="closeModal('modal-request-access')">&times;</span>
+            <h3><i class="fas fa-user-plus"></i> Solicitar Acesso</h3>
+            
+            <p class="alert-info"><i class="fas fa-info-circle"></i> Sua solicitação será enviada para aprovação do Administrador.</p>
+            
+            <form id="form-request-access" onsubmit="return false;">
+                <label for="access-name">Nome Completo:</label>
+                <input type="text" id="access-name" required>
+
+                <label for="access-cargo">Cargo/Função:</label>
+                <input type="text" id="access-cargo" required>
+
+                <label for="access-escola">Nome da Escola/Instituição:</label>
+                <input type="text" id="access-escola" required>
+
+                <label for="access-email">E-mail (Será seu login):</label>
+                <input type="email" id="access-email" required>
+                
+                <label for="access-password">Senha:</label>
+                <input type="password" id="access-password" required>
+                
+                <button type="button" class="btn-primary" onclick="handleRequestAccess()"><i class="fas fa-paper-plane"></i> Enviar Solicitação</button>
+            </form>
+            <div id="request-access-message" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+
+    <div id="modal-question-view" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal-question-view')">&times;</span>
+            <h3 id="modal-question-title">Visualizar Questão Q0</h3>
+            
+            <div id="modal-question-content" class="question-view-grid">
+                <div>
+                    <h4>Enunciado</h4>
+                    <p id="modal-enunciado-text"></p>
+                    <img id="modal-enunciado-image" class="question-image-preview" alt="Imagem do Enunciado" style="display: none;">
+                </div>
+                
+                <div>
+                    <h4>Alternativas / Gabarito</h4>
+                    <form id="modal-gabarito-form">
+                        <ul id="modal-alternatives-list" class="alternatives-list">
+                            </ul>
+                        <p>Resposta Correta Atual: <strong id="modal-resposta-correta-atual"></strong></p>
+                        <input type="hidden" id="modal-question-id">
+                        <button type="button" class="btn-primary" onclick="saveNewAnswer()"><i class="fas fa-check"></i> Salvar Nova Alternativa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-question-edit" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <span class="close-btn" onclick="closeModal('modal-question-edit')">&times;</span>
+            <h3 id="modal-edit-question-title">Editar Questão Q0</h3>
+
+            <form id="form-edit-question">
+                <input type="hidden" id="edit-question-firebaseId">
+                <input type="hidden" id="edit-question-id-sequencial">
+                
+                <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div>
+                        <label for="edit-modalidade">Modalidade de Ensino:</label>
+                        <select id="edit-modalidade" required>
+                            <option value="Ensino Fundamental I">Ensino Fundamental I</option>
+                            <option value="Ensino Fundamental II">Ensino Fundamental II</option>
+                            <option value="Ensino Médio">Ensino Médio</option>
+                        </select>
+
+                        <label for="edit-componente">Componente Curricular:</label>
+                        <input type="text" id="edit-componente" placeholder="Ex: Matemática, Português, Ciências" required>
+                        
+                        <label for="edit-habilidade">Habilidade BNCC (D-XX):</label>
+                        <input type="text" id="edit-habilidade" placeholder="Ex: D 33">
+                        
+                        <label for="edit-tipo">Tipo de Questão:</label>
+                        <select id="edit-tipo" onchange="toggleEditAlternatives(this.value)" required>
+                            <option value="Múltipla Escolha">Múltipla Escolha</option>
+                            <option value="Discursiva">Discursiva</option>
+                        </select>
+                        
+                         <div id="edit-linhas-discursiva-group" style="display: none;">
+                            <label for="edit-linhas-discursiva">Linhas para Resposta Discursiva (padrão 4):</label>
+                            <input type="number" id="edit-linhas-discursiva" min="1" max="20" value="4">
+                        </div>
+
+                    </div>
+                    <div>
+                        <label for="edit-enunciado">Enunciado da Questão (Texto):</label>
+                        <textarea id="edit-enunciado" rows="5" required></textarea>
+                        
+                        <label for="edit-enunciado-imagem">Imagem/Mídia para o Enunciado (Selecione um novo arquivo para substituir):</label>
+                        <input type="file" id="edit-enunciado-imagem" accept="image/*">
+                        <div id="edit-enunciado-image-preview-container">
+                             <small>Imagem Atual:</small>
+                             <img id="edit-enunciado-image-preview" class="image-preview-edit" alt="Imagem Enunciado Atual" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="edit-alternatives-section">
+                    <h3 style="margin-top: 30px;">Edição de Alternativas</h3>
+                    <div id="edit-alternatives-inputs" class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        </div>
+                    
+                    <label for="edit-resposta-correta">Resposta Correta:</label>
+                    <select id="edit-resposta-correta" required>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn-primary" style="margin-top: 20px;" onclick="handleEditQuestionSave()"><i class="fas fa-save"></i> Salvar Edição da Questão</button>
+                <div id="question-edit-message" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="modal-edit-exam" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal-edit-exam')">&times;</span>
+            <h3>Editar Prova <span id="modal-edit-exam-name"></span></h3>
+            
+            <p class="alert-info"><i class="fas fa-info-circle"></i> Edição de Cabeçalho: Para alterar questões, exclua e gere uma nova prova.</p>
+            
+            <form id="form-edit-exam">
+                <label for="edit-escola">Nome da Escola:</label>
+                <input type="text" id="edit-escola" required>
+                
+                <label for="edit-turma">Turma:</label>
+                <input type="text" id="edit-turma" required>
+                
+                <label for="edit-professor">Professor:</label>
+                <input type="text" id="edit-professor" required>
+                
+                <label for="edit-duracao">Duração:</label>
+                <input type="text" id="edit-duracao" required>
+                
+                <label for="edit-data-prova">Data da Prova:</label>
+                <input type="date" id="edit-data-prova" required>
+                
+                <button type="button" class="btn-primary" onclick="handleEditExamSave()"><i class="fas fa-save"></i> Salvar Alterações</button>
+            </form>
+            <div id="edit-exam-message" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+
+    <script>
+    const IMGBB_KEY = "95bb16ee776d7e20f26857cec98bd372";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFQCMsX04fwh7MVyEpvXnXD0U4TD5Or5w",
+        authDomain: "ja-barbearia.firebaseapp.com",
+        databaseURL: "https://ja-barbearia-default-rtdb.firebaseio.com",
+        projectId: "ja-barbearia",
+        appId: "1:213237027963:web:7d585b158ee06d3ab7fede",
+        measurementId: "G-YNNKX5YDDN"  
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = app.database();
+
+    let CURRENT_USER = null;    
+    let CURRENT_USER_ID = null;
+    let CURRENT_USER_ROLE = 'Padrão';    
+    let allUsers = {};  
+    let allExams = {};  
+    let allQuestions = {};  
+    let selectedExamId = null;
+    let selectedQuestionIdsForExam = [];
+
+    const ALTERNATIVE_LETTERS = ['A', 'B', 'C', 'D', 'E'];
+    const LINE_HEIGHT_PT = 14;  
+
+    let PAGE_SIZE = 20; 
+    let lastKey = null; 
+    let isSearching = false; 
+
+    async function uploadFileToImgBB(file) {
+        if (!file) return "";
+
+        const formData = new FormData();
+        formData.append("image", file);
+        
+        const url = `https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro de rede ou falha no upload: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+
+            if (data.success) {
+                return data.data.url;
+            } else {
+                throw new Error(data.error.message || "Erro desconhecido no ImgAtecServer.");
+            }
+        } catch (error) {
+            console.error("Erro no upload para ImgAtecServer:", error);
+            throw new Error(`Falha no upload da imagem. Erro: ${error.message}`);
+        }
+    }
+    
+    async function handleLogin() {
+        const email = document.getElementById('login-user').value;
+        const password = document.getElementById('login-password').value;
+        const messageEl = document.getElementById('login-message');
+        messageEl.innerHTML = '<i class="fas fa-sync fa-spin"></i> Verificando credenciais...';
+        
+        try {
+            const userSnapshot = await database.ref('usuarios').orderByChild('email').equalTo(email).once('value');
+            
+            if (!userSnapshot.exists()) {
+                 messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Usuário não encontrado.</div>`;
+                 return;
+            }
+
+            let userId = null;
+            let userDetails = null;
+
+            userSnapshot.forEach(child => {
+                userId = child.key;
+                userDetails = child.val();
+            });
+
+            if (userDetails && userDetails.password_hash === password) {
+                
+                if (userDetails.status === 'Pendente') {
+                    messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-user-clock"></i> Seu acesso está pendente de aprovação pelo administrador.</div>`;
+                    return;
+                }
+
+                CURRENT_USER_ID = userId;
+                CURRENT_USER_ROLE = userDetails.role;
+                CURRENT_USER = userDetails;
+
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-interface').style.display = 'flex';
+                
+                const nome = userDetails.nome || userDetails.email;
+                const userInfoDisplay = document.getElementById('user-info-display');
+                if (userInfoDisplay) {
+                    userInfoDisplay.textContent = ` | Seja Bem-Vindo ${nome}!`;
+                }
+                
+                document.getElementById('user-role-display').textContent = `[${CURRENT_USER_ROLE}]`;
+                
+                if (CURRENT_USER_ROLE === 'ADM') {
+                    document.getElementById('nav-admin').style.display = 'list-item';
+                } else {
+                    document.getElementById('nav-admin').style.display = 'none';
+                }
+                
+                document.getElementById('cabecalho-professor').value = nome;
+                document.getElementById('cabecalho-professor').disabled = true;
+
+                await updateDashboardIndicators();
+                showPage('dashboard');
+
+            } else {
+                messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Senha incorreta.</div>`;
+            }
+
+        } catch (error) {
+            console.error("Erro no login:", error);
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-radiation-alt"></i> Erro de conexão: ${error.message}</div>`;
+        }
+    }
+    
+    async function handleRequestAccess() {
+        const name = document.getElementById('access-name').value;
+        const cargo = document.getElementById('access-cargo').value;
+        const escola = document.getElementById('access-escola').value;
+        const email = document.getElementById('access-email').value;
+        const password = document.getElementById('access-password').value;
+
+        const messageEl = document.getElementById('request-access-message');
+        messageEl.innerHTML = '';
+
+        if (!name || !cargo || !escola || !email || !password) {
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-triangle"></i> Todos os campos são obrigatórios.</div>`;
+            return;
+        }
+        
+        try {
+            const existingUserSnapshot = await database.ref('usuarios').orderByChild('email').equalTo(email).once('value');
+            if (existingUserSnapshot.exists()) {
+                 messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-user-lock"></i> Este e-mail já está cadastrado. Tente entrar.</div>`;
+                 return;
+            }
+
+            const newUserRef = database.ref('usuarios').push();
+            await newUserRef.set({
+                nome: name,
+                cargo: cargo,
+                escola: escola,
+                email: email,
+                password_hash: password,    
+                role: 'Padrão',
+                status: 'Pendente',
+                data_solicitacao: new Date().toISOString()
+            });
+            
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Solicitação enviada! Aguarde a aprovação do administrador.</div>`;
+            document.getElementById('form-request-access').reset();
+            
+        } catch (error) {
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao enviar solicitação: ${error.message}</div>`;
+        }
+    }
+    
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(pageId).style.display = 'block';
+        
+        document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+        document.getElementById(`nav-${pageId.replace('-', '')}`).classList.add('active');
+        
+        if (pageId === 'bank') {
+            updateBankView();
+        } else if (pageId === 'my-exams') {
+            if(Object.keys(allExams).length === 0) updateExamListView();
+            else filterExams();    
+            document.getElementById('exam-details-view').style.display = 'none';
+        } else if (pageId === 'admin') {
+            if (CURRENT_USER_ROLE === 'ADM') {
+                updateAdminViews();
+            }
+        } else if (pageId === 'dashboard') {
+            updateDashboardIndicators();
+        } else if (pageId === 'create-exam') {
+            if(selectedQuestionIdsForExam.length > 0) {
+                displaySelectedQuestionsForExam(selectedQuestionIdsForExam);
+            } else {
+                document.getElementById('selected-questions-from-bank').style.display = 'none';
+                document.getElementById('exam-questions-list').innerHTML = '<p>Selecione uma disciplina acima ou use o Banco de Questões para carregar as questões.</p>';
+            }
+        }
+    }
+
+    function simularLogout() {
+        CURRENT_USER = null;
+        CURRENT_USER_ID = null;
+        CURRENT_USER_ROLE = 'Padrão';
+        document.getElementById('main-interface').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('login-user').value = '';    
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-message').innerHTML = '';
+        
+        allQuestions = {};
+        allExams = {};
+    }
+
+    function formatDateTimeBR(isoString) {
+        if (!isoString) return 'N/A';
+        const date = new Date(isoString);
+        return date.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+    }
+    
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    async function getNextQuestionId() {
+        const counterRef = database.ref('metadata/questionCounter');
+        
+        const { committed, snapshot } = await counterRef.transaction(currentValue => {
+            return (currentValue || 0) + 1;
+        });
+
+        if (committed) {
+            return snapshot.val();
+        } else {
+            const currentSnapshot = await counterRef.once('value');
+            return currentSnapshot.val();    
+        }
+    }
+    
+    let originalUsersList = [];
+
+    async function updateAdminViews() {
+        try {
+            const snapshot = await database.ref('usuarios').once('value');
+            allUsers = snapshot.val() || {};
+            
+            originalUsersList = Object.entries(allUsers).map(([id, user]) => ({ id, ...user }));
+            
+            const totalPadrao = originalUsersList.filter(u => u.status === 'Aprovado' && u.role === 'Padrão').length;
+            const totalAdm = originalUsersList.filter(u => u.status === 'Aprovado' && u.role === 'ADM').length;
+            const totalPendentes = originalUsersList.filter(u => u.status === 'Pendente').length;
+            
+            document.getElementById('dash-total-padrao').textContent = totalPadrao;
+            document.getElementById('dash-total-adm').textContent = totalAdm;
+            document.getElementById('dash-total-pendentes').textContent = totalPendentes;
+            
+            filterUsers();
+            
+        } catch (e) {
+            console.error("Erro ao carregar usuários (ADM):", e);
+        }
+    }
+    
+    function filterUsers() {
+        const pendingList = document.getElementById('pending-users-list');
+        const activeList = document.getElementById('active-users-list');
+        pendingList.innerHTML = '';
+        activeList.innerHTML = '';
+        
+        const filterText = document.getElementById('filter-users-text').value.toLowerCase();
+        
+        const filteredUsers = originalUsersList.filter(u => u.email.toLowerCase().includes(filterText));
+        
+        const pending = filteredUsers.filter(u => u.status === 'Pendente');
+        const active = filteredUsers.filter(u => u.status === 'Aprovado');
+        
+        if (pending.length === 0) pendingList.innerHTML = '<li>Nenhum usuário pendente ou encontrado com o filtro.</li>';
+        pending.forEach(u => {
+            pendingList.innerHTML += `
+                <li>
+                    <span>${u.email} (Nome: ${u.nome || 'N/A'} | Escola: ${u.escola || 'N/A'})</span>
+                    <div>
+                        <button class="action-button btn-primary" onclick="changeUserStatus('${u.id}', 'Aprovado')"><i class="fas fa-check"></i> Aprovar</button>
+                        <button class="action-button btn-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i> Excluir</button>
+                    </div>
+                </li>
+            `;
+        });
+        
+        if (active.length === 0) activeList.innerHTML = '<li>Nenhum usuário ativo ou encontrado com o filtro.</li>';
+        active.forEach(u => {
+            activeList.innerHTML += `
+                <li>
+                    <span>${u.email} (Função: ${u.role})</span>
+                    <div>
+                        <button class="action-button btn-secondary" onclick="resetUserPassword('${u.id}')"><i class="fas fa-redo"></i> Resetar Senha</button>
+                        <button class="action-button btn-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i> Excluir</button>
+                    </div>
+                </li>
+            `;
+        });
+    }
+
+    async function handleCreateUser() {
+        const name = document.getElementById('new-user-name').value;
+        const email = document.getElementById('new-user-email').value;
+        const password = document.getElementById('new-user-password').value;
+        const role = document.getElementById('new-user-role').value;
+        const messageEl = document.getElementById('create-user-message');
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Criando usuário...</div>`;
+        
+        try {
+            const newUserRef = database.ref('usuarios').push();
+            await newUserRef.set({
+                nome: name,
+                email: email,
+                password_hash: password,    
+                role: role,
+                status: 'Aprovado',
+                data_criacao: new Date().toISOString()
+            });
+            
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Usuário ${email} criado com sucesso!</div>`;
+            document.getElementById('form-create-user').reset();
+            updateAdminViews();
+        } catch (error) {
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao criar usuário: ${error.message}</div>`;
+        }
+    }
+
+    async function changeUserStatus(userId, status) {
+        try {
+            await database.ref(`usuarios/${userId}`).update({ status: status });
+            alert(`Status do usuário alterado para: ${status}`);
+            updateAdminViews();
+        } catch (e) {
+            alert("Erro ao mudar status: " + e.message);
+        }
+    }
+
+    async function resetUserPassword(userId) {
+        const newPassword = prompt("Digite a nova senha para este usuário:");
+        if (newPassword) {
+            try {
+                await database.ref(`usuarios/${userId}`).update({ password_hash: newPassword });
+                alert(`Senha resetada com sucesso! Nova senha: ${newPassword}`);
+                updateAdminViews();
+            } catch (e) {
+                alert("Erro ao resetar senha: " + e.message);
+            }
+        }
+    }
+
+    async function deleteUser(userId) {
+        if (confirm("Tem certeza que deseja EXCLUIR este usuário?")) {
+            try {
+                await database.ref(`usuarios/${userId}`).remove();
+                alert("Usuário excluído com sucesso.");
+                updateAdminViews();
+            } catch (e) {
+                alert("Erro ao excluir usuário: " + e.message);
+            }
+        }
+    }
+
+    function setupAlternativeInputs() {
+        const container = document.getElementById('alternatives-inputs');
+        container.innerHTML = '';
+        ALTERNATIVE_LETTERS.forEach(letra => {
+            container.innerHTML += `
+                <div>
+                    <label for="alt${letra}"><strong>${letra})</strong> Texto:</label>
+                    <input type="text" id="alt${letra}" placeholder="Texto da alternativa ${letra}" required>
+                    <label for="img${letra}">Mídia ${letra} (Opcional):</label>
+                    <input type="file" id="img${letra}" accept="image/*">
+                </div>
+            `;
+        });
+    }
+    
+    async function handleCreateQuestion() {
+        const messageEl = document.getElementById('question-creation-message');
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando... Uploads para ImgAtecServer em andamento.</div>`;
+        
+        try {
+            const nextId = await getNextQuestionId();
+            
+            const enunciadoFile = document.getElementById('enunciado-imagem').files[0];
+            const enunciadoUrl = await uploadFileToImgBB(enunciadoFile);
+
+            const tipo = document.getElementById('tipo').value;
+            const linhasDiscursivaEl = document.getElementById('linhas-discursiva');
+            const linhasDiscursiva = tipo === 'Discursiva' && linhasDiscursivaEl ? parseInt(linhasDiscursivaEl.value) : 0;
+            
+            const alternativas = [];
+            if (tipo === 'Múltipla Escolha') {
+                for (const letra of ALTERNATIVE_LETTERS) {
+                    const altText = document.getElementById(`alt${letra}`).value;
+                    const altFile = document.getElementById(`img${letra}`).files[0];
+                    let midiaUrl = "";
+                    if (altFile) {
+                        midiaUrl = await uploadFileToImgBB(altFile);
+                    }
+                    
+                    alternativas.push({
+                        letra: letra,
+                        texto: altText,
+                        midia: midiaUrl
+                    });
+                }
+            }
+            
+            const novaQuestaoRef = database.ref('banco_questoes').push();
+            const dadosQuestao = {
+                id_sequencial: nextId,
+                firebaseId: novaQuestaoRef.key,
+                modalidade: document.getElementById('modalidade').value,
+                componente_curricular: document.getElementById('componente').value,
+                habilidade_bncc: document.getElementById('habilidade').value,
+                enunciado: { texto: document.getElementById('enunciado').value, midia: enunciadoUrl || "" },
+                tipo_questao: tipo,
+                alternativas: alternativas,
+                resposta_correta: tipo === 'Múltipla Escolha' ? document.getElementById('resposta-correta').value : "Discursiva",
+                linhas_discursiva: linhasDiscursiva,
+                data_criacao: new Date().toISOString(),
+                criado_por_uid: CURRENT_USER_ID
+            };
+
+            await novaQuestaoRef.set(dadosQuestao);
+            
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${nextId} salva com sucesso! (Imagens no ImgAtecServer)</div>`;
+            document.getElementById('form-create-question').reset();
+            setupAlternativeInputs();    
+            updateBankView();
+            updateDashboardIndicators();
+            
+        } catch (error) {
+            console.error("Erro ao criar questão:", error);
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao salvar a questão: ${error.message}</div>`;
+        }
+    }
+    
+    // NOVO: Função para renderizar as questões no Banco de Questões
+    function displayQuestions(questoes) {
+        const listEl = document.getElementById('questions-bank-list');
+        
+        // Ordena por ID Sequencial para exibição
+        const questionsToDisplay = questoes.sort((a, b) => a.id_sequencial - b.id_sequencial);
+
+        if (questionsToDisplay.length > 0) {
+            questionsToDisplay.forEach(q => {
+                const isChecked = selectedQuestionIdsForExam.includes(q.firebaseId);
+                
+                const listItem = document.createElement('li');
+                listItem.setAttribute('data-id', q.firebaseId);
+                listItem.innerHTML = `
+                    <input type="checkbox" name="select_for_exam" value="${q.firebaseId}" ${isChecked ? 'checked' : ''} onchange="toggleQuestionSelection('${q.firebaseId}', this.checked)">
+                    <div class="question-item-info">
+                        <span><strong>Q${q.id_sequencial}</strong> (${q.componente_curricular} / ${q.modalidade}): ${q.enunciado.texto.substring(0, 70)}...</span>
+                        <small>Resp: ${q.resposta_correta} | Habilidade: ${q.habilidade_bncc || 'N/A'}</small>
+                    </div>
+                    <div class="question-item-actions">
+                        <button class="action-button btn-secondary btn-sm" onclick="openQuestionViewModal('${q.firebaseId}')"><i class="fas fa-eye"></i> Gabarito</button>
+                        <button class="action-button btn-primary btn-sm" onclick="openQuestionEditModal('${q.firebaseId}')"><i class="fas fa-edit"></i> Editar Questão</button>
+                    </div>
+                `;
+                listEl.appendChild(listItem);
+            });
+        }
+    }
+
+    // NOVO: Função para adicionar o botão "Carregar Mais"
+    function addLoadMoreButton(hasNextPage) {
+        const listEl = document.getElementById('questions-bank-list');
+        
+        const existingButton = document.querySelector('#bank #load-more-btn');
+        if (existingButton) existingButton.remove();
+
+        if (hasNextPage) {
+            const loadMoreBtn = document.createElement('button');
+            loadMoreBtn.id = 'load-more-btn';
+            loadMoreBtn.className = 'btn-secondary';
+            loadMoreBtn.style = 'margin-top: 20px; width: 100%;';
+            loadMoreBtn.innerHTML = '<i class="fas fa-arrow-down"></i> Carregar Mais Questões';
+            loadMoreBtn.onclick = () => manageBankPagination(false); 
+            
+            listEl.parentNode.insertBefore(loadMoreBtn, listEl.nextSibling);
+        }
+    }
+
+    // NOVO: Função de Paginação Mestra
+    async function manageBankPagination(reset = false) {
+        if (isSearching && !reset) return; 
+        isSearching = true;
+
+        const listEl = document.getElementById('questions-bank-list');
+        const filterText = document.getElementById('filter-bank-text').value.toLowerCase();
+        const filterModalidade = document.getElementById('filter-bank-modalidade').value;
+        
+        if (reset) {
+            lastKey = null;
+            listEl.innerHTML = ''; 
+        }
+        
+        if (listEl.children.length === 0) {
+             listEl.innerHTML = '<li style="text-align:center;"><i class="fas fa-sync fa-spin"></i> Carregando questões...</li>';
+        }
+        
+        const existingButton = document.querySelector('#bank #load-more-btn');
+        if (existingButton) existingButton.remove();
+
+        try {
+            let queryRef = database.ref('banco_questoes').orderByKey();
+            
+            if (lastKey) {
+                queryRef = queryRef.startAt(lastKey);
+            }
+            
+            queryRef = queryRef.limitToFirst(PAGE_SIZE + 1);
+
+            const snapshot = await queryRef.once('value');
+            let newQuestionsArray = [];
+            let lastIdInPage = null; 
+
+            snapshot.forEach(child => {
+                const currentKey = child.key;
+                
+                if (lastKey && currentKey === lastKey && newQuestionsArray.length === 0 && !reset) {
+                    return;
+                }
+
+                const q = { firebaseId: currentKey, ...child.val() };
+                
+                const modalidadeMatch = !filterModalidade || q.modalidade === filterModalidade;
+                const textMatch = !filterText || 
+                                    q.componente_curricular.toLowerCase().includes(filterText) ||
+                                    (q.habilidade_bncc && q.habilidade_bncc.toLowerCase().includes(filterText)) ||
+                                    q.enunciado.texto.toLowerCase().includes(filterText);
+
+                if (modalidadeMatch && textMatch) {
+                    newQuestionsArray.push(q);
+                    allQuestions[currentKey] = q; 
+                    lastIdInPage = currentKey;
+                }
+            });
+
+            const totalItemsFetched = snapshot.numChildren();
+            
+            const hasNextPage = newQuestionsArray.length >= PAGE_SIZE;
+
+            lastKey = hasNextPage ? lastIdInPage : null; 
+            
+            if(reset) {
+                listEl.innerHTML = '';
+            }
+            
+            // Remove o item de controle do final do array se ele não for o último item visível
+            if(newQuestionsArray.length > PAGE_SIZE) {
+                newQuestionsArray.pop();
+            }
+
+            displayQuestions(newQuestionsArray);
+
+            if (listEl.children.length === 0) {
+                 listEl.innerHTML = '<li>Nenhuma questão encontrada com os filtros aplicados.</li>';
+            }
+
+            addLoadMoreButton(hasNextPage);
+
+        } catch (e) {
+            listEl.innerHTML = `<li><div class="alert-error"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar questões: ${e.message}</div></li>`;
+            console.error("Erro no manageBankPagination:", e);
+        } finally {
+            isSearching = false;
+        }
+    }
+
+    async function updateBankView() {
+        const snapshot = await database.ref('banco_questoes').once('value');
+        allQuestions = snapshot.val() || {};
+        
+        const selectDisciplina = document.getElementById('cabecalho-disciplina-select');
+        const disciplinas = new Set(Object.values(allQuestions).map(q => q.componente_curricular).filter(c => c));
+        selectDisciplina.innerHTML = '<option value="">Selecione a Disciplina</option>';
+        disciplinas.forEach(d => {
+            selectDisciplina.innerHTML += `<option value="${d}">${d}</option>`;
+        });
+        
+        manageBankPagination(true);
+    }
+    
+    function selectAllQuestions(checked) {
+        const checkboxes = document.querySelectorAll('#questions-bank-list input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = checked;
+            toggleQuestionSelection(cb.value, checked);
+        });
+    }
+
+    function filterQuestions() {
+        manageBankPagination(true);
+    }
+    
+    function toggleQuestionSelection(questionId, isChecked) {
+        if (isChecked) {
+            if (!selectedQuestionIdsForExam.includes(questionId)) {
+                selectedQuestionIdsForExam.push(questionId);
+            }
+        } else {
+            selectedQuestionIdsForExam = selectedQuestionIdsForExam.filter(id => id !== questionId);
+        }
+    }
+
+    function sendSelectedToExam() {
+        if (selectedQuestionIdsForExam.length === 0) {
+            alert("Selecione pelo menos uma questão para enviar para a prova.");
+            return;
+        }
+        
+        displaySelectedQuestionsForExam(selectedQuestionIdsForExam);
+        showPage('create-exam');
+        
+        alert(`${selectedQuestionIdsForExam.length} questão(ões) enviada(s) para a tela "Gerar Prova".`);
+    }
+    
+    function displaySelectedQuestionsForExam(ids) {
+        const listEl = document.getElementById('exam-questions-list');
+        listEl.innerHTML = '';
+        
+        const questoesDetalhes = ids.map(id => allQuestions[id]).filter(q => q);
+        
+        if (questoesDetalhes.length > 0) {
+            const disciplina = questoesDetalhes[0].componente_curricular;
+            document.getElementById('cabecalho-disciplina-select').value = disciplina;
+            document.getElementById('selected-questions-from-bank').style.display = 'block';
+            document.getElementById('selected-questions-from-bank').innerHTML = `<i class="fas fa-info-circle"></i> <strong>Questões carregadas do Banco.</strong> Disciplina: <strong>${disciplina}</strong>. Total: <strong>${questoesDetalhes.length}</strong>. Você pode desmarcar.`;
+
+            listEl.innerHTML = '<h4><i class="fas fa-check-square"></i> Questões Carregadas (Desmarque para remover):</h4><ul style="list-style: none; padding: 0;">';
+            
+            questoesDetalhes.forEach(q => {
+                listEl.querySelector('ul').innerHTML += `
+                    <li data-id="${q.firebaseId}">
+                        <label>
+                            <input type="checkbox" name="selected_questions" value="${q.firebaseId}" checked>
+                            Q${q.id_sequencial} (${q.tipo_questao}): ${q.enunciado.texto.substring(0, 70)}...
+                        </label>
+                        <button class="action-button btn-secondary btn-sm" onclick="openQuestionViewModal('${q.firebaseId}')"><i class="fas fa-eye"></i> Visualizar</button>
+                    </li>
+                `;
+            });
+            listEl.innerHTML += '</ul>';
+        } else {
+            document.getElementById('selected-questions-from-bank').style.display = 'none';
+            listEl.innerHTML = '<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão válida selecionada ou carregada.</p>';
+        }
+    }
+
+    function shuffleSelectedQuestions() {
+        if (selectedQuestionIdsForExam.length < 2) return alert("Adicione mais questões para embaralhar.");
+        
+        for (let i = selectedQuestionIdsForExam.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [selectedQuestionIdsForExam[i], selectedQuestionIdsForExam[j]] = [selectedQuestionIdsForExam[j], selectedQuestionIdsForExam[i]];
+        }
+        
+        displaySelectedQuestionsForExam(selectedQuestionIdsForExam);
+        alert("Questões embaralhadas!");
+    }
+
+
+    function filterQuestionsForExam() {
+        const selectedDiscipline = document.getElementById('cabecalho-disciplina-select').value;
+        
+        if (selectedQuestionIdsForExam.length > 0) return;
+        
+        const examListEl = document.getElementById('exam-questions-list');
+        examListEl.innerHTML = '';
+        document.getElementById('selected-questions-from-bank').style.display = 'none';
+
+        if (!selectedDiscipline) {
+            examListEl.innerHTML = '<p class="alert-info"><i class="fas fa-arrow-up"></i> Selecione uma disciplina acima para carregar as questões.</p>';
+            return;
+        }
+        
+        const questoesArray = Object.values(allQuestions).sort((a, b) => a.id_sequencial - b.id.sequencial);
+        
+        const questoesFiltradas = questoesArray.filter(q => q.componente_curricular === selectedDiscipline);
+
+        if (questoesFiltradas.length > 0) {
+            examListEl.innerHTML = '<h4><i class="fas fa-check-square"></i> Marque as questões desejadas:</h4><ul style="list-style: none; padding: 0;">';
+            
+            questoesFiltradas.forEach(q => {
+                examListEl.querySelector('ul').innerHTML += `
+                    <li data-id="${q.firebaseId}">
+                        <label>
+                            <input type="checkbox" name="selected_questions" value="${q.firebaseId}">
+                            Q${q.id_sequencial} (${q.tipo_questao}): ${q.enunciado.texto.substring(0, 70)}...
+                        </label>
+                        <button class="action-button btn-secondary btn-sm" onclick="openQuestionViewModal('${q.firebaseId}')"><i class="fas fa-eye"></i> Visualizar</button>
+                    </li>
+                `;
+            });
+            examListEl.innerHTML += '</ul>';
+        } else {
+            examListEl.innerHTML = `<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão cadastrada para a disciplina <strong>${selectedDiscipline}</strong>.</p>`;
+        }
+    }
+    
+    function gerarGabaritoInstantaneo(questoes) {
+        let gabarito = "--- GABARITO OFICIAL ---\n";
+        gabarito += "Disciplina: " + (questoes[0]?.componente_curricular || 'N/A') + "\n";
+        gabarito += "Total de Questões: " + questoes.length + "\n\n";
+        
+        questoes.forEach((q, index) => {
+            gabarito += `Q${index + 1}: ${q.resposta_correta} (${q.tipo_questao})\n`;
+        });
+        
+        return gabarito;
+    }
+
+
+    async function handleCreateExam() {
+        const messageEl = document.getElementById('exam-creation-message');
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando upload da logo (ImgAtecServer) e geração da prova...</div>`;
+        
+        try {
+            // 1. Validação e Coleta das Questões Marcadas
+            const finalSelectedIds = Array.from(document.querySelectorAll('#exam-questions-list input[name="selected_questions"]:checked')).map(cb => cb.value);
+
+            if (finalSelectedIds.length === 0) {
+                throw new Error("Selecione pelo menos uma questão para criar a prova.");
+            }
+
+            // 2. Upload da Logo
+            const logoFile = document.getElementById('cabecalho-logo-file').files[0];
+            let logoUrl = "";
+            if (logoFile) {
+                 logoUrl = await uploadFileToImgBB(logoFile);
+            }
+            
+            // Coletando variáveis com segurança
+            const disciplina = document.getElementById('cabecalho-disciplina-select')?.value || '';
+            const dataProva = document.getElementById('cabecalho-data-prova')?.value || '';
+            const periodo = document.getElementById('cabecalho-periodo')?.value || '';
+            const duracao = document.getElementById('cabecalho-duracao')?.value || '';
+            const escola = document.getElementById('cabecalho-escola')?.value || '';
+            const turma = document.getElementById('cabecalho-turma')?.value || '';
+            const turno = document.getElementById('cabecalho-turno')?.value || '';
+            const professor = document.getElementById('cabecalho-professor')?.value || '';
+            
+            // 3. Recupera os detalhes das questões
+            const questoesDetalhes = finalSelectedIds.map(id => allQuestions[id]).filter(q => q);
+            
+            const dadosProva = {
+                cabecalho: {
+                    escola: escola,
+                    logo: logoUrl,
+                    turma: turma,
+                    turno: turno,
+                    disciplina: disciplina,
+                    professor: professor,
+                    periodo: periodo,  
+                    duracao: duracao,  
+                    data_prova: dataProva,
+                },
+                instrucoes_gerais: document.getElementById('instrucoes').value,
+                layout_colunas: document.getElementById('layout').value,
+                questoes_detalhes: questoesDetalhes,    
+                data_geracao: new Date().toISOString(),
+                criado_por_uid: CURRENT_USER_ID
+            };
+            
+            try {
+                localStorage.setItem('header_config', JSON.stringify({ escola, turma, professor, periodo, turno, duracao }));
+            } catch(e) {
+                console.warn("Falha ao salvar configuração do cabeçalho no localStorage:", e);
+            }
+
+
+            const gabarito = gerarGabaritoInstantaneo(questoesDetalhes);
+            dadosProva.gabarito = gabarito;
+
+            const novaProvaRef = database.ref('provas').push();
+            await novaProvaRef.set(dadosProva);
+
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-trophy"></i> Prova criada e Gabarito gerado com sucesso!</div>`;
+            document.getElementById('form-create-exam').reset();
+            document.getElementById('cabecalho-data-prova').value = new Date().toISOString().substring(0, 10);
+            
+            selectedQuestionIdsForExam = [];    
+            document.getElementById('selected-questions-from-bank').style.display = 'none';
+
+            await updateExamListView();
+            showPage('my-exams');    
+            selectExam(novaProvaRef.key);
+
+        } catch (error) {
+            console.error("Erro ao criar prova:", error);
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao gerar prova: ${error.message}.</div>`;
+        }
+    }
+    
+    async function updateExamListView() {
+        const snapshot = await database.ref('provas').once('value');
+        allExams = snapshot.val() || {};
+        filterExams();  
+    }
+
+    function filterExams() {
+        const listEl = document.getElementById('my-exams-list');
+        listEl.innerHTML = '';
+        
+        const filterText = document.getElementById('filter-exams-text').value.toLowerCase();
+        document.getElementById('exam-details-view').style.display = 'none';
+
+        if (Object.keys(allExams).length > 0) {
+            const examsArray = Object.entries(allExams)
+                .map(([id, prova]) => ({ id, ...prova }))
+                .sort((a, b) => new Date(b.data_geracao) - new Date(a.data_geracao));    
+
+            const examsFiltrados = examsArray.filter(e => {
+                return e.cabecalho.disciplina.toLowerCase().includes(filterText) ||
+                               e.cabecalho.turma.toLowerCase().includes(filterText) ||
+                               formatDateTimeBR(e.data_geracao).includes(filterText);
+            });
+
+            if (examsFiltrados.length === 0) {
+                listEl.innerHTML = '<li>Nenhuma prova encontrada com os filtros aplicados.</li>';
+                return;
+            }
+
+            examsFiltrados.forEach(e => {
+                const dataGeracaoBR = formatDateTimeBR(e.data_geracao);
+                const dataProvaBR = e.cabecalho.data_prova ? new Date(e.cabecalho.data_prova).toLocaleDateString('pt-BR') : 'N/A';
+                
+                listEl.innerHTML += `
+                    <li class="exam-list-item" onclick="selectExam('${e.id}')">
+                        <div class="exam-info">
+                            <span><strong>${e.cabecalho.disciplina}</strong> - ${e.cabecalho.turma} | Data Prova: ${dataProvaBR}</span>
+                            <small>Gerada em: ${dataGeracaoBR}</small>
+                        </div>
+                        <button class="action-button btn-primary" onclick="selectExam('${e.id}')"><i class="fas fa-cogs"></i> Gerenciar</button>
+                    </li>
+                `;
+            });
+        } else {
+            listEl.innerHTML = '<li>Nenhuma prova gerada.</li>';
+        }
+    }
+    
+    function selectExam(examId) {
+        selectedExamId = examId;
+        const prova = allExams[examId];
+        if (prova) {
+            document.getElementById('selected-exam-name').textContent = `Prova de ${prova.cabecalho.disciplina} (${prova.cabecalho.turma})`;
+            document.getElementById('exam-details-view').style.display = 'block';
+            document.getElementById('exam-preview').style.display = 'none';    
+        }
+    }
+
+    
+    window.openQuestionViewModal = function(questionId) {
+        const q = allQuestions[questionId];
+        if (!q) return;
+
+        openModal('modal-question-view');
+        
+        document.getElementById('modal-question-id').value = questionId;
+        document.getElementById('modal-question-title').textContent = `Visualizar/Editar Gabarito Questão Q${q.id_sequencial}`;
+        document.getElementById('modal-enunciado-text').textContent = q.enunciado.texto;
+        
+        const imgEl = document.getElementById('modal-enunciado-image');
+        if (q.enunciado.midia) {
+            imgEl.src = q.enunciado.midia;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.style.display = 'none';
+        }
+        
+        const altList = document.getElementById('modal-alternatives-list');
+        altList.innerHTML = '';
+        
+        if (q.tipo_questao === 'Múltipla Escolha') {
+            q.alternativas.forEach(alt => {
+                const isCorrect = q.resposta_correta === alt.letra;
+                let imgHtml = '';
+                if (alt.midia) {
+                    imgHtml = `<img src="${alt.midia}" class="question-image-preview" style="max-width: 150px;" alt="Imagem Alternativa ${alt.letra}">`;
+                }
+                
+                altList.innerHTML += `
+                    <li>
+                        <label>
+                            <input type="radio" name="new_correct_answer" value="${alt.letra}" ${isCorrect ? 'checked' : ''}>
+                            <strong>(${alt.letra})</strong> ${alt.texto}    
+                            ${imgHtml}
+                        </label>
+                    </li>
+                `;
+            });
+            document.getElementById('modal-resposta-correta-atual').textContent = q.resposta_correta;
+            document.getElementById('modal-gabarito-form').querySelector('button').style.display = 'block';
+        } else {
+            altList.innerHTML = `<p>Esta é uma questão <strong>Discursiva</strong>. Não há alternativa correta única para alterar.</p>`;
+            document.getElementById('modal-gabarito-form').querySelector('button').style.display = 'none';
+            document.getElementById('modal-resposta-correta-atual').textContent = 'Discursiva';
+        }
+    }
+
+    async function saveNewAnswer() {
+        const questionId = document.getElementById('modal-question-id').value;
+        const newAnswer = document.querySelector('#modal-gabarito-form input[name="new_correct_answer"]:checked')?.value;
+        
+        if (!questionId || !newAnswer) {
+            alert("Selecione uma nova resposta ou cancele.");
+            return;
+        }
+
+        try {
+            await database.ref(`banco_questoes/${questionId}`).update({ resposta_correta: newAnswer });
+            allQuestions[questionId].resposta_correta = newAnswer;
+            alert(`Gabarito da Questão Q${allQuestions[questionId].id_sequencial} atualizado para: ${newAnswer}`);
+            closeModal('modal-question-view');
+            filterQuestions();  
+        } catch (e) {
+            alert("Erro ao salvar a nova resposta: " + e.message);
+        }
+    }
+
+    window.openQuestionEditModal = function(questionId) {
+        const q = allQuestions[questionId];
+        if (!q) return;
+
+        document.getElementById('edit-question-firebaseId').value = questionId;
+        document.getElementById('edit-question-id-sequencial').value = q.id_sequencial;
+        document.getElementById('modal-edit-question-title').textContent = `Editar Questão Q${q.id_sequencial}`;
+
+        document.getElementById('edit-modalidade').value = q.modalidade;
+        document.getElementById('edit-componente').value = q.componente_curricular;
+        document.getElementById('edit-habilidade').value = q.habilidade_bncc || '';
+        document.getElementById('edit-tipo').value = q.tipo_questao;
+        document.getElementById('edit-enunciado').value = q.enunciado.texto;
+        document.getElementById('edit-resposta-correta').value = q.resposta_correta;
+        
+        document.getElementById('edit-linhas-discursiva').value = q.linhas_discursiva || 4;
+
+        const imgEl = document.getElementById('edit-enunciado-image-preview');
+        if (q.enunciado.midia) {
+            imgEl.src = q.enunciado.midia;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+        }
+
+        setupEditAlternativeInputs(q);
+        toggleEditAlternatives(q.tipo_questao);
+        openModal('modal-question-edit');
+    }
+
+    function setupEditAlternativeInputs(question) {
+        const container = document.getElementById('edit-alternatives-inputs');
+        container.innerHTML = '';
+        const isMultipleChoice = question.tipo_questao === 'Múltipla Escolha';
+
+        ALTERNATIVE_LETTERS.forEach((letra, index) => {
+            const alt = question.alternativas ? question.alternativas.find(a => a.letra === letra) || { texto: '', midia: '' } : { texto: '', midia: '' };
+            
+            let imagePreviewHtml = '';
+            if (alt.midia) {
+                imagePreviewHtml = `<small>Imagem Atual:</small><img src="${alt.midia}" class="image-preview-edit" alt="Imagem Alt ${letra} Atual">`;
+            }
+
+            container.innerHTML += `
+                <div>
+                    <label for="edit-alt${letra}"><strong>${letra})</strong> Texto:</label>
+                    <textarea id="edit-alt${letra}" rows="2" placeholder="Texto da alternativa ${letra}" ${isMultipleChoice ? 'required' : ''}>${alt.texto}</textarea>
+                    
+                    <label for="edit-img${letra}">Mídia ${letra} (Selecione um novo arquivo para substituir):</label>
+                    <input type="file" id="edit-img${letra}" accept="image/*">
+                    ${imagePreviewHtml}
+                </div>
+            `;
+        });
+
+        document.getElementById('edit-alternatives-section').style.display = isMultipleChoice ? 'block' : 'none';
+    }
+
+    function toggleAlternatives(tipo) {
+        document.getElementById('alternatives-section').style.display =  
+            tipo === 'Múltipla Escolha' ? 'block' : 'none';
+        document.getElementById('linhas-discursiva-group').style.display =
+            tipo === 'Discursiva' ? 'block' : 'none';
+    }
+    
+    function toggleEditAlternatives(tipo) {
+        const isMultipleChoice = tipo === 'Múltipla Escolha';
+        document.getElementById('edit-alternatives-section').style.display = isMultipleChoice ? 'block' : 'none';
+        document.getElementById('edit-linhas-discursiva-group').style.display =
+            tipo === 'Discursiva' ? 'block' : 'none';
+
+        ALTERNATIVE_LETTERS.forEach(letra => {
+            const textarea = document.getElementById(`edit-alt${letra}`);
+            if (textarea) textarea.required = isMultipleChoice;
+        });
+    }
+    
+    async function handleEditQuestionSave() {
+        const messageEl = document.getElementById('question-edit-message');
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Salvando e atualizando uploads...</div>`;
+        
+        const questionId = document.getElementById('edit-question-firebaseId').value;
+        const originalQuestion = allQuestions[questionId];
+
+        try {
+            const newEnunciadoFile = document.getElementById('edit-enunciado-imagem').files[0];
+            let enunciadoUrl = originalQuestion.enunciado.midia || "";
+            if (newEnunciadoFile) {
+                enunciadoUrl = await uploadFileToImgBB(newEnunciadoFile);
+            }
+
+            const tipo = document.getElementById('edit-tipo').value;
+            const linhasDiscursiva = tipo === 'Discursiva' ? parseInt(document.getElementById('edit-linhas-discursiva').value) : 0;
+            
+            const novasAlternativas = [];
+            
+            if (tipo === 'Múltipla Escolha') {
+                for (const letra of ALTERNATIVE_LETTERS) {
+                    const altText = document.getElementById(`edit-alt${letra}`).value;
+                    const altFile = document.getElementById(`edit-img${letra}`).files[0];
+                    
+                    const originalAlt = originalQuestion.alternativas.find(a => a.letra === letra);
+                    let midiaUrl = originalAlt ? originalAlt.midia : "";
+                    
+                    if (altFile) {
+                        midiaUrl = await uploadFileToImgBB(altFile);
+                    }
+                    
+                    novasAlternativas.push({
+                        letra: letra,
+                        texto: altText,
+                        midia: midiaUrl
+                    });
+                }
+            }
+
+            const dadosAtualizados = {
+                modalidade: document.getElementById('edit-modalidade').value,
+                componente_curricular: document.getElementById('edit-componente').value,
+                habilidade_bncc: document.getElementById('edit-habilidade').value,
+                enunciado: { texto: document.getElementById('edit-enunciado').value, midia: enunciadoUrl },
+                tipo_questao: tipo,
+                alternativas: novasAlternativas,
+                resposta_correta: tipo === 'Múltipla Escolha' ? document.getElementById('edit-resposta-correta').value : "Discursiva",
+                linhas_discursiva: linhasDiscursiva,
+                data_edicao: new Date().toISOString()
+            };
+
+            await database.ref(`banco_questoes/${questionId}`).update(dadosAtualizados);
+            
+            Object.assign(allQuestions[questionId], dadosAtualizados);
+            
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${originalQuestion.id_sequencial} salva com sucesso!</div>`;
+            
+            filterQuestions();
+            setTimeout(() => closeModal('modal-question-edit'), 1500);
+
+        } catch (error) {
+            console.error("Erro ao editar questão:", error);
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao salvar a edição: ${error.message}</div>`;
+        }
+    }
+    
+    function openEditExamModal() {
+        if (!selectedExamId) return;
+        const prova = allExams[selectedExamId];
+        
+        document.getElementById('modal-edit-exam-name').textContent = prova.cabecalho.disciplina;
+        document.getElementById('edit-escola').value = prova.cabecalho.escola;
+        document.getElementById('edit-turma').value = prova.cabecalho.turma;
+        document.getElementById('edit-professor').value = prova.cabecalho.professor;
+        document.getElementById('edit-duracao').value = prova.cabecalho.duracao;
+        document.getElementById('edit-data-prova').value = prova.cabecalho.data_prova;  
+
+        openModal('modal-edit-exam');
+    }
+
+    async function handleEditExamSave() {
+        const messageEl = document.getElementById('edit-exam-message');
+        const updates = {
+            escola: document.getElementById('edit-escola').value,
+            turma: document.getElementById('edit-turma').value,
+            professor: document.getElementById('edit-professor').value,
+            duracao: document.getElementById('edit-duracao').value,
+            data_prova: document.getElementById('edit-data-prova').value,
+        };
+        
+        try {
+            await database.ref(`provas/${selectedExamId}/cabecalho`).update(updates);
+            
+            Object.assign(allExams[selectedExamId].cabecalho, updates);
+            updateExamListView();
+            
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check"></i> Prova atualizada com sucesso!</div>`;
+            setTimeout(() => closeModal('modal-edit-exam'), 1500);
+        } catch (e) {
+            messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-exclamation-circle"></i> Erro ao salvar edição: ${e.message}</div>`;
+        }
+    }
+    
+    async function deleteExam() {
+        if (!selectedExamId || !confirm("Tem certeza que deseja EXCLUIR esta prova? Esta ação é irreversível.")) return;
+        try {
+            await database.ref(`provas/${selectedExamId}`).remove();
+            delete allExams[selectedExamId];
+            selectedExamId = null;
+            updateExamListView();
+            alert("Prova excluída com sucesso.");
+        } catch (e) {
+            alert("Erro ao excluir prova: " + e.message);
+        }
+    }
+
+    function getAntiFraudGarbage() {
+        const randomString = Math.random().toString(36).substring(2, 8);
+        return `<span class="af-garbage">${randomString}</span>`;
+    }
+
+    function obfuscateText(text) {
+        if (!text) return "";
+        let newText = "";
+        let chars = text.split("");
+        
+        for (let i = 0; i < chars.length; i++) {
+            newText += chars[i];
+            if (Math.random() > 0.6) {
+                newText += getAntiFraudGarbage();
+            }
+        }
+        return newText;
+    }
+
+function gerarHTMLProva(prova) {
+    const cab = prova.cabecalho;
+    const dataProvaBR = cab.data_prova ? new Date(cab.data_prova).toLocaleDateString('pt-BR') : '__/__/____';
+    const logoSrc = cab.logo && cab.logo.trim() !== '' ? cab.logo : '';
+
+    let htmlContent = `
+        <div class="exam-header-print" style="border: 2px solid #3f51b5;">
+            <div class="logo-area" style="display: flex; align-items: center; justify-content: center; padding: 5px; background: #fff;">
+                <img src="${logoSrc}" alt="Logo" style="max-width: 100%; max-height: 80px; object-fit: contain;">
+            </div>
+            <div class="header-table-container" style="border-left: 2px solid #3f51b5;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+                    <tr>
+                        <td colspan="4" style="text-align: center; font-weight: bold; border-bottom: 1px solid #3f51b5; padding: 8px; background: #3f51b5; color: white; -webkit-print-color-adjust: exact;">
+                            ${cab.escola.toUpperCase()}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right; padding: 3px 10px; border-bottom: 1px solid #3f51b5; color: #333;">
+                            <small><strong>TURMA:</strong> ${cab.turma} | <strong>TURNO:</strong> ${cab.turno} | <strong>DATA:</strong> ${dataProvaBR}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding: 8px; border-bottom: 1px solid #3f51b5;">
+                            <strong>ALUNO(A):</strong> <span style="color: #3f51b5;">_________________________________________________</span> <strong>Nº:</strong> <span style="color: #3f51b5;">______________</span>
+                        </td>
+                    </tr>
+                    <tr style="background: #f5f5f5; -webkit-print-color-adjust: exact;">
+                        <td style="width: 20%; border-right: 1px solid #3f51b5; padding: 5px; font-weight: bold; text-align: center; color: #3f51b5;">
+                            ${cab.periodo ? cab.periodo.toUpperCase() : 'AVALIAÇÃO'}
+                        </td>
+                        <td style="width: 60%; padding: 5px;">
+                            <strong>PROF:</strong> ${cab.professor} <br>
+                            <strong>DISCIPLINA:</strong> ${cab.disciplina}
+                        </td>
+                        <td style="width: 20%; border-left: 1px solid #3f51b5; text-align: center; font-weight: bold; color: #f44336;">
+                            NOTA:
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="instructions-text" style="margin-top: 12px; font-size: 9pt; border: 1px solid #fbc02d; padding: 8px; background: #fffde7; border-radius: 4px; -webkit-print-color-adjust: exact;">
+            <strong style="color: #f57f17;">Instruções:</strong> ${prova.instrucoes_gerais || 'Leia atentamente.'}
+        </div>
+
+        <div class="questions-wrapper" style="--print-col-count: ${prova.layout_colunas || 1}; margin-top: 20px;">
+    `;
+
+    prova.questoes_detalhes.forEach((q, index) => {
+        const numero = index + 1;
+        htmlContent += `
+            <div class="question-item-print" style="margin-bottom: 25px; break-inside: avoid;">
+                <div class="q-header" style="background: #e8eaf6 !important; border-bottom: 2px solid #3f51b5; padding: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact;">
+                    <strong style="color: #3f51b5;">QUESTÃO ${numero}</strong>
+                    <span style="background: #3f51b5; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8pt; -webkit-print-color-adjust: exact;">${q.habilidade_bncc || 'Geral'}</span>
+                </div>
+                <div class="q-enunciado" style="font-size: 11pt; line-height: 1.5; color: #333;">${q.enunciado.texto}</div>
+                ${q.enunciado.midia ? `<img src="${q.enunciado.midia}" style="max-width: 100%; display: block; margin: 15px auto; border-radius: 8px; border: 1px solid #ddd;">` : ''}
+                
+                ${q.tipo_questao === 'Múltipla Escolha' ? renderizarAlternativas(q) : renderizarLinhas(q)}
+            </div>
+        `;
+    });
+
+    htmlContent += `</div>`;
+    return htmlContent;
+}
+// Funções auxiliares para limpar o código principal
+function renderizarAlternativas(q) {
+    let out = '<ul style="list-style: none; padding: 0; margin-top: 10px;">';
+    q.alternativas.forEach(alt => {
+        out += `
+            <li style="margin-bottom: 5px; display: flex; align-items: flex-start;">
+                <span style="font-weight: bold; margin-right: 8px;">(${alt.letra})</span>
+                <div>
+                    ${alt.texto}
+                    ${alt.midia ? `<img src="${alt.midia}" style="max-width: 150px; display: block; margin-top: 5px;">` : ''}
+                </div>
+            </li>`;
+    });
+    return out + '</ul>';
+}
+
+function renderizarLinhas(q) {
+    const numLinhas = q.linhas_discursiva || 4;
+    let linhasHtml = '<div style="margin-top: 10px;">';
+    for (let i = 0; i < numLinhas; i++) {
+        linhasHtml += '<div style="border-bottom: 1px solid #ccc; height: 24px; width: 100%;"></div>';
+    }
+    return linhasHtml + '</div>';
+}
+    function visualizarProvaDetalhe() {
+        if (!selectedExamId) return;
+        const prova = allExams[selectedExamId];
+
+        const printContentEl = document.getElementById('exam-content-print');
+        
+        printContentEl.style.setProperty('--print-col-count', 1);
+
+        printContentEl.innerHTML = gerarHTMLProva(prova);
+
+        document.getElementById('exam-preview').style.display = 'block';
+    }
+
+function exportarProva() {
+    if (!selectedExamId) return;
+    const prova = allExams[selectedExamId];
+    const html = gerarHTMLProva(prova);
+    const printArea = document.getElementById('print-area-container');
+
+    printArea.innerHTML = html;
+    printArea.style.setProperty('--print-col-count', prova.layout_colunas || 1);
+
+    // Aguarda um pouco para garantir que as imagens do ImgAtecServer foram renderizadas no DOM
+    setTimeout(() => {
+        window.print();
+    }, 800); 
+}
+    function baixarGabarito() {
+        if (!selectedExamId) return;
+        const prova = allExams[selectedExamId];
+        const content = prova.gabarito;
+        
+        const filename = `Gabarito_${prova.cabecalho.disciplina}_${new Date().toISOString().substring(0, 10)}.txt`;
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        alert("Gabarito baixado em TXT.");
+    }
+
+    async function updateDashboardIndicators() {
+        try {
+            const questaoSnapshot = await database.ref('banco_questoes').once('value');
+            const provaSnapshot = await database.ref('provas').once('value');
+            const userSnapshot = await database.ref('usuarios').once('value');
+
+            const totalQuestoes = questaoSnapshot.exists() ? Object.keys(questaoSnapshot.val()).length : 0;
+            const totalProvas = provaSnapshot.exists() ? Object.keys(provaSnapshot.val()).length : 0;
+            
+            const users = userSnapshot.val();
+            const usersArray = users ? Object.values(users) : [];
+            const active = usersArray.filter(u => u.status === 'Aprovado');
+            const totalPendentes = usersArray.filter(u => u.status === 'Pendente').length;
+            const totalPadrao = active.filter(u => u.role === 'Padrão').length;
+            const totalAdm = active.filter(u => u.role === 'ADM').length;
+            
+            document.getElementById('dash-total-questoes').textContent = totalQuestoes;
+            document.getElementById('dash-total-provas').textContent = totalProvas;
+            document.getElementById('dash-total-padrao').textContent = totalPadrao;
+            document.getElementById('dash-total-adm').textContent = totalAdm;
+            document.getElementById('dash-total-pendentes').textContent = totalPendentes;
+        } catch (e) {
+            console.error("Erro ao carregar indicadores:", e);
+        }
+    }
+
+    function loadHeaderConfig() {
+        try {
+            const config = JSON.parse(localStorage.getItem('header_config'));
+            if (config) {
+                document.getElementById('cabecalho-escola').value = config.escola || '';
+                document.getElementById('cabecalho-professor').value = CURRENT_USER?.nome || '';  
+                document.getElementById('cabecalho-turma').value = config.turma || '';
+                document.getElementById('cabecalho-periodo').value = config.periodo || '1º PERÍODO';
+                document.getElementById('cabecalho-turno').value = config.turno || 'Matutino';
+            }
+        } catch (e) {
+            console.warn("Nenhuma configuração de cabeçalho encontrada ou inválida.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAlternativeInputs();
+        document.getElementById('cabecalho-data-prova').value = new Date().toISOString().substring(0, 10);
+        
+        toggleAlternatives('Múltipla Escolha');
+    });
+
+</script>
+</body>
+</html>
