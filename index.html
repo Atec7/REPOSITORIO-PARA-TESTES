@@ -1,10 +1,50 @@
+
 <!DOCTYPE html>
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>edu10 Avaliações - Gerador de Provas</title>
-    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -486,89 +526,7 @@
             user-select: none;
             z-index: -999;
         }
-        /* Ajuste Responsivo da Interface (Tela) */
-@media screen and (max-width: 768px) {
-    .exam-header-print {
-        display: flex !important;
-        flex-direction: column;
-        border: 1px solid #000;
-    }
-    .exam-header-print .logo-area {
-        border-bottom: 1px solid #000;
-        padding: 10px;
-    }
-    .exam-header-print div:last-child {
-        border-left: none !important;
-    }
-    /* Faz a tabela interna da prova virar blocos no celular */
-    .exam-header-print table, 
-    .exam-header-print tr, 
-    .exam-header-print td {
-        display: block;
-        width: 100% !important;
-        border: none !important;
-        border-bottom: 1px solid #eee !important;
-    }
-}
-@media print {
-    /* Força o navegador a imprimir cores e imagens de fundo */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-
-    /* Garante que o cabeçalho mantenha o tom de azul da sua marca */
-    .q-header strong {
-        color: #3f51b5 !important; /* Seu azul original */
-    }
-
-    .q-number-box {
-        color: #f44336 !important; /* Seu vermelho/laranja original */
-        border-color: #000 !important;
-    }
-
-    /* Ícones do FontAwesome costumam sumir na impressão, aqui garantimos a cor */
-    .fa-book-open {
-        color: #ff9800 !important;
-    }
-
-    /* Mantém as bordas visíveis */
-    .exam-header-print, .header-table-container, td {
-        border-color: #000 !important;
-    }
-}
-/* Ajuste Fixo para Impressão (iOS e Windows) */
-@media print {
-    #print-area-container {
-        display: block !important;
-    }
-    
-    .exam-header-print {
-        display: -webkit-grid !important; /* Safari/iOS */
-        display: grid !important;
-        grid-template-columns: 20% 80% !important;
-        -webkit-grid-template-columns: 20% 80% !important;
-        width: 100% !important;
-        border: 1px solid #000 !important;
-    }
-
-    /* Evita que a questão seja cortada entre páginas no iOS */
-    .question-item-print {
-        page-break-inside: avoid !important;
-        -webkit-column-break-inside: avoid !important;
-        break-inside: avoid !important;
-        display: block !important;
-        position: relative !important;
-        margin-bottom: 20px !important;
-    }
-
-    .questions-wrapper {
-        column-count: var(--print-col-count, 1);
-        -webkit-column-count: var(--print-col-count, 1);
-        gap: 1cm;
-    }
-}
+        
         @media print {
             @page {
                 size: A4;
@@ -727,7 +685,26 @@
             <div id="login-message" style="margin-top: 15px;"></div>
         </div>
     </div>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
     <div id="main-interface">
         <header>
             <div style="display: flex; align-items: center;">
@@ -740,7 +717,26 @@
                 <button class="btn-danger" onclick="simularLogout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </header>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
         <nav>
             <ul class="nav-menu">
                 <li><a id="nav-dashboard" href="#" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
@@ -757,7 +753,7 @@
                 <h2><i class="fas fa-tachometer-alt"></i> Resumo do Sistema</h2>
                 <div class="dashboard-grid">
                     <div class="indicator-card">
-                        <p>Total de Questões</p>
+                        <p>Total de Questões no Banco</p>
                         <h3 id="dash-total-questoes">0</h3>
                     </div>
                     <div class="indicator-card">
@@ -837,7 +833,26 @@
                     <div id="question-creation-message" style="margin-top: 20px;"></div>
                 </form>
             </section>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
             <section id="bank" class="page-section">
                 <h2><i class="fas fa-database"></i> Banco de Questões</h2>
                 <div class="filter-container">
@@ -956,7 +971,26 @@
                     </div>
                 </div>
             </section>
-            
+            <!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
             <section id="admin" class="page-section">
                 <h2><i class="fas fa-user-shield"></i> Painel de Administração</h2>
                 
@@ -1028,7 +1062,26 @@
             <div id="request-access-message" style="margin-top: 10px;"></div>
         </div>
     </div>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
 
     <div id="modal-question-view" class="modal">
         <div class="modal-content">
@@ -1104,7 +1157,26 @@
                         </div>
                     </div>
                 </div>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
                 <div id="edit-alternatives-section">
                     <h3 style="margin-top: 30px;">Edição de Alternativas</h3>
                     <div id="edit-alternatives-inputs" class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px;">
@@ -1155,11 +1227,88 @@
             <div id="edit-exam-message" style="margin-top: 10px;"></div>
         </div>
     </div>
-
+<!--/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner       ATECSEVEN TECNOLOGIA
+ * @cnpj        63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */-->
 
     <script>
+      /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     const IMGBB_KEY = "95bb16ee776d7e20f26857cec98bd372";
-    
+    /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     const firebaseConfig = {
         apiKey: "AIzaSyDFQCMsX04fwh7MVyEpvXnXD0U4TD5Or5w",
         authDomain: "ja-barbearia.firebaseapp.com",
@@ -1168,7 +1317,26 @@
         appId: "1:213237027963:web:7d585b158ee06d3ab7fede",
         measurementId: "G-YNNKX5YDDN"  
     };
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     const app = firebase.initializeApp(firebaseConfig);
     const database = app.database();
 
@@ -1183,7 +1351,26 @@
 
     const ALTERNATIVE_LETTERS = ['A', 'B', 'C', 'D', 'E'];
     const LINE_HEIGHT_PT = 14;  
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     let PAGE_SIZE = 20; 
     let lastKey = null; 
     let isSearching = false; 
@@ -1211,14 +1398,33 @@
             if (data.success) {
                 return data.data.url;
             } else {
-                throw new Error(data.error.message || "Erro desconhecido no ImgAtecServer.");
+                throw new Error(data.error.message || "Erro desconhecido no ImgBB.");
             }
         } catch (error) {
-            console.error("Erro no upload para ImgAtecServer:", error);
+            console.error("Erro no upload para ImgBB:", error);
             throw new Error(`Falha no upload da imagem. Erro: ${error.message}`);
         }
     }
-    
+    /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     async function handleLogin() {
         const email = document.getElementById('login-user').value;
         const password = document.getElementById('login-password').value;
@@ -1306,7 +1512,26 @@
                  messageEl.innerHTML = `<div class="alert-error"><i class="fas fa-user-lock"></i> Este e-mail já está cadastrado. Tente entrar.</div>`;
                  return;
             }
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
             const newUserRef = database.ref('usuarios').push();
             await newUserRef.set({
                 nome: name,
@@ -1385,7 +1610,26 @@
             hour12: false
         });
     }
-    
+    /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
     }
@@ -1551,7 +1795,7 @@
     
     async function handleCreateQuestion() {
         const messageEl = document.getElementById('question-creation-message');
-        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando... Uploads para ImgAtecServer em andamento.</div>`;
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando... Uploads para ImgBB em andamento.</div>`;
         
         try {
             const nextId = await getNextQuestionId();
@@ -1599,7 +1843,7 @@
 
             await novaQuestaoRef.set(dadosQuestao);
             
-            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${nextId} salva com sucesso! (Imagens no ImgAtecServer)</div>`;
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${nextId} salva com sucesso! (Imagens no ImgBB)</div>`;
             document.getElementById('form-create-question').reset();
             setupAlternativeInputs();    
             updateBankView();
@@ -1639,7 +1883,64 @@
             });
         }
     }
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     // NOVO: Função para adicionar o botão "Carregar Mais"
     function addLoadMoreButton(hasNextPage) {
         const listEl = document.getElementById('questions-bank-list');
@@ -1724,7 +2025,45 @@
             if(reset) {
                 listEl.innerHTML = '';
             }
-            
+            /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
             // Remove o item de controle do final do array se ele não for o último item visível
             if(newQuestionsArray.length > PAGE_SIZE) {
                 newQuestionsArray.pop();
@@ -1767,7 +2106,140 @@
             toggleQuestionSelection(cb.value, checked);
         });
     }
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     function filterQuestions() {
         manageBankPagination(true);
     }
@@ -1825,7 +2297,121 @@
             listEl.innerHTML = '<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão válida selecionada ou carregada.</p>';
         }
     }
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     function shuffleSelectedQuestions() {
         if (selectedQuestionIdsForExam.length < 2) return alert("Adicione mais questões para embaralhar.");
         
@@ -1876,7 +2462,64 @@
             examListEl.innerHTML = `<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão cadastrada para a disciplina <strong>${selectedDiscipline}</strong>.</p>`;
         }
     }
-    
+    /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     function gerarGabaritoInstantaneo(questoes) {
         let gabarito = "--- GABARITO OFICIAL ---\n";
         gabarito += "Disciplina: " + (questoes[0]?.componente_curricular || 'N/A') + "\n";
@@ -1892,7 +2535,7 @@
 
     async function handleCreateExam() {
         const messageEl = document.getElementById('exam-creation-message');
-        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando upload da logo (ImgAtecServer) e geração da prova...</div>`;
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando upload da logo (ImgBB) e geração da prova...</div>`;
         
         try {
             // 1. Validação e Coleta das Questões Marcadas
@@ -1976,7 +2619,45 @@
         allExams = snapshot.val() || {};
         filterExams();  
     }
-
+/**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
     function filterExams() {
         const listEl = document.getElementById('my-exams-list');
         listEl.innerHTML = '';
@@ -2311,123 +2992,191 @@
         return newText;
     }
 
-function gerarHTMLProva(prova) {
+    function gerarHTMLProva(prova) {
     const cab = prova.cabecalho;
-    const dataProvaBR = cab.data_prova ? new Date(cab.data_prova).toLocaleDateString('pt-BR') : '__/__/____';
-    const logoSrc = cab.logo && cab.logo.trim() !== '' ? cab.logo : '';
 
-    let htmlContent = `
-        <div class="exam-header-print" style="border: 2px solid #3f51b5; display: flex; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
-            <div class="logo-area" style="flex: 1 1 150px; display: flex; align-items: center; justify-content: center; padding: 10px; background: #fff; box-sizing: border-box;">
-                <img src="${logoSrc}" alt="Logo" style="max-width: 100%; max-height: 80px; object-fit: contain;">
+    const dataProvaBR = cab.data_prova
+        ? new Date(cab.data_prova).toLocaleDateString('pt-BR')
+        : '__/__/____';
+
+    const logoSrc = cab.logo && cab.logo.trim() !== ''
+        ? cab.logo
+        : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff" stroke="#ccc" stroke-width="1"/><text x="50" y="55" font-family="Arial, sans-serif" font-size="18" fill="#aaa" text-anchor="middle">LOGO</text></svg>';
+
+    let htmlContent = '';
+
+    htmlContent += `
+        <div class="exam-header-print">
+            <div class="logo-area">
+                <img src="${logoSrc}" alt="Logo da Escola">
             </div>
-            
-            <div class="header-table-container" style="flex: 4 1 300px; border-left: 2px solid #3f51b5; min-width: 0; box-sizing: border-box;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 10pt; table-layout: fixed;">
+            <div style="border-left: 1px solid #000;">
+                <table>
                     <tr>
-                        <td colspan="4" style="text-align: center; font-weight: bold; border-bottom: 1px solid #3f51b5; padding: 8px; background: #3f51b5; color: white; -webkit-print-color-adjust: exact;">
+                        <td colspan="4" style="text-align: center; font-weight: bold; border-top: none;">
                             ${cab.escola.toUpperCase()}
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right; padding: 3px 10px; border-bottom: 1px solid #3f51b5; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <small><strong>TURMA:</strong> ${cab.turma} | <strong>TURNO:</strong> ${cab.turno} | <strong>DATA:</strong> ${dataProvaBR}</small>
+                        <td colspan="4" style="text-align: right; border-top: none;">
+                            <span style="font-weight: bold; margin-right: 15px;">TURMA: ${cab.turma.toUpperCase()}</span> |
+                            <span style="font-weight: bold; margin-right: 15px;">TURNO: ${cab.turno.toUpperCase()}</span> |
+                            <span style="font-weight: bold;">DATA:</span> ${dataProvaBR}
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 8px; border-bottom: 1px solid #3f51b5; white-space: normal; word-wrap: break-word;">
-                            <strong>ALUNO(A):</strong> <span style="color: #3f51b5;">___________________________________________</span> <strong>Nº:</strong> <span style="color: #3f51b5;">_______</span>
+                        <td colspan="4" style="border-top: 1px solid #000;">
+                            <span style="font-weight: bold;">ALUNO(A)</span>
+                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 60%; margin-right: 5px;"></span>
+                            <span style="font-weight: bold;">Nº</span>
+                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 10%; margin-right: 5px;"></span>
+                            <span style="font-weight: bold;">SALA:</span>
+                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 10%;"></span>
                         </td>
                     </tr>
-                    <tr style="background: #f5f5f5; -webkit-print-color-adjust: exact;">
-                        <td style="width: 25%; border-right: 1px solid #3f51b5; padding: 5px; font-weight: bold; text-align: center; color: #3f51b5; font-size: 9pt;">
-                            ${cab.periodo ? cab.periodo.toUpperCase() : 'AVALIAÇÃO'}
+                    <tr>
+                        <td rowspan="2" style="font-weight: bold; text-align: center; width: 15%; border-left: none; border-top: 1px solid #000;">
+                            ${cab.periodo ? cab.periodo.toUpperCase() : 'PERÍODO'}
                         </td>
-                        <td style="width: 55%; padding: 5px; font-size: 9pt; line-height: 1.2;">
-                            <strong>PROF:</strong> ${cab.professor} <br>
-                            <strong>DISCIPLINA:</strong> ${cab.disciplina}
+                        <td style="width: 50%; border-top: 1px solid #000;">
+                            <span style="font-weight: bold;">PROFESSOR(A):</span> ${cab.professor}
                         </td>
-                        <td style="width: 20%; border-left: 1px solid #3f51b5; text-align: center; font-weight: bold; color: #f44336; font-size: 10pt;">
+                        <td rowspan="2" style="font-weight: bold; width: 20%; text-align: center; border-top: 1px solid #000;">
                             NOTA:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border-top: 1px solid #000;">
+                            <span style="font-weight: bold;">COMPONENTE CURRICULAR:</span> ${cab.disciplina}
                         </td>
                     </tr>
                 </table>
             </div>
         </div>
 
-        <div class="instructions-text" style="margin-top: 12px; font-size: 9pt; border: 1px solid #fbc02d; padding: 8px; background: #fffde7; border-radius: 4px; -webkit-print-color-adjust: exact; text-align: justify;">
-            <strong style="color: #f57f17;">Instruções:</strong> ${prova.instrucoes_gerais || 'Leia atentamente.'}
-        </div>
-
-        <div class="questions-wrapper" style="column-count: ${prova.layout_colunas || 1}; column-gap: 1.5cm; margin-top: 20px; width: 100%;">
+        <p class="instructions-text">
+            <strong>Instruções Gerais:</strong> ${prova.instrucoes_gerais}
+        </p>
     `;
+
+    htmlContent += `<div class="questions-wrapper" style="--print-col-count: ${prova.layout_colunas || 1};">`;
 
     prova.questoes_detalhes.forEach((q, index) => {
         const numero = index + 1;
+        const enunciadoSeguro = obfuscateText(q.enunciado.texto);
+
         htmlContent += `
-            <div class="question-item-print" style="margin-bottom: 25px; break-inside: avoid; -webkit-column-break-inside: avoid; display: block; width: 100%;">
-                <div class="q-header" style="background: #e8eaf6 !important; border-bottom: 2px solid #3f51b5; padding: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact;">
-                    <strong style="color: #3f51b5;">QUESTÃO ${numero}</strong>
-                    <span style="background: #3f51b5; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8pt; -webkit-print-color-adjust: exact;">${q.habilidade_bncc || 'Geral'}</span>
+            <div class="question-item-print">
+                <div class="q-header">
+                    <strong style="display: flex; align-items: center; gap: 5px; color: #3f51b5;">
+                        <i class="fas fa-book-open" style="color: #ff9800;"></i> QUESTÃO ${numero}
+                    </strong>
+                    <span class="q-number-box" style="border: 1px solid #000; padding: 2px 4px; font-weight: bold; color: #f44336;">
+                        ${q.habilidade_bncc || 'N/A'}
+                    </span>
                 </div>
-                <div class="q-enunciado" style="font-size: 11pt; line-height: 1.5; color: #333; text-align: justify;">${q.enunciado.texto}</div>
-                ${q.enunciado.midia ? `<img src="${q.enunciado.midia}" style="max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; border: 1px solid #ddd;">` : ''}
-                
-                <div style="width: 100%;">
-                    ${q.tipo_questao === 'Múltipla Escolha' ? renderizarAlternativas(q) : renderizarLinhas(q)}
+
+                <div class="q-enunciado" style="font-size: 11pt; margin-bottom: 10px;">
+                    ${enunciadoSeguro}
                 </div>
-            </div>
         `;
+
+        if (q.enunciado.midia) {
+            htmlContent += `
+                <img src="${q.enunciado.midia}"
+                     class="image-preview"
+                     alt="Imagem da Questão ${numero}"
+                     style="max-width: 90%; height: auto; display: block; margin: 8px auto;">
+            `;
+        }
+
+        if (q.tipo_questao === 'Múltipla Escolha') {
+            htmlContent += `<ul class="alternative-list-print" style="list-style: none; padding: 0 5px;">`;
+
+            q.alternativas.forEach(alt => {
+                const textoAltSeguro = obfuscateText(alt.texto);
+
+                htmlContent += `
+                    <li>
+                        <label style="display: flex; align-items: flex-start; font-size: 10.5pt;">
+                            <input type="checkbox" disabled style="margin-top: 3px; margin-right: 10px;">
+                            <span style="font-weight: bold; margin-right: 5px;">${alt.letra})</span>
+                            ${textoAltSeguro}
+                        </label>
+                `;
+
+                if (alt.midia) {
+                    htmlContent += `
+                        <img src="${alt.midia}"
+                             class="image-preview-small"
+                             alt="Imagem da Alternativa ${alt.letra}"
+                             style="max-width: 40%; height: auto; display: block; margin: 5px 0 5px 20px;">
+                    `;
+                }
+
+                htmlContent += `</li>`;
+            });
+
+            htmlContent += `</ul>`;
+        } else {
+            const linhas = q.linhas_discursiva || 4;
+            const minHeight = linhas * LINE_HEIGHT_PT;
+
+            htmlContent += `
+                <p class="discursiva-answer-space"
+                   style="min-height: ${minHeight}pt; font-size: 10.5pt;">
+                    Espaço para Resposta Discursiva
+                </p>
+            `;
+        }
+
+        htmlContent += `</div>`;
     });
 
     htmlContent += `</div>`;
-    return htmlContent;
+
+    // 🔒 Wrapper obrigatório para respeitar @page no Chrome macOS
+    return `
+        <div class="print-page">
+            ${htmlContent}
+        </div>
+    `;
 }
 
-function renderizarAlternativas(q) {
-    let out = '<ul style="list-style: none; padding: 0; margin-top: 10px; width: 100%;">';
-    q.alternativas.forEach(alt => {
-        out += `
-            <li style="margin-bottom: 6px; display: flex; align-items: flex-start; break-inside: avoid;">
-                <span style="font-weight: bold; margin-right: 8px; flex-shrink: 0;">(${alt.letra})</span>
-                <div style="flex-grow: 1;">
-                    ${alt.texto}
-                    ${alt.midia ? `<img src="${alt.midia}" style="max-width: 150px; height: auto; display: block; margin-top: 5px; border-radius: 4px;">` : ''}
-                </div>
-            </li>`;
-    });
-    return out + '</ul>';
-}
+    function visualizarProvaDetalhe() {
+        if (!selectedExamId) return;
+        const prova = allExams[selectedExamId];
 
-function renderizarLinhas(q) {
-    const numLinhas = q.linhas_discursiva || 4;
-    let linhasHtml = '<div style="margin-top: 10px; width: 100%;">';
-    for (let i = 0; i < numLinhas; i++) {
-        linhasHtml += '<div style="border-bottom: 1px solid #ccc; height: 28px; width: 100%;"></div>';
+        const printContentEl = document.getElementById('exam-content-print');
+        
+        printContentEl.style.setProperty('--print-col-count', 1);
+
+        printContentEl.innerHTML = gerarHTMLProva(prova);
+
+        document.getElementById('exam-preview').style.display = 'block';
     }
-    return linhasHtml + '</div>';
-}
 
-function visualizarProvaDetalhe() {
-    if (!selectedExamId) return;
-    const prova = allExams[selectedExamId];
-    const printContentEl = document.getElementById('exam-content-print');
-    // Força 1 coluna na visualização do dashboard para melhor UX no MacBook
-    printContentEl.innerHTML = gerarHTMLProva(prova);
-    document.getElementById('exam-preview').style.display = 'block';
-}
+    function exportarProva(tipo) {
+        if (!selectedExamId) return;
+        const prova = allExams[selectedExamId];
+        
+        const html = gerarHTMLProva(prova);
+        
+        const printArea = document.getElementById('print-area-container');
+        
+        printArea.innerHTML = html;
+        
+        printArea.style.setProperty('--print-col-count', prova.layout_colunas || 1);
 
-function exportarProva() {
-    if (!selectedExamId) return;
-    const prova = allExams[selectedExamId];
-    const printArea = document.getElementById('print-area-container');
-    printArea.innerHTML = gerarHTMLProva(prova);
-    
-    // O navegador MacBook (Safari/Chrome) precisa de um tempo para renderizar o layout de colunas
-    setTimeout(() => {
         window.print();
-    }, 800); 
-}
+        
+        setTimeout(() => {
+            printArea.innerHTML = '';
+        }, 500);
+        
+        alert(`✅ Prova Gerada com Proteção Anti-Fraude!\n\nSe tentarem converter este PDF para Word, o texto ficará ilegível devido à criptografia visual implementada.`);
+    }
+    
     function baixarGabarito() {
         if (!selectedExamId) return;
         const prova = allExams[selectedExamId];
@@ -2491,7 +3240,350 @@ function exportarProva() {
         
         toggleAlternatives('Múltipla Escolha');
     });
-
+//
+      /**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ *//**
+ * ============================================================================
+ * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
+ * ============================================================================
+ * * @owner        ATECSEVEN TECNOLOGIA
+ * @cnpj         63.363.373/0001-72
+ * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
+ * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
+ * ou comercialização deste código, total ou parcialmente, sem a expressa
+ * autorização por escrito da detentora dos direitos.
+ * * A violação destes termos está sujeita às penalidades previstas na legislação
+ * brasileira vigente:
+ * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
+ * - Lei nº 9.610/98 (Lei de Direitos Autorais).
+ * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
+ * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
+ * respondendo por perdas e danos e lucros cessantes.
+ * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
+ * ============================================================================
+ */
 </script>
 </body>
 </html>
