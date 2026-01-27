@@ -11,131 +11,707 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     
     <style>
-    :root {
-        --primary-color: #3f51b5;
-        --secondary-color: #f44336;
-        --background-color: #f4f7f6;
-        --card-bg: #ffffff;
-        --text-color: #333;
-    }
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #f44336;
+            --background-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
 
-    * {
-        box-sizing: border-box;
-        font-family: 'Arial', sans-serif;
-    }
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
 
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: var(--background-color);
-        color: var(--text-color);
-        line-height: 1.6;
-    }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
 
-    /* --- INTERFACE DO SISTEMA --- */
-    .container { display: flex; min-height: 100vh; }
-    #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
-    .login-box { width: 350px; padding: 30px; background: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; }
-    
-    #main-interface { display: none; flex-direction: column; width: 100%; }
-    header { background-color: var(--primary-color); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-    
-    .nav-menu { list-style: none; padding: 0; margin: 0; background: #2b3990; display: flex; }
-    .nav-menu li a { display: block; padding: 12px 20px; color: white; text-decoration: none; }
-    .nav-menu li a:hover, .nav-menu li a.active { background-color: var(--secondary-color); }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
 
-    .page-section { display: none; padding: 30px; flex-grow: 1; max-width: 1200px; margin: 20px auto; background: var(--card-bg); border-radius: 8px; }
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--background-color);
+        }
+        .login-box {
+            width: 350px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .login-box h2 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .login-box p {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-warning {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: #303f9f; }
+        .btn-secondary { background-color: #757575; color: white; }
+        .btn-secondary:hover { background-color: #616161; }
+        .btn-danger { background-color: var(--secondary-color); color: white; }
+        .btn-danger:hover { background-color: #d32f2f; }
+        .btn-success { background-color: #4CAF50; color: white; }
+        .btn-success:hover { background-color: #45a049; }
+        .btn-warning { background-color: #ff9800; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8em; }
 
-    /* --- ESTILOS DA PROVA (TELA E IMPRESSÃO) --- */
-    #exam-preview {
-        width: 100%;
-        max-width: 21cm;
-        margin: 20px auto;
-        padding: 15px;
-        background-color: #fff;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
 
+        #main-interface {
+            display: none;  
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #user-role-display {
+            font-size: 0.6em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        #user-info-display {
+            font-size: 0.9em;
+            margin-left: 10px;
+            font-weight: 300;
+        }
+
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background: #2b3990;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .nav-menu li a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .nav-menu li a:hover, .nav-menu li a.active {
+            background-color: var(--secondary-color);
+        }
+        .nav-menu li a i {
+            margin-right: 8px;
+        }
+
+        .page-section {
+            display: none;  
+            padding: 30px;
+            flex-grow: 1;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .page-section h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .page-section form label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .page-section form input[type="text"],
+        .page-section form input[type="email"],
+        .page-section form input[type="password"],
+        .page-section form input[type="date"],
+        .page-section form input[type="number"],
+        .page-section form select,
+        .page-section form textarea,
+        .modal-content form input:not([type="file"]),
+        .modal-content form select,
+        .modal-content form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .indicator-card {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .indicator-card h3 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .indicator-card p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .exam-list li, #questions-bank-list li, .user-list li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .exam-list li .exam-info, .question-item-info {
+            flex-grow: 1;
+            padding-right: 15px;
+        }
+        .exam-list li:last-child, #questions-bank-list li:last-child, .user-list li:last-child { border-bottom: none; }
+        .user-list li span, .exam-list li span { font-weight: bold; }
+        
+        #questions-bank-list li {
+            display: flex;
+            align-items: center;
+        }
+        #questions-bank-list li input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.5);  
+        }
+        .question-item-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .question-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-container input, .filter-container select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        
+        .alert-error, .alert-success, .alert-info {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .alert-error { background-color: #fce4e4; color: #cc0000; border: 1px solid #f09595; }
+        .alert-success { background-color: #e6f6e6; color: #008000; border: 1px solid #a3d9a3; }
+        .alert-info { background-color: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
+        
+        #exam-preview {
+            border: 1px solid #ddd;
+            padding: 20px; 
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 210mm;   
+            margin: 20px auto;  
+            min-height: 297mm;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        #exam-content-print {
+            padding: 10px;
+        }
+        #exam-content-print .exam-header-print {
+            border: 1px solid #000;
+            padding: 0; 
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 20% 80%; 
+            font-size: 10pt;
+        }
+        #exam-content-print .exam-header-print table {
+             width: 100%; 
+             border-collapse: collapse; 
+             font-size: 10pt;
+        }
+        #exam-content-print .exam-header-print table,
+        #exam-content-print .exam-header-print td {
+            border: 1px solid #000;
+        }
+        #exam-content-print .exam-header-print td {
+            padding: 3px 5px;
+        }
+        #exam-content-print .exam-header-print .logo-area {
+            border: 1px solid #000; 
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+        #exam-content-print .exam-header-print .logo-area img {
+            max-width: 100%;
+            max-height: 50px;
+            height: auto;
+        }
+        #exam-content-print .questions-wrapper {
+             column-count: 1; 
+             gap: 20px;
+        }
+        #exam-content-print .question-item-print {
+             border: 1px solid #ddd;
+             padding: 10px;
+             margin-bottom: 15px;
+        }
+        #exam-content-print .q-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             background-color: #fff8e1; 
+             padding: 5px;
+             margin: -10px -10px 10px -10px;
+             border-bottom: 1px solid #ccc;
+        }
+        #exam-content-print .q-header strong {
+             font-size: 12pt;
+             color: #3f51b5;
+        }
+        #exam-content-print .q-enunciado {
+             font-size: 11pt;
+             margin-bottom: 10px;
+        }
+        #exam-content-print .alternative-list-print {
+             list-style: none;
+             padding: 0;
+             margin: 0;
+        }
+        #exam-content-print .alternative-list-print li label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11pt;
+        }
+        #exam-content-print .alternative-list-print input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        
+        #exam-questions-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px dotted #ccc;
+        }
+        #exam-questions-list li label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            flex-grow: 1;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        #exam-questions-list li input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+            transform: scale(1.0);
+        }
+
+        footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75em;
+            color: #777;
+            border-top: 1px solid #eee;
+            margin-top: auto;
+        }
+
+
+        .modal {
+            display: none;  
+            position: fixed;    
+            z-index: 1000;  
+            left: 0;
+            top: 0;
+            width: 100%;    
+            height: 100%;   
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.4);   
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;    
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 900px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-content h3 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 5px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #modal-question-view .question-view-grid,
+        #modal-question-edit .question-view-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .alternatives-list label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        .alternatives-list input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-image-preview {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+        .image-preview-edit {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 5px 0;
+        }
+
+
+        /* =======================================================================
+           3. ESTILOS DE IMPRESSÃO (PDF PERFEITO - Fiel ao Anexo + Páginação + ANTI-FRAUDE)
+           ======================================================================= */
+        
+        #print-area-container {
+            display: none; 
+            font-family: 'Times New Roman', serif;
+        }
+
+        /* Classe de Ruído Anti-Fraude (Invisível mas quebra copiar/colar) */
+        .af-garbage {
+            position: absolute;
+            opacity: 0;
+            color: transparent;
+            font-size: 1px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+            z-index: -999;
+        }
+        /* Ajuste Responsivo da Interface (Tela) */
+@media screen and (max-width: 768px) {
     .exam-header-print {
-        display: grid !important;
-        grid-template-columns: 20% 80% !important;
-        width: 100% !important;
-        border: 1px solid #000 !important;
-        background: #fff;
+        display: flex !important;
+        flex-direction: column;
+        border: 1px solid #000;
     }
-
-    .logo-area {
-        border-right: 1px solid #000 !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .exam-header-print .logo-area {
+        border-bottom: 1px solid #000;
         padding: 10px;
     }
-
-    .header-table {
-        width: 100%;
-        border-collapse: collapse;
+    .exam-header-print div:last-child {
+        border-left: none !important;
+    }
+    /* Faz a tabela interna da prova virar blocos no celular */
+    .exam-header-print table, 
+    .exam-header-print tr, 
+    .exam-header-print td {
+        display: block;
+        width: 100% !important;
+        border: none !important;
+        border-bottom: 1px solid #eee !important;
+    }
+}
+@media print {
+    /* Força o navegador a imprimir cores e imagens de fundo */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
     }
 
-    .header-table td {
-        border: 1px solid #000;
-        padding: 4px 8px;
-        font-size: 9pt;
-        color: #000;
+    /* Garante que o cabeçalho mantenha o tom de azul da sua marca */
+    .q-header strong {
+        color: #3f51b5 !important; /* Seu azul original */
     }
 
-    .instructions-text {
-        margin-top: 10px;
-        padding: 8px;
-        border: 1px solid #000;
-        background-color: #fffde7 !important;
-        font-size: 9pt;
-        text-align: justify;
+    .q-number-box {
+        color: #f44336 !important; /* Seu vermelho/laranja original */
+        border-color: #000 !important;
+    }
+
+    /* Ícones do FontAwesome costumam sumir na impressão, aqui garantimos a cor */
+    .fa-book-open {
+        color: #ff9800 !important;
+    }
+
+    /* Mantém as bordas visíveis */
+    .exam-header-print, .header-table-container, td {
+        border-color: #000 !important;
+    }
+}
+/* Ajuste Fixo para Impressão (iOS e Windows) */
+@media print {
+    #print-area-container {
+        display: block !important;
+    }
+    
+    .exam-header-print {
+        display: -webkit-grid !important; /* Safari/iOS */
+        display: grid !important;
+        grid-template-columns: 20% 80% !important;
+        -webkit-grid-template-columns: 20% 80% !important;
+        width: 100% !important;
+        border: 1px solid #000 !important;
+    }
+
+    /* Evita que a questão seja cortada entre páginas no iOS */
+    .question-item-print {
+        page-break-inside: avoid !important;
+        -webkit-column-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        position: relative !important;
+        margin-bottom: 20px !important;
     }
 
     .questions-wrapper {
-        margin-top: 20px;
         column-count: var(--print-col-count, 1);
-        column-gap: 1cm;
+        -webkit-column-count: var(--print-col-count, 1);
+        gap: 1cm;
     }
+}
+        @media print {
+            @page {
+                size: A4;
+                margin: 18mm 15mm 15mm 18mm; 
+                
+                @bottom-right {
+                    content: "Página " counter(page) " de " counter(pages);
+                    font-size: 9pt;
+                    font-family: 'Times New Roman', serif;
+                    color: #000;
+                }
+                
+                @bottom-left {
+                    content: "By Atecseven tecnologia - www.atecseven.com.br - CNPJ 63.373.374/0001-72";
+                    font-size: 8pt;
+                    font-family: 'Times New Roman', serif;
+                    color: #555;
+                }
+            }
+            
+            body {
+                background: none;
+                color: black;
+                margin: 0;
+                padding: 0;
+                font-size: 11pt;    
+                line-height: 1.4;
+            }
 
-    .question-item-print {
-        margin-bottom: 20px;
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
+            body > *:not(#print-area-container) {
+                display: none !important;
+            }
+            
+            #print-area-container {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0;
+                box-shadow: none;
+            }
 
-    .q-header {
-        background: #e8eaf6 !important;
-        border-bottom: 2px solid var(--primary-color) !important;
-        padding: 4px 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+            .exam-header-print {
+                border: 1px solid #000; 
+                padding: 0;
+                margin-bottom: 15px;
+                display: grid !important;
+                grid-template-columns: 20% 80% !important; 
+                break-after: avoid; 
+                page-break-after: avoid;
+            }
+            .exam-header-print .logo-area {
+                border: none !important; 
+                border-right: 1px solid #000 !important; 
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+            }
+            .exam-header-print .logo-area img {
+                max-width: 100%;
+                max-height: 70px;
+            }
+            .exam-header-print table {
+                border-collapse: collapse;
+                width: 100%;
+                height: 100%;
+            }
+            .exam-header-print table, .exam-header-print td {
+                border: none;
+            }
+            .exam-header-print td {
+                border-top: 1px solid #000; 
+                border-left: 1px solid #000;
+                padding: 3px 5px;
+                font-size: 9pt;
+                vertical-align: top;
+            }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr:first-child > td {
+                 border-top: none !important;
+             }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr > td:first-child {
+                border-left: none !important;
+            }
+            .exam-header-print > div:nth-child(2) > table > tbody > tr:nth-child(4) > td:first-child {
+                border-left: none !important;
+            }
 
-    /* --- RESPONSIVIDADE CELULAR --- */
-    @media screen and (max-width: 768px) {
-        #exam-preview { padding: 5px; margin: 0; }
-        .exam-header-print { display: flex !important; flex-direction: column; }
-        .logo-area { border-right: none !important; border-bottom: 1px solid #000; }
-        .questions-wrapper { column-count: 1 !important; }
-        .header-table td { display: block; width: 100% !important; border: 0.5px solid #eee; }
-    }
+            
+            .instructions-text {
+                font-size: 9pt;
+                margin-bottom: 10px; 
+                padding: 5px 10px;
+                border: 1px solid #000;
+                text-align: justify;
+            }
 
-    /* --- AJUSTES DE IMPRESSÃO --- */
-    @media print {
-        body * { visibility: hidden; }
-        #exam-preview, #exam-preview * { visibility: visible; }
-        #exam-preview { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; padding: 0; }
-        
-        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        @page { size: A4; margin: 1.5cm; }
-        
-        .q-header { background: #e8eaf6 !important; }
-    }
-</style>
+            .questions-wrapper {
+                column-count: var(--print-col-count, 1); 
+                column-gap: 15mm;
+                column-rule: 1px solid #ccc;
+                page-break-after: auto;
+            }
+            .question-item-print {
+                margin-bottom: 10px;
+                padding: 0; 
+                border: none;
+                break-inside: avoid-column; 
+                page-break-inside: avoid;
+            }
+            .q-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: transparent; 
+                padding: 3px 0;
+                margin: 0 0 5px 0;
+                border-bottom: 1px dotted #ccc; 
+            }
+            .q-header strong {
+                font-size: 11pt;
+                font-weight: bold;
+                color: #333;
+            }
+            .q-enunciado {
+                font-size: 10.5pt;
+                margin: 5px 0 5px 5px; 
+                text-align: justify;
+            }
+            
+            .image-preview { 
+                max-width: 60%; 
+                height: auto; 
+                margin: 8px 0; 
+            }
+
+            .discursiva-answer-space {
+                border: 1px dashed #aaa;    
+                margin-top: 5px !important; 
+                padding: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
     
@@ -1737,122 +2313,65 @@
 
 function gerarHTMLProva(prova) {
     const cab = prova.cabecalho;
-    const dataBR = cab.data_prova ? new Date(cab.data_prova).toLocaleDateString('pt-BR') : '23/01/2026'; // 
-
-    return `
-    <div class="print-area">
-        <div class="exam-header-print">
-            <div class="logo-area">
-                <img src="${cab.logo || ''}" style="max-width: 100px; height: auto;" alt="Logo">
-            </div>
-            <div class="header-content">
-                <table class="header-table">
-                    <tr>
-                        <td colspan="3" style="text-align: center; background: #3f51b5; color: white; font-weight: bold;">
-                            ${cab.escola.toUpperCase()} </td>
-                    </tr>
-                    <tr style="text-align: right; font-size: 8pt;">
-                        <td colspan="3">
-                            TURMA: ${cab.turma} | TURNO: ${cab.turno} | DATA: ${dataBR} </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><strong>ALUNO(A):</strong> ___________________________________</td> <td style="width: 15%;"><strong>Nº:</strong> ____</td> </tr>
-                    <tr>
-                        <td style="width: 25%; text-align: center; font-weight: bold;">${cab.periodo || '1º PERÍODO'}</td> <td>
-                            <strong>PROF:</strong> ${cab.professor}<br> <strong>DISCIPLINA:</strong> ${cab.disciplina} </td>
-                        <td style="text-align: center; color: #f44336; font-weight: bold;">NOTA:</td> </tr>
-                </table>
-            </div>
-        </div>
-
-        <div style="border: 1px solid #ffe082; background: #fffde7; padding: 8px; margin: 10px 0; font-size: 9pt; border-radius: 4px;">
-            <strong style="color: #f57f17;">Instruções:</strong> ${prova.instrucoes_gerais} </div>
-
-        <div class="questions-wrapper" style="--print-col-count: ${prova.layout_colunas || 1};">
-            ${prova.questoes_detalhes.map((q, i) => `
-                <div class="question-item-print" style="margin-bottom: 20px;">
-                    <div style="background: #e8eaf6; border-bottom: 2px solid #3f51b5; padding: 4px; display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <strong style="color: #3f51b5;">QUESTÃO ${i + 1}</strong> <span style="background: #3f51b5; color: white; padding: 0 5px; border-radius: 3px; font-size: 8pt;">${q.habilidade_bncc || '1010'}</span> </div>
-                    <div style="font-size: 10.5pt; line-height: 1.4; margin-bottom: 10px; text-align: justify;">
-                        ${q.enunciado.texto} </div>
-                    ${q.tipo_questao === 'Múltipla Escolha' ? renderizarAlternativas(q) : '<div style="border-bottom: 1px solid #ccc; height: 100px;"></div>'}
-                </div>
-            `).join('')}
-        </div>
-    </div>`;
-}
-
-function renderizarAlternativas(q) {
-    return `<div style="padding-left: 5px;">
-        ${q.alternativas.map(alt => `
-            <div style="margin-bottom: 5px; display: flex; align-items: flex-start; font-size: 10pt;">
-                <strong style="margin-right: 8px;">(${alt.letra})</strong> <span>${alt.texto}</span>
-            </div>
-        `).join('')}
-    </div>`;
-}
-    const cab = prova.cabecalho;
     const dataProvaBR = cab.data_prova ? new Date(cab.data_prova).toLocaleDateString('pt-BR') : '__/__/____';
     const logoSrc = cab.logo && cab.logo.trim() !== '' ? cab.logo : '';
 
     let htmlContent = `
-        <div class="exam-header-print" style="display: flex; flex-wrap: wrap; border: 2px solid #3f51b5; width: 100%;">
-            <div class="logo-area" style="flex: 1 1 150px; display: flex; align-items: center; justify-content: center; padding: 10px; background: #fff;">
-                <img src="${logoSrc}" alt="Logo" style="max-width: 100%; height: auto; max-height: 70px; object-fit: contain;">
+        <div class="exam-header-print" style="border: 2px solid #3f51b5; display: flex; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+            <div class="logo-area" style="flex: 1 1 150px; display: flex; align-items: center; justify-content: center; padding: 10px; background: #fff; box-sizing: border-box;">
+                <img src="${logoSrc}" alt="Logo" style="max-width: 100%; max-height: 80px; object-fit: contain;">
             </div>
             
-            <div class="header-table-container" style="flex: 3 1 300px; border-left: 2px solid #3f51b5;">
-                <table style="width: 100%; border-collapse: collapse; font-size: clamp(8pt, 2vw, 10pt);">
+            <div class="header-table-container" style="flex: 4 1 300px; border-left: 2px solid #3f51b5; min-width: 0; box-sizing: border-box;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 10pt; table-layout: fixed;">
                     <tr>
-                        <td colspan="4" style="text-align: center; font-weight: bold; border-bottom: 1px solid #3f51b5; padding: 6px; background: #3f51b5; color: white;">
-                            ${cab.escola.toUpperCase()} [cite: 1]
+                        <td colspan="4" style="text-align: center; font-weight: bold; border-bottom: 1px solid #3f51b5; padding: 8px; background: #3f51b5; color: white; -webkit-print-color-adjust: exact;">
+                            ${cab.escola.toUpperCase()}
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right; padding: 4px 10px; border-bottom: 1px solid #3f51b5; color: #333;">
-                            <small><strong>TURMA:</strong> ${cab.turma} | <strong>TURNO:</strong> ${cab.turno} | <strong>DATA:</strong> ${dataProvaBR}</small> [cite: 2]
+                        <td colspan="4" style="text-align: right; padding: 3px 10px; border-bottom: 1px solid #3f51b5; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <small><strong>TURMA:</strong> ${cab.turma} | <strong>TURNO:</strong> ${cab.turno} | <strong>DATA:</strong> ${dataProvaBR}</small>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 8px; border-bottom: 1px solid #3f51b5;">
-                            <strong>ALUNO(A):</strong> <span style="display: inline-block; border-bottom: 1px solid #3f51b5; min-width: 50%; width: auto;">&nbsp;</span> <strong>Nº:</strong> <span style="display: inline-block; border-bottom: 1px solid #3f51b5; width: 40px;">&nbsp;</span> [cite: 4, 5]
+                        <td colspan="4" style="padding: 8px; border-bottom: 1px solid #3f51b5; white-space: normal; word-wrap: break-word;">
+                            <strong>ALUNO(A):</strong> <span style="color: #3f51b5;">___________________________________________</span> <strong>Nº:</strong> <span style="color: #3f51b5;">_______</span>
                         </td>
                     </tr>
-                    <tr style="background: #f5f5f5;">
-                        <td style="width: 25%; border-right: 1px solid #3f51b5; padding: 5px; font-weight: bold; text-align: center; color: #3f51b5;">
-                            ${cab.periodo ? cab.periodo.toUpperCase() : 'AVALIAÇÃO'} [cite: 6]
+                    <tr style="background: #f5f5f5; -webkit-print-color-adjust: exact;">
+                        <td style="width: 25%; border-right: 1px solid #3f51b5; padding: 5px; font-weight: bold; text-align: center; color: #3f51b5; font-size: 9pt;">
+                            ${cab.periodo ? cab.periodo.toUpperCase() : 'AVALIAÇÃO'}
                         </td>
-                        <td style="width: 50%; padding: 5px;">
+                        <td style="width: 55%; padding: 5px; font-size: 9pt; line-height: 1.2;">
                             <strong>PROF:</strong> ${cab.professor} <br>
-                            <strong>DISCIPLINA:</strong> ${cab.disciplina} [cite: 7]
+                            <strong>DISCIPLINA:</strong> ${cab.disciplina}
                         </td>
-                        <td style="width: 25%; border-left: 1px solid #3f51b5; text-align: center; font-weight: bold; color: #f44336;">
-                            NOTA: [cite: 8]
+                        <td style="width: 20%; border-left: 1px solid #3f51b5; text-align: center; font-weight: bold; color: #f44336; font-size: 10pt;">
+                            NOTA:
                         </td>
                     </tr>
                 </table>
             </div>
         </div>
 
-        <div class="instructions-text" style="margin-top: 1rem; font-size: 0.85rem; border: 1px solid #fbc02d; padding: 10px; background: #fffde7; border-radius: 4px; width: 100%;">
-            <strong style="color: #f57f17;">Instruções:</strong> ${prova.instrucoes_gerais || 'Leia atentamente.'} [cite: 9]
+        <div class="instructions-text" style="margin-top: 12px; font-size: 9pt; border: 1px solid #fbc02d; padding: 8px; background: #fffde7; border-radius: 4px; -webkit-print-color-adjust: exact; text-align: justify;">
+            <strong style="color: #f57f17;">Instruções:</strong> ${prova.instrucoes_gerais || 'Leia atentamente.'}
         </div>
 
-        <div class="questions-wrapper" style="column-count: var(--print-col-count, 1); column-gap: 20px; margin-top: 1.5rem; width: 100%;">
+        <div class="questions-wrapper" style="column-count: ${prova.layout_colunas || 1}; column-gap: 1.5cm; margin-top: 20px; width: 100%;">
     `;
 
     prova.questoes_detalhes.forEach((q, index) => {
         const numero = index + 1;
         htmlContent += `
-            <div class="question-item-print" style="margin-bottom: 2rem; break-inside: avoid; width: 100%;">
-                <div class="q-header" style="background: #e8eaf6 !important; border-bottom: 2px solid #3f51b5; padding: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="color: #3f51b5;">QUESTÃO ${numero}</strong> 
-                    <span style="background: #3f51b5; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem;">${q.habilidade_bncc || 'Geral'}</span>
+            <div class="question-item-print" style="margin-bottom: 25px; break-inside: avoid; -webkit-column-break-inside: avoid; display: block; width: 100%;">
+                <div class="q-header" style="background: #e8eaf6 !important; border-bottom: 2px solid #3f51b5; padding: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact;">
+                    <strong style="color: #3f51b5;">QUESTÃO ${numero}</strong>
+                    <span style="background: #3f51b5; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8pt; -webkit-print-color-adjust: exact;">${q.habilidade_bncc || 'Geral'}</span>
                 </div>
-                <div class="q-enunciado" style="font-size: 1rem; line-height: 1.6; color: #333; margin-bottom: 10px; overflow-wrap: break-word;">
-                    ${q.enunciado.texto} [cite: 12, 13, 22, 23]
-                </div>
-                ${q.enunciado.midia ? `<img src="${q.enunciado.midia}" style="max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px;">` : ''}
+                <div class="q-enunciado" style="font-size: 11pt; line-height: 1.5; color: #333; text-align: justify;">${q.enunciado.texto}</div>
+                ${q.enunciado.midia ? `<img src="${q.enunciado.midia}" style="max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; border: 1px solid #ddd;">` : ''}
                 
                 <div style="width: 100%;">
                     ${q.tipo_questao === 'Múltipla Escolha' ? renderizarAlternativas(q) : renderizarLinhas(q)}
@@ -1864,16 +2383,16 @@ function renderizarAlternativas(q) {
     htmlContent += `</div>`;
     return htmlContent;
 }
-// Funções auxiliares para limpar o código principal
+
 function renderizarAlternativas(q) {
-    let out = '<ul style="list-style: none; padding: 0; margin-top: 10px;">';
+    let out = '<ul style="list-style: none; padding: 0; margin-top: 10px; width: 100%;">';
     q.alternativas.forEach(alt => {
         out += `
-            <li style="margin-bottom: 5px; display: flex; align-items: flex-start;">
-                <span style="font-weight: bold; margin-right: 8px;">(${alt.letra})</span>
-                <div>
+            <li style="margin-bottom: 6px; display: flex; align-items: flex-start; break-inside: avoid;">
+                <span style="font-weight: bold; margin-right: 8px; flex-shrink: 0;">(${alt.letra})</span>
+                <div style="flex-grow: 1;">
                     ${alt.texto}
-                    ${alt.midia ? `<img src="${alt.midia}" style="max-width: 150px; display: block; margin-top: 5px;">` : ''}
+                    ${alt.midia ? `<img src="${alt.midia}" style="max-width: 150px; height: auto; display: block; margin-top: 5px; border-radius: 4px;">` : ''}
                 </div>
             </li>`;
     });
@@ -1882,35 +2401,29 @@ function renderizarAlternativas(q) {
 
 function renderizarLinhas(q) {
     const numLinhas = q.linhas_discursiva || 4;
-    let linhasHtml = '<div style="margin-top: 10px;">';
+    let linhasHtml = '<div style="margin-top: 10px; width: 100%;">';
     for (let i = 0; i < numLinhas; i++) {
-        linhasHtml += '<div style="border-bottom: 1px solid #ccc; height: 24px; width: 100%;"></div>';
+        linhasHtml += '<div style="border-bottom: 1px solid #ccc; height: 28px; width: 100%;"></div>';
     }
     return linhasHtml + '</div>';
 }
-    function visualizarProvaDetalhe() {
-        if (!selectedExamId) return;
-        const prova = allExams[selectedExamId];
 
-        const printContentEl = document.getElementById('exam-content-print');
-        
-        printContentEl.style.setProperty('--print-col-count', 1);
-
-        printContentEl.innerHTML = gerarHTMLProva(prova);
-
-        document.getElementById('exam-preview').style.display = 'block';
-    }
+function visualizarProvaDetalhe() {
+    if (!selectedExamId) return;
+    const prova = allExams[selectedExamId];
+    const printContentEl = document.getElementById('exam-content-print');
+    // Força 1 coluna na visualização do dashboard para melhor UX no MacBook
+    printContentEl.innerHTML = gerarHTMLProva(prova);
+    document.getElementById('exam-preview').style.display = 'block';
+}
 
 function exportarProva() {
     if (!selectedExamId) return;
     const prova = allExams[selectedExamId];
-    const html = gerarHTMLProva(prova);
     const printArea = document.getElementById('print-area-container');
-
-    printArea.innerHTML = html;
-    printArea.style.setProperty('--print-col-count', prova.layout_colunas || 1);
-
-    // Aguarda um pouco para garantir que as imagens do ImgAtecServer foram renderizadas no DOM
+    printArea.innerHTML = gerarHTMLProva(prova);
+    
+    // O navegador MacBook (Safari/Chrome) precisa de um tempo para renderizar o layout de colunas
     setTimeout(() => {
         window.print();
     }, 800); 
