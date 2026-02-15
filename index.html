@@ -1899,10 +1899,10 @@ async function handleCreateExam() {
             </div>
             <div class="btn-group">
 <button class="btn-mini primary" onclick="reparoMestreViaModelo(); visualizarProvaDetalhe();">
-    <i class="fas fa-eye"></i> Visualizar
-</button>                <button class="btn-mini" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
-                <button class="btn-mini" onclick="baixarGabarito()"><i class="fas fa-key"></i> Gabarito</button>
-                <button class="btn-mini" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar</button>
+    <i class="fas fa-eye"></i> Visualizar</button>                <button class="btn-mini" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+<button class="btn-mini" onclick="reparoMestreViaModelo(); baixarGabarito()">
+    <i class="fas fa-key"></i> Gabarito
+</button>                <button class="btn-mini" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-mini danger" onclick="deleteExam()"><i class="fas fa-trash"></i> Excluir</button>
             </div>
         </div>
@@ -2862,7 +2862,7 @@ async function handleCreateExam() {
                 const nome = userDetails.nome || userDetails.email;
                 const userInfoDisplay = document.getElementById('user-info-display');
                 if (userInfoDisplay) {
-                    userInfoDisplay.textContent = ` | Seja Bem-Vindo ${nome}`;
+                    userInfoDisplay.textContent = ` | Seja Bem-Vindo(a) ${nome}`;
                 }
                 
                 document.getElementById('user-role-display').textContent = `[${CURRENT_USER_ROLE}]`;
