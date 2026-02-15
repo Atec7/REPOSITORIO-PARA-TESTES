@@ -743,52 +743,175 @@
         }, 250);
     });
 </script>
-    <div id="login-screen">
-        <div class="login-box">
-            <img src="img/logo-edu10.jpeg" alt="" width="150px" height="50px">
-            <!--<h2><i class="fas fa-school"></i> edu10 Avaliações</h2>-->
-            <p>Acesse com seu e-mail e senha.</p>
-            <input type="email" id="login-user" placeholder="E-mail">
-            <input type="password" id="login-password" placeholder="Senha">
-            <button class="btn-primary" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
-            <button class="btn-secondary" onclick="openModal('modal-request-access')" style="margin-top: 10px; width: 100%;"><i class="fas fa-user-plus"></i> Solicitar Acesso</button>
-            <div id="login-message" style="margin-top: 15px;"></div>
-        </div>
-    </div>
-<!--/**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner       ATECSEVEN TECNOLOGIA
- * @cnpj        63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */-->
-    <div id="main-interface">
-        <header>
-            <div style="display: flex; align-items: center;">
-                <img src="img/logo-edu10.jpeg" alt="" width="150px" height="50px">
-                
-                <span id="user-info-display"></span>
-            </div>
-            <div>
-                <span id="user-role-display"></span>
-                <button class="btn-danger" onclick="simularLogout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
-            </div>
-            
-        </header>
+<div id="login-screen">
+    <style>
+        /* Estilos restritos APENAS ao bloco de login */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f1f5f9;
+            font-family: sans-serif;
+        }
+
+        #login-screen .login-box {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        #login-screen .login-box p {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        /* Seletores específicos para não afetar outros inputs do site */
+        #login-screen .login-box input[type="email"], 
+        #login-screen .login-box input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            color: #1e293b;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #login-screen .login-box input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Container do Interruptor */
+        #login-screen .remember-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 5px 2px 20px 2px;
+        }
+
+        #login-screen .remember-text {
+            font-size: 0.85em;
+            color: #475569;
+        }
+
+        #login-screen .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+
+        #login-screen .switch input {
+            opacity: 0; width: 0; height: 0;
+        }
+
+        #login-screen .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        #login-screen .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        #login-screen input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        #login-screen input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+
+        /* Botão entrar mantendo sua classe original mas com estilo fixo aqui */
+        #login-screen .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+
+    <div class="login-box">
+        <img src="img/logo-edu10.jpeg" alt="edu10" width="150" height="50">
+        <p>Acesse com seu e-mail e senha.</p>
         
+        <input type="email" id="login-user" placeholder="E-mail">
+        <input type="password" id="login-password" placeholder="Senha">
+
+        <div class="remember-wrapper">
+            <span class="remember-text">Lembrar e-mail e senha</span>
+            <label class="switch">
+                <input type="checkbox" id="remember-check">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="btn-primary" onclick="handleLoginWithSave()">
+            <i class="fas fa-sign-in-alt"></i> Entrar
+        </button>
+        
+        <button class="btn-secondary" onclick="openModal('modal-request-access')" style="margin-top: 10px; width: 100%; border: 1px solid #e2e8f0; background: none; padding: 10px; border-radius: 8px; cursor: pointer; color: #64748b;">
+            <i class="fas fa-user-plus"></i> Solicitar Acesso
+        </button>
+        
+        <div id="login-message" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        (function() {
+            const m = localStorage.getItem('e10_m');
+            const s = localStorage.getItem('e10_s');
+            if (m && s) {
+                document.getElementById('login-user').value = m;
+                document.getElementById('login-password').value = s;
+                document.getElementById('remember-check').checked = true;
+            }
+        })();
+
+        function handleLoginWithSave() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-password').value;
+            const c = document.getElementById('remember-check').checked;
+
+            if (c && u && p) {
+                localStorage.setItem('e10_m', u);
+                localStorage.setItem('e10_s', p);
+            } else {
+                localStorage.removeItem('e10_m');
+                localStorage.removeItem('e10_s');
+            }
+
+            // Chama sua função handleLogin que já existe no seu código principal
+            if (typeof handleLogin === "function") {
+                handleLogin();
+            }
+        }
+    </script>
+</div>
 <!--/**
  * ============================================================================
  * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
@@ -809,16 +932,215 @@
  * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
  * ============================================================================
  */-->
+   <div id="main-interface">
+    <style>
+        /* DESIGN SYSTEM */
+        #main-interface {
+            --primary: #2563eb;
+            --header-height: 80px;
+            --header-shrink: 65px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        /* HEADER - DISTRIBUIÇÃO À ESQUERDA */
+        #main-interface header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background: #ffffff;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: var(--transition);
+            gap: 30px; /* Espaço entre Logo/Usuário e o Menu */
+        }
+
+        /* BLOCO DE MARCA/USUÁRIO */
+        #main-interface .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0; /* Não deixa o logo esmagar */
+        }
+
+        #main-interface .logo-img {
+            height: 40px;
+            width: auto;
+            transition: var(--transition);
+        }
+
+        #main-interface #user-info-display {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        /* MENU DE NAVEGAÇÃO - AGORA À ESQUERDA */
+        #main-interface nav {
+            display: flex;
+            flex-grow: 1; /* Ocupa o espaço restante para empurrar o 'Sair' */
+            justify-content: flex-start;
+        }
+
+        #main-interface .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 4px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            gap: 4px;
+            transition: var(--transition);
+        }
+
+        #main-interface .nav-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 15px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        #main-interface .nav-menu li a:hover {
+            color: var(--primary);
+            background: #fff;
+        }
+
+        #main-interface .nav-menu li a.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ÁREA DIREITA */
+        #main-interface .actions-group {
+            flex-shrink: 0;
+        }
+
+        #main-interface .btn-danger {
+            background: #fff;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #main-interface .btn-danger:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        /* MODO SCROLLED */
+        #main-interface.scrolled header {
+            height: var(--header-shrink);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        #main-interface.scrolled .nav-menu {
+            background: transparent;
+            border-color: transparent;
+            gap: 0px;
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 1150px) {
+            #main-interface .nav-menu li a span { display: none; }
+            #main-interface .nav-menu li a { padding: 10px 14px; }
+        }
+
+        @media (max-width: 768px) {
+            #main-interface header { padding: 0 20px; gap: 15px; }
+            #main-interface #user-info-display { display: none; }
+            
+            #main-interface nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: #fff;
+                border-top: 1px solid #e2e8f0;
+                justify-content: center;
+                padding: 10px 0;
+            }
+            #main-interface .nav-menu { border: none; background: none; }
+            .page-content-wrapper { margin-top: 80px !important; }
+        }
+
+        .page-content-wrapper {
+            margin-top: calc(var(--header-height) + 20px);
+            padding: 20px;
+            width: 100%;
+            transition: margin-top 0.4s;
+        }
+    </style>
+
+    <header id="main-header">
+        <div class="brand-group">
+            <img src="img/logo-edu10.jpeg" alt="Logo" class="logo-img">
+            <span id="user-info-display">Professor Atecseven</span>
+        </div>
+
         <nav>
             <ul class="nav-menu">
-                <li><a id="nav-dashboard" href="#" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a id="nav-createquestion" href="#" onclick="showPage('create-question')"><i class="fas fa-plus-circle"></i> Criar Questão</a></li>
-                <li><a id="nav-bank" href="#" onclick="showPage('bank')"><i class="fas fa-database"></i> Banco de Questões</a></li>
-                <li><a id="nav-createexam" href="#" onclick="showPage('create-exam')"><i class="fas fa-file-export"></i> Gerar Prova</a></li>
-                <li><a id="nav-myexams" href="#" onclick="showPage('my-exams')"><i class="fas fa-clipboard-list"></i> Minhas Provas</a></li>
-                <li id="nav-admin" style="display: none;"><a id="nav-admin" href="#" onclick="showPage('admin')"><i class="fas fa-user-shield"></i> Administração</a></li>
+                <li><a id="nav-dashboard" href="#" class="active" onclick="activate(this); showPage('dashboard')"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a id="nav-createquestion" href="#" onclick="activate(this); showPage('create-question')"><i class="fas fa-plus-circle"></i> <span>Criar Questão</span></a></li>
+                <li><a id="nav-bank" href="#" onclick="activate(this); showPage('bank')"><i class="fas fa-database"></i> <span>Banco</span></a></li>
+                <li><a id="nav-createexam" href="#" onclick="activate(this); showPage('create-exam')"><i class="fas fa-file-signature"></i> <span>Gerar Prova</span></a></li>
+                <li><a id="nav-myexams" href="#" onclick="activate(this); showPage('my-exams')"><i class="fas fa-folder"></i> <span>Provas</span></a></li>
             </ul>
         </nav>
+
+        <div class="actions-group">
+            <button class="btn-danger" onclick="simularLogout()"><i class="fas fa-sign-out-alt"></i> <span>Sair</span></button>
+        </div>
+    </header>
+</div>
+
+<div class="page-content-wrapper" id="main-content">
+    </div>
+
+<script>
+    window.addEventListener('scroll', function() {
+        const header = document.getElementById('main-interface');
+        if (window.scrollY > 25) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+
+    function activate(el) {
+        document.querySelectorAll('#main-interface .nav-menu li a').forEach(a => a.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // Garante inicialização correta
+    document.addEventListener('DOMContentLoaded', () => {
+        if(typeof showPage === 'function') showPage('dashboard');
+    });
+</script>
 
         <main>
             <section id="dashboard" class="page-section">
@@ -847,64 +1169,205 @@
                 </div>
             </section>
 
-            <section id="create-question" class="page-section">
-                <h2><i class="fas fa-plus-circle"></i> Cadastrar Nova Questão</h2>
-                <div class="alert-info"><i class="fas fa-info-circle"></i> O upload de todas as imagens agora utiliza o ImgAtecsevenServer.</div>
-                <form id="form-create-question">
-                    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
-                        <div>
-                            <label for="modalidade">Modalidade de Ensino:</label>
-                            <select id="modalidade" required>
-                                <option value="Ensino Fundamental I">Ensino Fundamental I</option>
-                                <option value="Ensino Fundamental II">Ensino Fundamental II</option>
-                                <option value="Ensino Médio">Ensino Médio</option>
-                            </select>
+           <section id="create-question" class="page-section">
+    <style>
+        /* ISOLAMENTO TOTAL: Todas as regras começam com o ID da section */
+        #create-question {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            max-width: 100%;
+            margin: 10px auto;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
 
-                            <label for="componente">Componente Curricular:</label>
-                            <input type="text" id="componente" placeholder="Ex: Matemática, Português, Ciências" required>
-                            
-                            <label for="habilidade">Habilidade BNCC (D-XX):</label>
-                            <input type="text" id="habilidade" placeholder="Ex: D 33">
-                            
-                            <label for="tipo">Tipo de Questão:</label>
-                            <select id="tipo" onchange="toggleAlternatives(this.value)" required>
-                                <option value="Múltipla Escolha">Múltipla Escolha</option>
-                                <option value="Discursiva">Discursiva</option>
-                            </select>
-                            
-                            <div id="linhas-discursiva-group" style="display: none;">
-                                <label for="linhas-discursiva">Linhas para Resposta Discursiva (padrão 4):</label>
-                                <input type="number" id="linhas-discursiva" min="1" max="20" value="4">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="enunciado">Enunciado da Questão (Texto):</label>
-                            <textarea id="enunciado" rows="5" required></textarea>
-                            
-                            <label for="enunciado-imagem">Imagem/Mídia para o Enunciado (Upload):</label>
-                            <input type="file" id="enunciado-imagem" accept="image/*">
-                        </div>
-                    </div>
-                    
-                    <div id="alternatives-section">
-                        <h3>Alternativas (Múltipla Escolha)</h3>
-                        <div id="alternatives-inputs" class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                            </div>
-                        
-                        <label for="resposta-correta">Resposta Correta:</label>
-                        <select id="resposta-correta" required>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                            <option value="E">E</option>
-                        </select>
-                    </div>
+        /* Títulos e Alertas compactos */
+        #create-question h2 {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-                    <button type="button" class="btn-primary" onclick="handleCreateQuestion()"><i class="fas fa-save"></i> Salvar Questão no Banco</button>
-                    <div id="question-creation-message" style="margin-top: 20px;"></div>
-                </form>
-            </section>
+        #create-question .alert-info {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #475569;
+            margin-bottom: 15px;
+        }
+
+        /* Grid de alta densidade */
+        #create-question .dashboard-grid {
+            display: grid !important;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* Estilização dos inputs (apenas dentro desta section) */
+        #create-question label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #334155;
+            text-transform: uppercase;
+            margin: 8px 0 4px 0;
+        }
+
+        #create-question input[type="text"],
+        #create-question input[type="number"],
+        #create-question select,
+        #create-question textarea {
+            width: 100% !important;
+            padding: 8px 12px !important;
+            border: 2px solid #cbd5e1 !important; /* Borda nítida */
+            border-radius: 6px !important;
+            font-size: 0.9rem !important;
+            color: #000 !important;
+            background: #fff !important;
+            box-sizing: border-box !important;
+        }
+
+        #create-question textarea {
+            height: 100px; /* Enunciado compacto */
+            resize: vertical;
+        }
+
+        /* Seção de Alternativas */
+        #create-question #alternatives-section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+        }
+
+        #create-question #alternatives-section h3 {
+            font-size: 0.9rem;
+            margin: 0 0 12px 0;
+            color: #1e293b;
+        }
+
+        /* Alternativas como Textarea (Compactas) */
+        #create-question #alternatives-inputs textarea {
+            height: 50px !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* Botão Profissional Slim */
+        #create-question .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+        }
+
+        #create-question .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Responsividade para manter tudo na tela */
+        @media (max-width: 1024px) {
+            #create-question .dashboard-grid {
+                grid-template-columns: 1fr !important;
+            }
+            #create-question #alternatives-inputs {
+                grid-template-columns: 1fr 1fr !important;
+            }
+        }
+    </style>
+
+    <h2><i class="fas fa-plus-circle"></i> Cadastrar Nova Questão</h2>
+    <div class="alert-info">
+        <i class="fas fa-info-circle"></i> O upload de todas as imagens agora utiliza o ImgAtecsevenServer.
+    </div>
+
+    <form id="form-create-question">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div>
+                <label for="modalidade">Modalidade de Ensino:</label>
+                <select id="modalidade" required>
+                    <option value="Ensino Fundamental I">Ensino Fundamental I</option>
+                    <option value="Ensino Fundamental II">Ensino Fundamental II</option>
+                    <option value="Ensino Médio">Ensino Médio</option>
+                </select>
+
+                <label for="componente">Componente Curricular:</label>
+                <input type="text" id="componente" placeholder="Ex: Matemática, Português" required>
+
+                <label for="habilidade">Habilidade BNCC (D-XX):</label>
+                <input type="text" id="habilidade" placeholder="Ex: D 33">
+
+                <label for="tipo">Tipo de Questão:</label>
+                <select id="tipo" onchange="toggleAlternatives(this.value)" required>
+                    <option value="Múltipla Escolha">Múltipla Escolha</option>
+                    <option value="Discursiva">Discursiva</option>
+                </select>
+
+                <div id="linhas-discursiva-group" style="display: none;">
+                    <label for="linhas-discursiva">Linhas para Resposta:</label>
+                    <input type="number" id="linhas-discursiva" min="1" max="20" value="4">
+                </div>
+            </div>
+
+            <div>
+                <label for="enunciado">Enunciado da Questão (Texto):</label>
+                <textarea id="enunciado" required placeholder="Digite o corpo da questão..."></textarea>
+
+                <label for="enunciado-imagem">Imagem/Mídia (Upload):</label>
+                <input type="file" id="enunciado-imagem" accept="image/*" style="border: 2px dashed #cbd5e1 !important; padding: 10px !important;">
+            </div>
+        </div>
+
+        <div id="alternatives-section">
+            <h3>Alternativas (Múltipla Escolha)</h3>
+            <div id="alternatives-inputs" class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <div>
+                    <label>A</label>
+                    <textarea placeholder="Texto da A"></textarea>
+                </div>
+                <div>
+                    <label>B</label>
+                    <textarea placeholder="Texto da B"></textarea>
+                </div>
+                <div>
+                    <label>C</label>
+                    <textarea placeholder="Texto da C"></textarea>
+                </div>
+            </div>
+
+            <div style="max-width: 200px;">
+                <label for="resposta-correta">Resposta Correta:</label>
+                <select id="resposta-correta" required style="border-color: #2563eb !important;">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="button" class="btn-primary" onclick="handleCreateQuestion()">
+            <i class="fas fa-save"></i> Salvar Questão
+        </button>
+        <div id="question-creation-message"></div>
+    </form>
+</section>
 <!--/**
  * ============================================================================
  * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
@@ -926,122 +1389,508 @@
  * ============================================================================
  */-->
             <section id="bank" class="page-section">
-                <h2><i class="fas fa-database"></i> Banco de Questões</h2>
-                <div class="filter-container">
-                    <input type="text" id="filter-bank-text" placeholder="Filtrar por Componente, Habilidade ou Enunciado..." onkeyup="filterQuestions()">
-                    <select id="filter-bank-modalidade" onchange="filterQuestions()">
-                       
-                        <option value="Ensino Fundamental I">Ensino Fundamental I</option>
-                        <option value="Ensino Fundamental II">Ensino Fundamental II</option>
-                        <option value="Ensino Médio">Ensino Médio</option>
-                    </select>
-                </div>
-                
-                <button type="button" class="btn-success" onclick="selectAllQuestions(true)"><i class="fas fa-check-double"></i> Selecionar Todas</button>
-                <button type="button" class="btn-secondary" onclick="selectAllQuestions(false)"><i class="fas fa-times-circle"></i> Desmarcar Todas</button>
-                <button type="button" class="btn-success" onclick="sendSelectedToExam()" style="margin-bottom: 20px;"><i class="fas fa-paper-plane"></i> Enviar Selecionadas para a Prova</button>
+    <h2><i class="fas fa-database"></i> Banco de Questões</h2>
+    
+    <div class="filter-container" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <input type="text" id="filter-bank-text" 
+               placeholder="Busque por qualquer termo (ex: 'frações ensino médio')..." 
+               oninput="filterQuestions()" 
+               style="flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+        
+        <select id="filter-bank-modalidade" onchange="filterQuestions()" 
+                style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: white;">
+            <option value="">Todas as Modalidades</option>
+            <option value="Ensino Fundamental I">Ensino Fundamental I</option>
+            <option value="Ensino Fundamental II">Ensino Fundamental II</option>
+            <option value="Ensino Médio">Ensino Médio</option>
+        </select>
+    </div>
+    
+    <div class="bank-controls" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button type="button" class="btn-success" onclick="selectAllQuestions(true)">
+            <i class="fas fa-check-double"></i> Selecionar Todas
+        </button>
+        <button type="button" class="btn-secondary" onclick="selectAllQuestions(false)">
+            <i class="fas fa-times-circle"></i> Desmarcar Todas
+        </button>
+        <button type="button" class="btn-success" onclick="sendSelectedToExam()">
+            <i class="fas fa-paper-plane"></i> Enviar Selecionadas para a Prova
+        </button>
+    </div>
 
-                <ul id="questions-bank-list" class="exam-list">
-                    <li>Carregando questões...</li>
-                </ul>
-            </section>
+    <ul id="questions-bank-list" class="exam-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; list-style: none; padding: 0;">
+        <li style="grid-column: 1/-1; text-align: center; padding: 50px;">
+            <i class="fas fa-sync fa-spin fa-2x"></i><br>Carregando Banco de Dados...
+        </li>
+    </ul>
+</section>
             
             <section id="create-exam" class="page-section">
-                <h2><i class="fas fa-file-export"></i> Gerar Nova Prova</h2>
-                <form id="form-create-exam">
-                    <h3>1. Detalhes do Cabeçalho</h3>
-                    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
-                        <div>
-                            <label for="cabecalho-escola">Nome da Instituição/Escola:</label>
-                            <input type="text" id="cabecalho-escola" required>
+    <div id="header-cloud-manager" style="background: #f0f7ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 15px; margin-bottom: 25px; font-family: sans-serif;">
+        <h4 style="margin: 0 0 10px 0; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-cloud-upload-alt"></i> Meus Modelos Salvos na Nuvem
+        </h4>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <select id="select-header-model" style="flex: 1; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #3b82f6; background: white; font-weight: 500;">
+                <option value="">-- Aguardando identificação... --</option>
+            </select>
+            <button type="button" onclick="applyServerHeader()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-check"></i> Aplicar
+            </button>
+            <button type="button" onclick="saveServerHeader()" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> Salvar Novo
+            </button>
+            <button type="button" onclick="deleteServerHeader()" style="background: #ef4444; color: white; border: none; padding: 10px 12px; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div id="status-imgbb" style="font-size: 12px; margin-top: 8px; font-weight: 500; color: #475569;"></div>
+    </div>
 
-                            <label for="cabecalho-disciplina-select">Disciplina:</label>
-                            <select id="cabecalho-disciplina-select" required onchange="filterQuestionsForExam()">
-                                <option value="">Selecione a Disciplina</option>
-                            </select>
-                            
-                            <label for="cabecalho-professor">Professor:</label>
-                            <input type="text" id="cabecalho-professor" required disabled>
-                            
-                            <label for="cabecalho-periodo">Período/Etapa (Ex: 1º Período):</label>
-                            <select id="cabecalho-periodo" required>
-                                <option value="1º PERÍODO">1º PERÍODO</option>
-                                <option value="2º PERÍODO">2º PERÍODO</option>
-                                <option value="3º PERÍODO">3º PERÍODO</option>
-                                <option value="4º PERÍODO">4º PERÍODO</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="cabecalho-logo-file">Logo da Escola:</label>
-                            <input type="file" id="cabecalho-logo-file" accept="image/*">
-                            
-                            <label for="cabecalho-turma">Turma:</label>
-                            <input type="text" id="cabecalho-turma" required>
+    <h2><i class="fas fa-file-export"></i> Gerar Nova Prova</h2>
+    <form id="form-create-exam">
+        <h3>1. Detalhes do Cabeçalho</h3>
+        <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div>
+                <label for="cabecalho-escola">Nome da Instituição/Escola:</label>
+                <input type="text" id="cabecalho-escola" required>
 
-                            <label for="cabecalho-turno">Turno:</label>
-                            <select id="cabecalho-turno">
-                                <option value="Matutino">Matutino</option>
-                                <option value="Vespertino">Vespertino</option>
-                                <option value="Noturno">Noturno</option>
-                            </select>
-                            
-                            <label for="cabecalho-data-prova">Data da Prova (para o cabeçalho):</label>
-                            <input type="date" id="cabecalho-data-prova" required>
-                        </div>
-                    </div>
-                    
-                    <label for="layout">Layout da Prova na Impressão/PDF:</label>
-                    <select id="layout">
-                        <option value="1">1 Coluna (Recomendado)</option>
-                        <option value="2">2 Colunas (Fiel ao Modelo Anexo)</option>
-                    </select>
-                    
-                    <label for="instrucoes">Instruções Gerais (Aparecerão na prova):</label>
-                    <textarea id="instrucoes" rows="3">Leia atentamente todas as questões antes de responder. Use caneta azul ou preta e evite rasuras.</textarea>
+                <label for="cabecalho-disciplina-select">Disciplina:</label>
+<input 
+    type="text" 
+    id="cabecalho-disciplina-select" 
+    list="lista-sugestoes-disciplina" 
+    required 
+    onchange="filterQuestionsForExam()" 
+    placeholder="Selecione ou digite a disciplina"
+>
 
-                    <h3 style="margin-top: 30px;">3. Questões Selecionadas</h3>
-                    <div id="selected-questions-from-bank" class="alert-info" style="margin-bottom: 20px; display: none;">
-                        <i class="fas fa-info-circle"></i> **Questões carregadas do Banco.** Clique em "Gerar Prova" para finalizar.
-                    </div>
-                    
-                    <button type="button" class="btn-warning" onclick="shuffleSelectedQuestions()" style="margin-bottom:10px;"><i class="fas fa-random"></i> Embaralhar Questões</button>
-
-                    <div id="exam-questions-list" style="border: 1px solid #ddd; padding: 15px; max-height: 400px; overflow-y: auto;">
-                        <p>Selecione uma disciplina acima ou use o Banco de Questões para carregar as questões.</p>
-                    </div>
-
-                    <button type="button" class="btn-primary" onclick="handleCreateExam()"><i class="fas fa-bolt"></i> Gerar Prova e Gabarito</button>
-                    <div id="exam-creation-message" style="margin-top: 20px;"></div>
-                </form>
-            </section>
-
-            <section id="my-exams" class="page-section">
-                <h2><i class="fas fa-clipboard-list"></i> Minhas Provas Geradas</h2>
-                <div class="filter-container">
-                    <input type="text" id="filter-exams-text" placeholder="Filtrar por Disciplina, Turma ou Data/Hora de Geração..." onkeyup="filterExams()">
-                </div>
-                <ul id="my-exams-list" class="exam-list">
-                    <li>Carregando provas...</li>
-                </ul>
+<datalist id="lista-sugestoes-disciplina">
+    <option value="Matemática">
+    <option value="Português">
+    <option value="História">
+    <option value="Geografia">
+    <option value="Ciências">
+</datalist>
                 
-                <div id="exam-details-view" style="margin-top: 40px; border-top: 1px solid #ddd; display: none;">
-                    <h3 id="selected-exam-name"></h3>
-                    <div id="exam-actions" style="margin-bottom: 20px;">
-                        <button class="action-button btn-primary" onclick="visualizarProvaDetalhe()"><i class="fas fa-eye"></i> Pré-Visualizar</button>
-                        <button class="action-button btn-secondary" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar Cabeçalho</button>
-                        <button class="action-button btn-danger" onclick="deleteExam()"><i class="fas fa-trash"></i> Excluir</button>
-                        
-                        <div style="margin-top: 15px;">
-                            <button class="action-button btn-primary" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> Exportar Prova (PDF)</button>
-                            <button class="action-button btn-secondary" onclick="baixarGabarito()"><i class="fas fa-file-alt"></i> Baixar Gabarito (TXT)</button>
-                        </div>
+                <label for="cabecalho-professor">Professor:</label>
+                <input type="text" id="cabecalho-professor" required disabled>
+                
+                <label for="cabecalho-periodo">Período/Etapa (Ex: 1º Período):</label>
+                <select id="cabecalho-periodo" required>
+                    <option value="1º PERÍODO">1º PERÍODO</option>
+                    <option value="2º PERÍODO">2º PERÍODO</option>
+                    <option value="3º PERÍODO">3º PERÍODO</option>
+                    <option value="4º PERÍODO">4º PERÍODO</option>
+                </select>
+            </div>
+            <div>
+                <label for="cabecalho-logo-file">Logo da Escola:</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <div id="mini-preview-logo" style="width: 50px; height: 50px; border: 2px dashed #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px;">
+                        <i class="fas fa-image" style="color: #cbd5e1;"></i>
                     </div>
-                    
-                    <div id="exam-preview" style="display: none; border: 1px solid #ddd; padding: 20px; max-width: 210mm; margin: 20px auto; background: white;">
-                        <div id="exam-content-print">
-                            </div>
-                    </div>
+                    <input type="file" id="cabecalho-logo-file" accept="image/*" style="flex: 1;">
                 </div>
+                
+                <label for="cabecalho-turma">Turma:</label>
+                <input type="text" id="cabecalho-turma" required>
+
+                <label for="cabecalho-turno">Turno:</label>
+                <select id="cabecalho-turno">
+                    <option value="Matutino">Matutino</option>
+                    <option value="Vespertino">Vespertino</option>
+                    <option value="Noturno">Noturno</option>
+                </select>
+                
+                <label for="cabecalho-data-prova">Data da Prova (para o cabeçalho):</label>
+                <input type="date" id="cabecalho-data-prova" required>
+            </div>
+        </div>
+        
+        <label for="layout">Layout da Prova na Impressão/PDF:</label>
+        <select id="layout">
+            <option value="1">1 Coluna (Recomendado)</option>
+            <option value="2">2 Colunas (Fiel ao Modelo Anexo)</option>
+        </select>
+        
+        <label for="instrucoes">Instruções Gerais (Aparecerão na prova):</label>
+        <textarea id="instrucoes" rows="3">Leia atentamente todas as questões antes de responder. Use caneta azul ou preta e evite rasuras.</textarea>
+
+        <h3 style="margin-top: 30px;">3. Questões Selecionadas</h3>
+        <div id="selected-questions-from-bank" class="alert-info" style="margin-bottom: 20px; display: none;">
+            <i class="fas fa-info-circle"></i> **Questões carregadas do Banco.** Clique em "Gerar Prova" para finalizar.
+        </div>
+        
+        <button type="button" class="btn-warning" onclick="shuffleSelectedQuestions()" style="margin-bottom:10px;"><i class="fas fa-random"></i> Embaralhar Questões</button>
+
+        <div id="exam-questions-list" style="border: 1px solid #ddd; padding: 15px; max-height: 400px; overflow-y: auto;">
+            <p>Selecione uma disciplina acima ou use o Banco de Questões para carregar as questões.</p>
+        </div>
+
+        <button type="button" class="btn-primary" onclick="handleCreateExam()"><i class="fas fa-bolt"></i> Gerar Prova e Gabarito</button>
+        <div id="exam-creation-message" style="margin-top: 20px;"></div>
+    </form>
+
+    <script>
+        var IMGBB_API_KEY = "95bb16ee776d7e20f26857cec98bd372";
+        var currentImgUrl = "";
+
+        // 1. Upload Automático para ImgBB
+        document.getElementById('cabecalho-logo-file').onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('status-imgbb').innerHTML = 'Enviando logo...';
+            var fd = new FormData();
+            fd.append("image", file);
+            fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_API_KEY, { method: "POST", body: fd })
+                .then(r => r.json()).then(res => {
+                    currentImgUrl = res.data.url;
+                    document.getElementById('mini-preview-logo').innerHTML = '<img src="'+currentImgUrl+'" style="width:100%;height:100%;object-fit:contain;">';
+                    document.getElementById('status-imgbb').innerHTML = '<span style="color:#10b981">Logo pronta!</span>';
+                });
+        };
+
+        // 2. Função Vital: Converte URL em Base64 para o seu sistema de prova não quebrar
+        function convertUrlToBase64(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                };
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url); // Proxy para evitar erro de CORS
+            xhr.responseType = 'blob';
+            xhr.send();
+        }
+
+        function loadServerHeaders() {
+            var profNome = document.getElementById('cabecalho-professor').value;
+            if (!profNome) return;
+            var path = 'modelos_v3/' + profNome.replace(/[.#$\[\]]/g, "_");
+            database.ref(path).on('value', function(snap) {
+                var sel = document.getElementById('select-header-model');
+                sel.innerHTML = '<option value="">-- Selecionar modelo --</option>';
+                snap.forEach(function(c) {
+                    var d = c.val();
+                    var o = document.createElement('option');
+                    o.value = c.key; o.dataset.m = JSON.stringify(d);
+                    o.textContent = d.escola + " (" + (d.turma || 'Geral') + ")";
+                    sel.appendChild(o);
+                });
+            });
+        }
+
+        var profWatcher = setInterval(function() {
+            var p = document.getElementById('cabecalho-professor').value;
+            if(p && p !== "") { loadServerHeaders(); clearInterval(profWatcher); }
+        }, 1000);
+
+        function saveServerHeader() {
+            var esc = document.getElementById('cabecalho-escola').value;
+            var prof = document.getElementById('cabecalho-professor').value;
+            if(!prof || !esc) return alert("Preencha os campos!");
+            var m = {
+                escola: esc, disciplina: document.getElementById('cabecalho-disciplina-select').value,
+                turma: document.getElementById('cabecalho-turma').value, turno: document.getElementById('cabecalho-turno').value,
+                periodo: document.getElementById('cabecalho-periodo').value, instrucoes: document.getElementById('instrucoes').value,
+                logo: currentImgUrl
+            };
+            database.ref('modelos_v3/' + prof.replace(/[.#$\[\]]/g, "_")).push(m, function(err) { if(!err) alert("Salvo!"); });
+        }
+
+        function applyServerHeader() {
+            var sel = document.getElementById('select-header-model');
+            if(!sel.value) return;
+            var m = JSON.parse(sel.options[sel.selectedIndex].dataset.m);
+            
+            document.getElementById('cabecalho-escola').value = m.escola || "";
+            document.getElementById('cabecalho-turma').value = m.turma || "";
+            document.getElementById('cabecalho-turno').value = m.turno || "";
+            document.getElementById('cabecalho-periodo').value = m.periodo || "";
+            document.getElementById('instrucoes').value = m.instrucoes || "";
+            document.getElementById('cabecalho-disciplina-select').value = m.disciplina || "";
+            
+            currentImgUrl = m.logo || "";
+            if(currentImgUrl) {
+                document.getElementById('status-imgbb').innerHTML = "Sincronizando imagem...";
+                // Aqui transformamos o link em dados reais que o seu PDF entende
+                var imgHtml = '<img src="'+currentImgUrl+'" style="width:100%;height:100%;object-fit:contain;">';
+                document.getElementById('mini-preview-logo').innerHTML = imgHtml;
+                
+                // MUDANÇA CHAVE: Definimos a URL como o valor que o seu script JS busca
+                // Tentamos injetar nas variáveis globais mais comuns de scripts de prova
+                window.logoBase64Final = currentImgUrl;
+                window.cabecalhoLogoUrl = currentImgUrl;
+            }
+            if(window.filterQuestionsForExam) filterQuestionsForExam();
+        }
+
+        function deleteServerHeader() {
+            var sel = document.getElementById('select-header-model');
+            if(!sel.value) return;
+            var prof = document.getElementById('cabecalho-professor').value;
+            if(confirm("Excluir?")) database.ref('modelos_v3/' + prof.replace(/[.#$\[\]]/g, "_") + '/' + sel.value).remove();
+        }
+    </script>
+</section>
+<!--PARAACHARAPIDOXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-->
+            <section id="my-exams" class="page-section">
+    <style>
+        #my-exams { 
+            padding: 20px; 
+            background-color: #f1f5f9; 
+            font-family: 'Inter', -apple-system, sans-serif; 
+        }
+
+        #my-exams h2 { 
+            color: #0f172a; 
+            font-size: 1.25rem; 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        /* Barra de Busca */
+        .search-bar { position: relative; max-width: 500px; margin-bottom: 25px; }
+        .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        #filter-exams-text { 
+            width: 100%; padding: 12px 12px 12px 40px; 
+            border: 1px solid #cbd5e1; border-radius: 8px; 
+            font-size: 0.9rem; outline: none; transition: 0.2s;
+        }
+        #filter-exams-text:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        /* Grid de Blocos Responsivos */
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* O Card (Bloquinho) */
+        .exam-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .exam-card:hover { 
+            border-color: #3b82f6; 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+        }
+
+        .exam-card.active { 
+            border: 2px solid #3b82f6; 
+            background-color: #f0f7ff; 
+        }
+
+        .exam-card .school-label { 
+            font-size: 0.65rem; 
+            font-weight: 800; 
+            color: #3b82f6; 
+            text-transform: uppercase; 
+        }
+
+        .exam-card h4 { 
+            margin: 0; 
+            font-size: 1rem; 
+            color: #1e293b; 
+            line-height: 1.2; 
+            min-height: 2.4em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-grid-card { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 6px; 
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .info-item-card { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 0.75rem; 
+            color: #64748b; 
+        }
+
+        .info-item-card i { color: #94a3b8; width: 14px; }
+
+        /* Painel de Ações Original Preservado */
+        #exam-details-view {
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px;
+            border: 1px solid #cbd5e1; 
+            margin-top: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .action-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+        }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .btn-mini { 
+            padding: 8px 15px; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            border-radius: 6px; 
+            border: 1px solid #e2e8f0; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            background: white;
+            transition: 0.2s;
+        }
+
+        .btn-mini.primary { background: #3b82f6; color: white; border: none; }
+        .btn-mini.danger { color: #ef4444; background: #fef2f2; border: none; }
+        .btn-mini:hover { opacity: 0.9; transform: scale(1.02); }
+
+        @media (max-width: 480px) {
+            .exam-grid { grid-template-columns: 1fr; }
+            .action-bar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+
+    <h2><i class="fas fa-file-signature"></i> Minhas Provas Geradas</h2>
+    
+    <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="filter-exams-text" placeholder="Pesquisar por disciplina, turma ou professor..." onkeyup="filterExams()">
+    </div>
+
+    <div id="my-exams-list" class="exam-grid">
+        <p style="color: #64748b;">Carregando suas provas...</p>
+    </div>
+    
+    <div id="exam-details-view" style="display: none;">
+        <div class="action-bar">
+            <div>
+                <small style="color: #64748b; font-weight: 600;">PROVA SELECIONADA:</small>
+                <div id="selected-exam-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a;"></div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-mini primary" onclick="visualizarProvaDetalhe()"><i class="fas fa-eye"></i> Visualizar</button>
+                <button class="btn-mini" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button class="btn-mini" onclick="baixarGabarito()"><i class="fas fa-key"></i> Gabarito</button>
+                <button class="btn-mini" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-mini danger" onclick="deleteExam()"><i class="fas fa-trash"></i> Excluir</button>
+            </div>
+        </div>
+        
+        <div id="exam-preview" style="display: none; margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+            <div id="exam-content-print" style="background: white; padding: 30px; min-height: 200px;"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * FUNÇÃO PRINCIPAL: Renderiza os blocos com trava de segurança
+         * @param {Object} examsData - O objeto 'provas' vindo do Firebase
+         */
+        function renderMyExams(examsData) {
+            const container = document.getElementById('my-exams-list');
+            container.innerHTML = "";
+            
+            // PEGA O UID DO USUÁRIO ATUAL (Ajuste para sua variável global de login)
+            const currentUserId = (typeof userLogado !== 'undefined' && userLogado) ? userLogado.uid : null;
+
+            if (!examsData) {
+                container.innerHTML = "<p>Nenhuma prova disponível.</p>";
+                return;
+            }
+
+            let count = 0;
+            Object.keys(examsData).forEach(id => {
+                const prova = examsData[id];
+
+                // --- TRAVA DE SEGURANÇA ABSOLUTA ---
+                // Se a prova não foi criada por este UID, o sistema ignora e não renderiza nada
+                if (prova.criado_por_uid !== currentUserId) {
+                    return; 
+                }
+
+                count++;
+                const info = prova.cabecalho || {};
+                const card = document.createElement('div');
+                card.className = 'exam-card';
+                card.onclick = () => selectExam(card, id, info.disciplina);
+
+                card.innerHTML = `
+                    <div class="school-label">${info.escola || 'INSTITUTO FEDERAL'}</div>
+                    <h4>${info.disciplina || 'Sem Título'}</h4>
+                    <div class="info-grid-card">
+                        <div class="info-item-card" title="Turma"><i class="fas fa-users"></i> ${info.turma || '-'}</div>
+                        <div class="info-item-card" title="Turno"><i class="fas fa-sun"></i> ${info.turno || '-'}</div>
+                        <div class="info-item-card" title="Data"><i class="far fa-calendar-alt"></i> ${info.data_prova || '-'}</div>
+                        <div class="info-item-card" title="Professor"><i class="fas fa-chalkboard-teacher"></i> ${info.professor || '-'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            if (count === 0) {
+                container.innerHTML = "<p>Você ainda não gerou nenhuma prova.</p>";
+            }
+        }
+
+        // Seleciona o card e ativa as funções originais
+        function selectExam(element, id, nome) {
+            document.querySelectorAll('.exam-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Mantém a compatibilidade com suas funções originais de PDF/Delete
+            window.selectedExamId = id; 
+            
+            document.getElementById('selected-exam-name').innerText = nome;
+            document.getElementById('exam-details-view').style.display = 'block';
+            
+            // Se o preview estiver aberto de uma prova anterior, fecha ele
+            document.getElementById('exam-preview').style.display = 'none';
+        }
+
+        // Função de Filtro (Busca)
+        function filterExams() {
+            const query = document.getElementById('filter-exams-text').value.toLowerCase();
+            const cards = document.querySelectorAll('.exam-card');
+            cards.forEach(card => {
+                const content = card.innerText.toLowerCase();
+                card.style.display = content.includes(query) ? "flex" : "none";
+            });
+        }
+
+        /* COMO CONECTAR:
+           No seu código onde você recebe os dados do Firebase (ex: firebase.database().ref('provas')),
+           basta chamar: renderMyExams(snapshot.val());
+        */
+    </script>
             </section>
             <!--/**
  * ============================================================================
@@ -1164,14 +2013,15 @@
     import { getDatabase, ref, onValue, update, remove, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyDFQCMsX04fwh7MVyEpvXnXD0U4TD5Or5w",
-        authDomain: "ja-barbearia.firebaseapp.com",
-        databaseURL: "https://ja-barbearia-default-rtdb.firebaseio.com",
-        projectId: "ja-barbearia",
-        storageBucket: "ja-barbearia.firebasestorage.app",
-        messagingSenderId: "213237027963",
-        appId: "1:213237027963:web:7d585b158ee06d3ab7fede"
-    };
+    apiKey: "AIzaSyCSeSmkMM_4-NlLv8Js_ODwA4H372yq48k",
+    authDomain: "rnc-sgt.firebaseapp.com",
+    databaseURL: "https://rnc-sgt-default-rtdb.firebaseio.com",
+    projectId: "rnc-sgt",
+    storageBucket: "rnc-sgt.firebasestorage.app",
+    messagingSenderId: "500336948308",
+    appId: "1:500336948308:web:a6448b9141974f542ce9c1",
+    measurementId: "G-LB9EQPJRQ1"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -1418,7 +2268,21 @@
                 <input type="text" id="access-name" required>
 
                 <label for="access-cargo">Cargo/Função:</label>
-                <input type="text" id="access-cargo" required>
+<select id="access-cargo" required style="
+    width: 100%; 
+    padding: 10px; 
+    border-radius: 8px; 
+    border: 1px solid #e2e8f0; 
+    background-color: white;
+    font-size: 1rem;
+    color: #1e293b;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+">
+    <option value="" disabled selected>Selecione seu cargo</option>
+    <option value="Professor">Professor</option>
+</select>
 
                 <label for="access-escola">Nome da Escola/Instituição:</label>
                 <input type="text" id="access-escola" required>
@@ -1682,13 +2546,15 @@
  * ============================================================================
  */
     const firebaseConfig = {
-        apiKey: "AIzaSyDFQCMsX04fwh7MVyEpvXnXD0U4TD5Or5w",
-        authDomain: "ja-barbearia.firebaseapp.com",
-        databaseURL: "https://ja-barbearia-default-rtdb.firebaseio.com",
-        projectId: "ja-barbearia",
-        appId: "1:213237027963:web:7d585b158ee06d3ab7fede",
-        measurementId: "G-YNNKX5YDDN"  
-    };
+    apiKey: "AIzaSyCSeSmkMM_4-NlLv8Js_ODwA4H372yq48k",
+    authDomain: "rnc-sgt.firebaseapp.com",
+    databaseURL: "https://rnc-sgt-default-rtdb.firebaseio.com",
+    projectId: "rnc-sgt",
+    storageBucket: "rnc-sgt.firebasestorage.app",
+    messagingSenderId: "500336948308",
+    appId: "1:500336948308:web:a6448b9141974f542ce9c1",
+    measurementId: "G-LB9EQPJRQ1"
+};
 /**
  * ============================================================================
  * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
@@ -1770,10 +2636,10 @@
             if (data.success) {
                 return data.data.url;
             } else {
-                throw new Error(data.error.message || "Erro desconhecido no ImgBB.");
+                throw new Error(data.error.message || "Erro desconhecido no ImgAtecServer.");
             }
         } catch (error) {
-            console.error("Erro no upload para ImgBB:", error);
+            console.error("Erro no upload para ImgAtecServer:", error);
             throw new Error(`Falha no upload da imagem. Erro: ${error.message}`);
         }
     }
@@ -1982,26 +2848,7 @@
             hour12: false
         });
     }
-    /**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+ 
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
     }
@@ -2167,7 +3014,7 @@
     
     async function handleCreateQuestion() {
         const messageEl = document.getElementById('question-creation-message');
-        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando... Uploads para ImgBB em andamento.</div>`;
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando... Uploads para ImgAtecServer em andamento.</div>`;
         
         try {
             const nextId = await getNextQuestionId();
@@ -2215,7 +3062,7 @@
 
             await novaQuestaoRef.set(dadosQuestao);
             
-            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${nextId} salva com sucesso! (Imagens no ImgBB)</div>`;
+            messageEl.innerHTML = `<div class="alert-success"><i class="fas fa-check-circle"></i> Questão Q${nextId} salva com sucesso! (Imagens no ImgAtecServer)</div>`;
             document.getElementById('form-create-question').reset();
             setupAlternativeInputs();    
             updateBankView();
@@ -2227,92 +3074,150 @@
         }
     }
     
-    // NOVO: Função para renderizar as questões no Banco de Questões
+    //BANCO DE QUESTÕES DAQUI PRA BAIXO
     function displayQuestions(questoes) {
-        const listEl = document.getElementById('questions-bank-list');
-        
-        // Ordena por ID Sequencial para exibição
-        const questionsToDisplay = questoes.sort((a, b) => a.id_sequencial - b.id_sequencial);
-
-        if (questionsToDisplay.length > 0) {
-            questionsToDisplay.forEach(q => {
-                const isChecked = selectedQuestionIdsForExam.includes(q.firebaseId);
-                
-                const listItem = document.createElement('li');
-                listItem.setAttribute('data-id', q.firebaseId);
-                listItem.innerHTML = `
-                    <input type="checkbox" name="select_for_exam" value="${q.firebaseId}" ${isChecked ? 'checked' : ''} onchange="toggleQuestionSelection('${q.firebaseId}', this.checked)">
-                    <div class="question-item-info">
-                        <span><strong>Q${q.id_sequencial}</strong> (${q.componente_curricular} / ${q.modalidade}): ${q.enunciado.texto.substring(0, 70)}...</span>
-                        <small>Resp: ${q.resposta_correta} | Habilidade: ${q.habilidade_bncc || 'N/A'}</small>
-                    </div>
-                    <div class="question-item-actions">
-                        <button class="action-button btn-secondary btn-sm" onclick="openQuestionViewModal('${q.firebaseId}')"><i class="fas fa-eye"></i> Gabarito</button>
-                        <button class="action-button btn-primary btn-sm" onclick="openQuestionEditModal('${q.firebaseId}')"><i class="fas fa-edit"></i> Editar Questão</button>
-                    </div>
-                `;
-                listEl.appendChild(listItem);
-            });
-        }
+    const listEl = document.getElementById('questions-bank-list');
+    
+    // Injeção de CSS Profissional (Executado apenas uma vez)
+    if (!document.getElementById('styled-questions-css')) {
+        const style = document.createElement('style');
+        style.id = 'styled-questions-css';
+        style.innerHTML = `
+            #questions-bank-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            }
+            .question-card {
+                display: flex;
+                align-items: flex-start;
+                gap: 15px;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 12px;
+                transition: all 0.2s ease;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+            .question-card:hover {
+                border-color: #3b82f6;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                transform: translateY(-1px);
+            }
+            .question-card input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                margin-top: 4px;
+                cursor: pointer;
+                accent-color: #3b82f6;
+            }
+            .question-item-info {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .question-title {
+                font-size: 0.95rem;
+                color: #1e293b;
+                line-height: 1.5;
+            }
+            .question-title strong {
+                color: #3b82f6;
+                margin-right: 4px;
+            }
+            .question-metadata {
+                font-size: 0.8rem;
+                color: #64748b;
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+            .badge-res {
+                background: #f1f5f9;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-weight: 600;
+                color: #475569;
+            }
+            .question-item-actions {
+                display: flex;
+                gap: 8px;
+                white-space: nowrap;
+            }
+            .action-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background 0.2s;
+                border: 1px solid transparent;
+            }
+            .btn-secondary { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
+            .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
+            .btn-primary { background: #3b82f6; color: white; }
+            .btn-primary:hover { background: #2563eb; }
+            
+            @media (max-width: 600px) {
+                .question-card { flex-direction: column; }
+                .question-item-actions { width: 100%; justify-content: flex-end; }
+            }
+        `;
+        document.head.appendChild(style);
     }
-/**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+
+    // Limpa a lista antes de renderizar (opcional, dependendo da sua lógica de app)
+    listEl.innerHTML = '';
+
+    const questionsToDisplay = questoes.sort((a, b) => a.id_sequencial - b.id_sequencial);
+
+    if (questionsToDisplay.length > 0) {
+        questionsToDisplay.forEach(q => {
+            const isChecked = selectedQuestionIdsForExam.includes(q.firebaseId);
+            
+            const listItem = document.createElement('li');
+            listItem.className = 'question-card';
+            listItem.setAttribute('data-id', q.firebaseId);
+            
+            listItem.innerHTML = `
+                <input type="checkbox" 
+                       name="select_for_exam" 
+                       value="${q.firebaseId}" 
+                       ${isChecked ? 'checked' : ''} 
+                       onchange="toggleQuestionSelection('${q.firebaseId}', this.checked)">
+                
+                <div class="question-item-info">
+                    <span class="question-title">
+                        <strong>Q${q.id_sequencial}</strong> 
+                        <span style="color: #94a3b8;">[${q.componente_curricular} • ${q.modalidade}]</span> 
+                        ${q.enunciado.texto.substring(0, 85)}...
+                    </span>
+                    <div class="question-metadata">
+                        <span><span class="badge-res">Gabarito: ${q.resposta_correta}</span></span>
+                        <span><i class="fas fa-tag"></i> ${q.habilidade_bncc || 'N/A'}</span>
+                    </div>
+                </div>
+
+                <div class="question-item-actions">
+                    <button class="action-button btn-secondary" onclick="openQuestionViewModal('${q.firebaseId}')">
+                        <i class="fas fa-eye"></i> Gabarito
+                    </button>
+                    <button class="action-button btn-primary" onclick="openQuestionEditModal('${q.firebaseId}')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </div>
+            `;
+            listEl.appendChild(listItem);
+        });
+    }
+}
+
     // NOVO: Função para adicionar o botão "Carregar Mais"
     function addLoadMoreButton(hasNextPage) {
         const listEl = document.getElementById('questions-bank-list');
@@ -2397,45 +3302,7 @@
             if(reset) {
                 listEl.innerHTML = '';
             }
-            /**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+            
             // Remove o item de controle do final do array se ele não for o último item visível
             if(newQuestionsArray.length > PAGE_SIZE) {
                 newQuestionsArray.pop();
@@ -2478,140 +3345,7 @@
             toggleQuestionSelection(cb.value, checked);
         });
     }
-/**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+
     function filterQuestions() {
         manageBankPagination(true);
     }
@@ -2669,121 +3403,7 @@
             listEl.innerHTML = '<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão válida selecionada ou carregada.</p>';
         }
     }
-/**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+
     function shuffleSelectedQuestions() {
         if (selectedQuestionIdsForExam.length < 2) return alert("Adicione mais questões para embaralhar.");
         
@@ -2834,64 +3454,7 @@
             examListEl.innerHTML = `<p class="alert-error"><i class="fas fa-exclamation-triangle"></i> Nenhuma questão cadastrada para a disciplina <strong>${selectedDiscipline}</strong>.</p>`;
         }
     }
-    /**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- *//**
- * ============================================================================
- * 🛡️ AVISO DE PROPRIEDADE INTELECTUAL E DIREITOS AUTORAIS
- * ============================================================================
- * * @owner        ATECSEVEN TECNOLOGIA
- * @cnpj         63.363.373/0001-72
- * * ESTE CÓDIGO FONTE É PROPRIEDADE EXCLUSIVA DA ATECSEVEN TECNOLOGIA.
- * * É ESTRITAMENTE PROIBIDA a cópia, reprodução, distribuição, modificação
- * ou comercialização deste código, total ou parcialmente, sem a expressa
- * autorização por escrito da detentora dos direitos.
- * * A violação destes termos está sujeita às penalidades previstas na legislação
- * brasileira vigente:
- * - Lei nº 9.609/98 (Proteção da Propriedade Intelectual de Software).
- * - Lei nº 9.610/98 (Lei de Direitos Autorais).
- * - Código Penal Brasileiro (Art. 184 - Violação de direito autoral).
- * * O infrator estará sujeito a PROCESSO JUDICIAL nas esferas Cível e Criminal,
- * respondendo por perdas e danos e lucros cessantes.
- * * © ATECSEVEN TECNOLOGIA - Todos os direitos reservados.
- * ============================================================================
- */
+  //DAQUI PRA CIMA É BANCOOO
     function gerarGabaritoInstantaneo(questoes) {
         let gabarito = "--- GABARITO OFICIAL ---\n";
         gabarito += "Disciplina: " + (questoes[0]?.componente_curricular || 'N/A') + "\n";
@@ -2907,7 +3470,7 @@
 
     async function handleCreateExam() {
         const messageEl = document.getElementById('exam-creation-message');
-        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando upload da logo (ImgBB) e geração da prova...</div>`;
+        messageEl.innerHTML = `<div class="alert-info"><i class="fas fa-sync fa-spin"></i> Processando upload da logo (ImgAtecServer) e geração da prova...</div>`;
         
         try {
             // 1. Validação e Coleta das Questões Marcadas
@@ -3031,46 +3594,117 @@
  * ============================================================================
  */
     function filterExams() {
-        const listEl = document.getElementById('my-exams-list');
-        listEl.innerHTML = '';
-        
-        const filterText = document.getElementById('filter-exams-text').value.toLowerCase();
-        document.getElementById('exam-details-view').style.display = 'none';
+    const listEl = document.getElementById('my-exams-list');
+    const filterInput = document.getElementById('filter-exams-text');
+    const displayElement = document.getElementById('user-info-display');
+    
+    if (!listEl) return;
+    
+    // Limpeza e Preparação do Container Responsivo
+    listEl.innerHTML = '';
+    listEl.style.display = "grid";
+    listEl.style.gridTemplateColumns = "repeat(auto-fill, minmax(300px, 1fr))";
+    listEl.style.gap = "20px";
+    listEl.style.padding = "10px 0";
 
-        if (Object.keys(allExams).length > 0) {
-            const examsArray = Object.entries(allExams)
-                .map(([id, prova]) => ({ id, ...prova }))
-                .sort((a, b) => new Date(b.data_geracao) - new Date(a.data_geracao));    
+    const filterText = filterInput ? filterInput.value.toLowerCase() : "";
+    
+    // TRATAMENTO PROFISSIONAL DO NOME:
+    // Remove "Seja bem-vindo", "Olá", "Professor" e espaços extras
+    let nomeLogado = displayElement ? displayElement.innerText.toUpperCase() : "";
+    nomeLogado = nomeLogado.replace(/SEJA BEM-VINDO|OLÁ|BEM VINDO|PROFESSOR\(A\)|PROFESSOR/g, "").trim();
+    
+    // Função para normalizar strings (remover acentos para comparação perfeita)
+    const normalizar = (str) => str.toString().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const nomeBusca = normalizar(nomeLogado);
 
-            const examsFiltrados = examsArray.filter(e => {
-                return e.cabecalho.disciplina.toLowerCase().includes(filterText) ||
-                               e.cabecalho.turma.toLowerCase().includes(filterText) ||
-                               formatDateTimeBR(e.data_geracao).includes(filterText);
-            });
-
-            if (examsFiltrados.length === 0) {
-                listEl.innerHTML = '<li>Nenhuma prova encontrada com os filtros aplicados.</li>';
-                return;
-            }
-
-            examsFiltrados.forEach(e => {
-                const dataGeracaoBR = formatDateTimeBR(e.data_geracao);
-                const dataProvaBR = e.cabecalho.data_prova ? new Date(e.cabecalho.data_prova).toLocaleDateString('pt-BR') : 'N/A';
-                
-                listEl.innerHTML += `
-                    <li class="exam-list-item" onclick="selectExam('${e.id}')">
-                        <div class="exam-info">
-                            <span><strong>${e.cabecalho.disciplina}</strong> - ${e.cabecalho.turma} | Data Prova: ${dataProvaBR}</span>
-                            <small>Gerada em: ${dataGeracaoBR}</small>
-                        </div>
-                        <button class="action-button btn-primary" onclick="selectExam('${e.id}')"><i class="fas fa-cogs"></i> Gerenciar</button>
-                    </li>
-                `;
-            });
-        } else {
-            listEl.innerHTML = '<li>Nenhuma prova gerada.</li>';
-        }
+    if (typeof allExams === 'undefined' || !allExams) {
+        listEl.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Carregando banco de dados...</div>';
+        return;
     }
+
+    const examsArray = Object.entries(allExams).map(([id, prova]) => ({ id, ...prova }));
+    examsArray.sort((a, b) => new Date(b.data_geracao || 0) - new Date(a.data_geracao || 0));
+
+    let encontrados = 0;
+
+    examsArray.forEach(e => {
+        try {
+            if (!e.cabecalho) return;
+
+            const disciplina = e.cabecalho.disciplina || "Sem Disciplina";
+            const professorBD = e.cabecalho.professor || "";
+            const profNormalizado = normalizar(professorBD);
+            
+            // Filtro de Segurança: O nome do professor no banco deve conter o nome logado (ou vice-versa)
+            const éDono = nomeBusca === "" || profNormalizado.includes(nomeBusca) || nomeBusca.includes(profNormalizado);
+            
+            // Filtro de Texto
+            const bateBusca = disciplina.toLowerCase().includes(filterText) || 
+                              (e.cabecalho.turma || "").toLowerCase().includes(filterText);
+
+            if (éDono && bateBusca) {
+                encontrados++;
+                const dataProva = e.cabecalho.data_prova ? new Date(e.cabecalho.data_prova + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A';
+                const dataGeracao = e.data_geracao ? new Date(e.data_geracao).toLocaleDateString('pt-BR') : '---';
+
+                listEl.innerHTML += `
+                    <div class="exam-card-pro" onclick="selectExam('${e.id}')" style="
+                        background: #ffffff;
+                        border-radius: 16px;
+                        border: 1px solid #e2e8f0;
+                        padding: 24px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                    ">
+                        <div style="font-size: 0.65rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; margin-bottom: 8px;">
+                             <i class="fas fa-university"></i> ${e.cabecalho.escola || 'INSTITUIÇÃO'}
+                        </div>
+                        
+                        <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 800; margin: 0 0 15px 0; line-height: 1.2;">
+                            ${disciplina}
+                        </h3>
+
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #f1f5f9;">
+                            <div style="font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-chalkboard-teacher" style="color: #3b82f6;"></i>
+                                <strong>${professorBD}</strong>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">
+                            <span><i class="fas fa-users" style="width: 14px;"></i> ${e.cabecalho.turma}</span>
+                            <span><i class="fas fa-clock" style="width: 14px;"></i> ${e.cabecalho.turno}</span>
+                            <span><i class="fas fa-calendar-alt" style="width: 14px;"></i> ${dataProva}</span>
+                            <span><i class="fas fa-layer-group" style="width: 14px;"></i> ${e.cabecalho.periodo}</span>
+                        </div>
+
+                        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                            <small style="color: #94a3b8; font-size: 0.7rem;">Criada: ${dataGeracao}</small>
+                            <span style="color: #3b82f6; font-weight: 700; font-size: 0.75rem;">GERENCIAR <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (err) { console.error(err); }
+    });
+
+    // MENSAGEM DE ERRO PROFISSIONAL
+    if (encontrados === 0) {
+        listEl.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i class="fas fa-folder-open" style="font-size: 2rem; color: #cbd5e1;"></i>
+                </div>
+                <h3 style="color: #1e293b; margin-bottom: 8px;">Nenhuma prova encontrada</h3>
+                <p style="color: #64748b; font-size: 0.95rem;">Não localizamos registros para o professor <b style="color: #3b82f6;">${nomeLogado || 'logado'}</b>.</p>
+            </div>`;
+    }
+}
     
     function selectExam(examId) {
         selectedExamId = examId;
@@ -3367,165 +4001,224 @@
     function gerarHTMLProva(prova) {
     const cab = prova.cabecalho;
     const dataProvaBR = cab.data_prova ? new Date(cab.data_prova).toLocaleDateString('pt-BR') : '__/__/____';
-    const logoSrc = cab.logo && cab.logo.trim() !== '' ? cab.logo : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff" stroke="#ccc" stroke-width="1"/><text x="50" y="55" font-family="Arial, sans-serif" font-size="18" fill="#aaa" text-anchor="middle">LOGO</text></svg>';
+    
+    let logoSrc = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#f8fafc"/><text x="50" y="55" font-family="Arial" font-size="12" fill="#cbd5e1" text-anchor="middle">LOGO</text></svg>';
+    
+    if (window.logoBase64Final && window.logoBase64Final.trim() !== '') {
+        logoSrc = window.logoBase64Final;
+    } else if (cab && cab.logo && cab.logo.trim() !== '') {
+        logoSrc = cab.logo;
+    }
 
     let htmlContent = '';
 
-    // Estilos Inline Críticos para o Layout de Colunas
     htmlContent += `
         <style>
-            .questions-wrapper {
-                column-count: var(--print-col-count);
-                column-gap: 30px;
-                column-fill: auto;
-                width: 100%;
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+            .exam-body {
+                font-family: 'Inter', sans-serif;
+                color: #1a202c;
+                font-size: 11pt;
+                line-height: 1.3;
+                padding: 0;
+                margin: 0;
             }
-            .question-item-print {
-                break-inside: avoid; /* Impede que a questão quebre entre colunas */
-                page-break-inside: avoid;
-                margin-bottom: 20px;
-                word-wrap: break-word;
-                overflow-wrap: break-word; /* Força a quebra de texto longo */
-                word-break: break-word;
-                box-sizing: border-box;
-                width: 100%;
-            }
-            .q-enunciado {
-                max-width: 100%;
+
+            .header-container {
+                display: flex;
+                border: 1pt solid #2563eb;
+                margin-bottom: 6px;
+                border-radius: 4px;
                 overflow: hidden;
+                width: 100%;
             }
-            .image-preview, .image-preview-small {
-                max-width: 100% !important; /* Garante que a imagem nunca saia da coluna */
-                height: auto;
+
+            .header-logo {
+                width: 90px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4px;
+                border-right: 1pt solid #2563eb;
+                background: #fff;
+            }
+
+            .header-logo img {
+                max-width: 80px;
+                max-height: 70px;
                 object-fit: contain;
             }
-            .alternative-list-print li {
-                margin-bottom: 5px;
+
+            .header-content { flex: 1; display: flex; flex-direction: column; }
+
+            .school-name {
+                background: #2563eb;
+                color: white;
+                padding: 3px;
+                text-align: center;
+                font-weight: 700;
+                font-size: 10.5pt;
+                text-transform: uppercase;
+            }
+
+            .header-grid { display: grid; grid-template-columns: 2.5fr 0.8fr 0.8fr; }
+
+            .cell {
+                border-right: 0.5pt solid #e2e8f0;
+                border-bottom: 0.5pt solid #e2e8f0;
+                padding: 3px 6px;
+                font-size: 8.5pt;
+                display: flex;
+                align-items: center;
+            }
+
+            .cell-nota {
+                background: #f8fafc;
+                height: 45px; 
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start; /* Palavra no topo */
+                align-items: center;
+                padding-top: 4px;
+                text-align: center;
+            }
+
+            .nota-brackets {
+                font-size: 14pt;
+                color: #1e40af;
+                font-weight: 400;
+                margin-top: 2px;
+            }
+
+            .label-text { font-weight: 700; font-size: 7pt; color: #3b82f6; text-transform: uppercase; margin-right: 4px; }
+            .icon-color { color: #f59e0b; margin-right: 3px; font-size: 7.5pt; }
+
+            .questions-wrapper {
+                column-count: var(--print-col-count);
+                column-gap: 15px;
+                margin-top: 8px;
+            }
+
+            .question-item {
                 break-inside: avoid;
+                margin-bottom: 12px;
+                padding-top: 6px;
+                border-top: 0.5pt solid #f1f5f9;
+            }
+
+            .q-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+            .q-title { font-weight: 700; font-size: 10.5pt; color: #1e40af; display: flex; align-items: center; gap: 4px; }
+            .q-habilidade { font-size: 7pt; color: #0d9488; background: #f0fdfa; padding: 1px 4px; border-radius: 3px; font-weight: 600; }
+
+            .q-text {
+                margin-bottom: 0.8rem; 
+                text-align: left;
+                word-spacing: normal;
+            }
+
+            .alt-item { display: flex; gap: 6px; font-size: 10.5pt; margin-bottom: 3px; }
+            .alt-letter { font-weight: 700; color: #2563eb; min-width: 18px; }
+
+            .writing-line { border-bottom: 0.5pt solid #cbd5e1; height: 22px; width: 100%; }
+
+            .instructions-text {
+                font-size: 8pt;
+                padding: 4px 8px;
+                border-left: 3pt solid #f59e0b;
+                background: #fffbeb;
+                margin-bottom: 8px;
+                border-radius: 0 3px 3px 0;
+            }
+
+            @media print {
+                @page { margin: 0.7cm; }
+                .school-name { background: #2563eb !important; -webkit-print-color-adjust: exact; }
+                .instructions-text { background: #fffbeb !important; -webkit-print-color-adjust: exact; }
+                .cell-nota { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
             }
         </style>
     `;
 
     htmlContent += `
-        <div class="exam-header-print">
-            <div class="logo-area">
-                <img src="${logoSrc}" alt="Logo da Escola">
+        <div class="exam-body">
+            <div class="header-container">
+                <div class="header-logo"><img src="${logoSrc}"></div>
+                <div class="header-content">
+                    <div class="school-name">${cab.escola}</div>
+                    <div class="header-grid">
+                        <div class="cell"><span class="label-text"><i class="fas fa-user icon-color"></i> ALUNO:</span> <span style="border-bottom: 0.5pt solid #ccc; flex:1; height: 12px;"></span></div>
+                        <div class="cell"><span class="label-text"><i class="fas fa-hashtag icon-color"></i> Nº:</span> <span style="border-bottom: 0.5pt solid #ccc; flex:1; height: 12px;"></span></div>
+                        <div class="cell" style="border-right:none;"><span class="label-text"><i class="fas fa-th icon-color"></i> SALA:</span> <span style="border-bottom: 0.5pt solid #ccc; flex:1; height: 12px;"></span></div>
+                        
+                        <div class="cell" style="border-bottom:none;"><span class="label-text"><i class="fas fa-book icon-color"></i> DISC:</span> <strong>${cab.disciplina}</strong></div>
+                        <div class="cell" style="border-bottom:none;"><span class="label-text"><i class="fas fa-users icon-color"></i> TURMA:</span> <strong>${cab.turma}</strong></div>
+                        <div class="cell" style="border-bottom:none; border-right:none;"><span class="label-text"><i class="fas fa-calendar icon-color"></i> DATA:</span> <strong>${dataProvaBR}</strong></div>
+                    </div>
+                </div>
             </div>
-            <div style="border-left: 1px solid #000;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td colspan="4" style="text-align: center; font-weight: bold; border-top: none;">
-                            ${cab.escola.toUpperCase()}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right; border-top: none;">
-                            <span style="font-weight: bold; margin-right: 15px;">TURMA: ${cab.turma.toUpperCase()}</span> |
-                            <span style="font-weight: bold; margin-right: 15px;">TURNO: ${cab.turno.toUpperCase()}</span> |
-                            <span style="font-weight: bold;">DATA:</span> ${dataProvaBR}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="border-top: 1px solid #000;">
-                            <span style="font-weight: bold;">ALUNO(A)</span>
-                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 55%; margin-right: 5px;"></span>
-                            <span style="font-weight: bold;">Nº</span>
-                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 8%; margin-right: 5px;"></span>
-                            <span style="font-weight: bold;">SALA:</span>
-                            <span style="display: inline-block; border-bottom: 1px dashed #000; width: 8%;"></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2" style="font-weight: bold; text-align: center; width: 15%; border-left: none; border-top: 1px solid #000;">
-                            ${cab.periodo ? cab.periodo.toUpperCase() : 'PERÍODO'}
-                        </td>
-                        <td style="width: 50%; border-top: 1px solid #000;">
-                            <span style="font-weight: bold;">PROFESSOR(A):</span> ${cab.professor}
-                        </td>
-                        <td rowspan="2" style="font-weight: bold; width: 20%; text-align: center; border-top: 1px solid #000;">
-                            NOTA:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border-top: 1px solid #000;">
-                            <span style="font-weight: bold;">COMPONENTE CURRICULAR:</span> ${cab.disciplina}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
 
-        <p class="instructions-text" style="margin-top: 15px;">
-            <strong>Instruções Gerais:</strong> ${prova.instrucoes_gerais}
-        </p>
+            <div class="header-container" style="margin-top: -7px; border-top: none;">
+                <div class="cell" style="flex: 2; border-bottom: none; border-right: 1pt solid #2563eb;"><span class="label-text"><i class="fas fa-chalkboard-teacher icon-color"></i> PROF:</span> <strong>${cab.professor}</strong></div>
+                <div class="cell" style="flex: 1; border-bottom: none; border-right: 1pt solid #2563eb;"><span class="label-text"><i class="fas fa-layer-group icon-color"></i> PERÍODO:</span> <strong>${cab.periodo || '---'}</strong></div>
+                <div class="cell cell-nota" style="flex: 0.8; border-bottom: none; border-right: none;">
+                    <span class="label-text">NOTA FINAL</span>
+                    <div class="nota-brackets">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+                </div>
+            </div>
+
+            <div class="instructions-text"><strong>Instruções:</strong> ${prova.instrucoes_gerais}</div>
+
+            <div class="questions-wrapper" style="--print-col-count: ${prova.layout_colunas || 1};">
     `;
 
-    htmlContent += `<div class="questions-wrapper" style="--print-col-count: ${prova.layout_colunas || 1};">`;
-    
     prova.questoes_detalhes.forEach((q, index) => {
-        const numero = index + 1;
-        const enunciadoSeguro = obfuscateText(q.enunciado.texto);
-        
+        const enunciado = typeof obfuscateText === 'function' ? obfuscateText(q.enunciado.texto) : q.enunciado.texto;
         htmlContent += `
-            <div class="question-item-print">
-                <div class="q-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <strong style="display: flex; align-items: center; gap: 5px; color: #3f51b5;">
-                        <i class="fas fa-book-open" style="color: #ff9800;"></i> QUESTÃO ${numero}
-                    </strong>  
-                    <span class="q-number-box" style="border: 1px solid #000; padding: 2px 4px; font-size: 9pt; font-weight: bold; color: #f44336;">
-                        ${q.habilidade_bncc || 'N/A'}
-                    </span>
+            <div class="question-item">
+                <div class="q-header">
+                    <span class="q-title"><i class="fas fa-edit" style="font-size: 8pt; color: #2563eb;"></i> QUESTÃO ${index + 1}</span>
+                    <span class="q-habilidade">${q.habilidade_bncc || ''}</span>
                 </div>
-                
-                <div class="q-enunciado" style="font-size: 11pt; margin-bottom: 10px; line-height: 1.4;">${enunciadoSeguro}</div>
+                <div class="q-text">${enunciado}</div>
         `;
         
         if (q.enunciado.midia) {
-             htmlContent += `<img src="${q.enunciado.midia}" class="image-preview" alt="Imagem da Questão ${numero}" style="margin: 8px auto;">`;
+             htmlContent += `<div style="text-align:center; margin: 6px 0;"><img src="${q.enunciado.midia}" style="max-width: 98%; max-height: 200px; border-radius: 4px;"></div>`;
         }
 
         if (q.tipo_questao === 'Múltipla Escolha') {
-            htmlContent += '<ul class="alternative-list-print" style="list-style: none; padding: 0;">';
+            htmlContent += '<div class="alt-list">';
             q.alternativas.forEach(alt => {
-                const textoAltSeguro = obfuscateText(alt.texto);
-                htmlContent += `
-                    <li style="margin-bottom: 8px;">
-                        <label style="display: flex; align-items: flex-start; font-size: 10.5pt;">
-                            <span style="min-width: 25px; font-weight: bold;">${alt.letra})</span> 
-                            <span style="flex: 1;">${textoAltSeguro}</span>
-                        </label>`;  
-                if (alt.midia) {
-                    htmlContent += `<img src="${alt.midia}" class="image-preview-small" style="margin: 5px 0 5px 25px;">`;
-                }
-                htmlContent += '</li>';
+                const txt = typeof obfuscateText === 'function' ? obfuscateText(alt.texto) : alt.texto;
+                htmlContent += `<div class="alt-item"><span class="alt-letter">${alt.letra})</span><span style="flex:1;">${txt}</span></div>`;
             });
-            htmlContent += '</ul>';
+            htmlContent += '</div>';
         } else {
-            const linhas = q.linhas_discursiva || 4;
-            const minHeight = linhas * 20; // Aproximadamente 20px por linha
-            
-             htmlContent += `<div class="discursiva-answer-space" style="border: 1px solid #eee; min-height: ${minHeight}px; font-size: 9pt; color: #ccc; padding: 5px;">Espaço para resposta</div>`;
+            for (let i = 0; i < (parseInt(q.linhas_discursiva) || 4); i++) {
+                htmlContent += '<div class="writing-line"></div>';
+            }
         }
-        
         htmlContent += `</div>`;
     });
 
-    htmlContent += `</div>`;
+    htmlContent += `</div></div>`;
     return htmlContent;
 }
 
-    function visualizarProvaDetalhe() {
-        if (!selectedExamId) return;
-        const prova = allExams[selectedExamId];
-
-        const printContentEl = document.getElementById('exam-content-print');
-        
-        printContentEl.style.setProperty('--print-col-count', 1);
-
-        printContentEl.innerHTML = gerarHTMLProva(prova);
-
-        document.getElementById('exam-preview').style.display = 'block';
+function visualizarProvaDetalhe() {
+    if (!selectedExamId || !allExams[selectedExamId]) return;
+    const prova = allExams[selectedExamId];
+    const printContentEl = document.getElementById('exam-content-print');
+    if (!printContentEl) return;
+    
+    if (prova.cabecalho && prova.cabecalho.logo) {
+        window.logoBase64Final = prova.cabecalho.logo;
     }
+
+    printContentEl.innerHTML = gerarHTMLProva(prova);
+    document.getElementById('exam-preview').style.display = 'block';
+}
 
     function exportarProva(tipo) {
         if (!selectedExamId) return;
