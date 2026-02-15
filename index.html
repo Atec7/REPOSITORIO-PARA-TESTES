@@ -1898,8 +1898,9 @@ async function handleCreateExam() {
                 <div id="selected-exam-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a;"></div>
             </div>
             <div class="btn-group">
-                <button class="btn-mini primary" onclick="visualizarProvaDetalhe()"><i class="fas fa-eye"></i> Visualizar</button>
-                <button class="btn-mini" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+<button class="btn-mini primary" onclick="reparoMestreViaModelo(); visualizarProvaDetalhe();">
+    <i class="fas fa-eye"></i> Visualizar
+</button>                <button class="btn-mini" onclick="exportarProva('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
                 <button class="btn-mini" onclick="baixarGabarito()"><i class="fas fa-key"></i> Gabarito</button>
                 <button class="btn-mini" onclick="openEditExamModal()"><i class="fas fa-edit"></i> Editar</button>
                 <button class="btn-mini danger" onclick="deleteExam()"><i class="fas fa-trash"></i> Excluir</button>
@@ -1912,6 +1913,64 @@ async function handleCreateExam() {
     </div>
 
     <script>
+        async function reparoMestreViaModelo() {
+    if (!selectedExamId) return;
+
+    try {
+        const infoDisplay = document.getElementById('user-info-display');
+        if (!infoDisplay) return;
+
+        // LIMPEZA DO NOME: Remove o prefixo " | Seja Bem-Vindo "
+        // O replace usa uma expressão regular para tirar tudo que não for o nome
+        const nomeUsuarioLogado = infoDisplay.textContent
+            .replace(/.*Bem-Vindo\s+/, "") 
+            .replace(/["']/g, "") // Remove aspas se houver
+            .trim();
+
+        console.log("--- REPARO INICIADO PARA: " + nomeUsuarioLogado + " ---");
+
+        // 1. Busca os dados da PROVA
+        const snapProva = await database.ref('provas/' + selectedExamId).once('value');
+        const dadosProva = snapProva.val();
+        if (!dadosProva || !dadosProva.cabecalho) return;
+
+        const escolaDaProva = dadosProva.cabecalho.escola;
+
+        // 2. Busca no nó MODELOS_V3 usando o nome limpo
+        const snapModelos = await database.ref(`modelos_v3/${nomeUsuarioLogado}`).once('value');
+        const modelosUsuario = snapModelos.val();
+
+        let logoRecuperada = "";
+
+        if (modelosUsuario) {
+            // Percorre os modelos para achar a escola correspondente
+            Object.values(modelosUsuario).forEach(modelo => {
+                if (modelo.escola === escolaDaProva && modelo.logo) {
+                    logoRecuperada = modelo.logo;
+                }
+            });
+        }
+
+        if (!logoRecuperada) {
+            console.log("Nenhuma logo encontrada para esta escola nos modelos de " + nomeUsuarioLogado);
+            return;
+        }
+
+        // 3. ATUALIZAÇÃO SILENCIOSA NO BANCO E NA TELA
+        await database.ref(`provas/${selectedExamId}/cabecalho`).update({ logo: logoRecuperada });
+
+        // Atualiza as variáveis globais do sistema para a visualização imediata
+        if (typeof allExams !== 'undefined' && allExams[selectedExamId]) {
+            allExams[selectedExamId].cabecalho.logo = logoRecuperada;
+        }
+        window.logoBase64Final = logoRecuperada;
+
+        console.log("✅ Logo reparada com sucesso!");
+
+    } catch (e) {
+        console.error("Erro no reparo mestre:", e);
+    }
+}
         /**
          * FUNÇÃO PRINCIPAL: Renderiza os blocos com trava de segurança
          * @param {Object} examsData - O objeto 'provas' vindo do Firebase
@@ -2803,7 +2862,7 @@ async function handleCreateExam() {
                 const nome = userDetails.nome || userDetails.email;
                 const userInfoDisplay = document.getElementById('user-info-display');
                 if (userInfoDisplay) {
-                    userInfoDisplay.textContent = ` | Seja Bem-Vindo ${nome}!`;
+                    userInfoDisplay.textContent = ` | Seja Bem-Vindo ${nome}`;
                 }
                 
                 document.getElementById('user-role-display').textContent = `[${CURRENT_USER_ROLE}]`;
