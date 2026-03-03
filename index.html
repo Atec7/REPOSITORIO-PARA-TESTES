@@ -1,386 +1,856 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Sistema Financeiro Avançado</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-    :root{
-      --bg:#f0f2f5; --card:#fff; --accent:#2ecc71; --danger:#e74c3c; --primary:#3498db;
-      --text:#333; --text-muted:#555; --thead:#2c3e50; --stripe:#f2f2f2; --shadow:0 4px 15px rgba(0,0,0,0.1);
-    }
-    /* Dark mode vars */
-    .dark{
-      --bg:#0f141a; --card:#121a22; --accent:#23c36b; --danger:#ef4444; --primary:#3b82f6;
-      --text:#e5e7eb; --text-muted:#9ca3af; --thead:#0b1117; --stripe:#0c1722; --shadow:0 6px 20px rgba(0,0,0,0.35);
-    }
-    *{box-sizing:border-box}
-    body{margin:0; font-family:'Roboto',sans-serif; background:var(--bg); color:var(--text);}
-    
-    /* Overlay de Login */
-    #login-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: linear-gradient(135deg, #0f2027, #2c5364);
-      display: flex; align-items: center; justify-content: center; z-index: 10000;
-    }
-    .login-box {
-      background: #fff; padding: 40px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      width: 90%; max-width: 350px; text-align: center;
-    }
-    .login-box input {
-      width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;
-    }
-    .login-box button {
-      width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; 
-      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;
-    }
-    #app-wrapper { display: none; } /* Esconde tudo até logar */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { 
+            --vba-bg: #d4d0c8; 
+            --vba-blue: #000080; 
+            --vba-shd: #808080;
+            --vba-gold: #ffd700;
+            --vba-green: #228b22;
+            --vba-red: #dc143c;
+        }
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-size: 11px; 
+        }
+        body { 
+            background: linear-gradient(135deg, #3a6ea5 0%, #2a5a8a 100%); 
+            margin: 0; 
+            padding: 8px; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        .window { 
+            background: var(--vba-bg); 
+            border: 3px outset #c0c0c0; 
+            border-radius: 8px;
+            height: 100%; 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .title-bar { 
+            background: linear-gradient(90deg, var(--vba-blue), #1084d0, #1e90ff); 
+            color: white; 
+            padding: 6px 12px; 
+            font-weight: 600; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .main { 
+            display: flex; 
+            flex: 1; 
+            overflow: hidden; 
+            padding: 8px; 
+            gap: 6px; 
+        }
+        .sidebar { 
+            width: 200px; 
+            border: 2px inset #c0c0c0; 
+            padding: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px;
+            background: linear-gradient(to bottom, #f0f0f0, #e8e8e8);
+            border-radius: 6px;
+        }
+        .viewport { 
+            flex: 1; 
+            background: white; 
+            border: 2px inset #c0c0c0; 
+            overflow-y: auto; 
+            padding: 15px; 
+            position: relative;
+            border-radius: 6px;
+        }
 
-    header{
-      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
-      color:#fff; padding:16px 20px; display:flex; gap:12px; align-items:center; justify-content:space-between;
-    }
-    header h1{font-size:22px; margin:0; font-weight:700;}
-    .header-actions{display:flex; flex-wrap:wrap; gap:8px}
-    .btn{
-      background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow);
-      display:inline-flex; align-items:center; gap:8px; font-weight:700
-    }
-    .btn.secondary{ background:#64748b }
-    .btn.accent{ background:var(--accent) }
-    .btn.danger{ background:var(--danger) }
-    .btn:hover{ filter:brightness(.95) }
-    .container{ max-width:1200px; margin:auto; padding:20px; }
+        .btn { 
+            background: linear-gradient(145deg, #e8e8e8, var(--vba-bg)); 
+            border: 2px outset #c0c0c0; 
+            padding: 8px 12px; 
+            cursor: pointer; 
+            text-align: center; 
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .btn:hover { 
+            background: linear-gradient(145deg, #f5f5f5, #d8d8d8);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn:active { 
+            border: 2px inset #c0c0c0; 
+            transform: translateY(0);
+        }
+        .btn-active { 
+            background: linear-gradient(145deg, #ffd700, #ffed4e) !important; 
+            border: 2px outset var(--vba-gold) !important; 
+            font-weight: bold; 
+            color: #000 !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        fieldset { 
+            border: 2px groove var(--vba-shd); 
+            margin-bottom: 12px; 
+            padding: 12px; 
+            background: linear-gradient(to bottom, #fdfdfd, #f5f5f5); 
+            border-radius: 6px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        legend { 
+            font-weight: 600; 
+            color: var(--vba-blue); 
+            padding: 0 8px;
+            background: white;
+            border-radius: 4px;
+        }
+        input, select, textarea { 
+            border: 2px inset #c0c0c0; 
+            padding: 6px; 
+            width: 100%; 
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--vba-blue);
+            box-shadow: 0 0 0 2px rgba(0,0,128,0.2);
+            background: white;
+        }
 
-    .dashboard{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:20px; }
-    .card{ background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:18px; transition: transform .2s; text-align:center; }
-    .card:hover{ transform: translateY(-4px) }
-    .card h3{ margin:0 0 8px; font-size:14px; color:var(--text-muted) }
-    .card p{ font-size:22px; font-weight:800; margin:0 }
+        /* KPIs */
+        .kpi-row { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+        }
+        .kpi-card { 
+            flex: 1; 
+            background: linear-gradient(145deg, #ffffff, #f8f8f8); 
+            border: 2px outset #c0c0c0; 
+            padding: 12px; 
+            text-align: center; 
+            border-left: 6px solid var(--vba-blue); 
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .kpi-val { 
+            font-size: 20px; 
+            font-weight: 700; 
+            display: block; 
+            color: var(--vba-blue); 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 4px;
+        }
 
-    .transaction-form{
-      background:var(--card); padding:16px; border-radius:14px; margin-bottom:12px; box-shadow:var(--shadow);
-      display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      align-items:end;
-    }
-    .transaction-form input, .transaction-form select, .transaction-form button{
-      padding:10px; border-radius:10px; border:1px solid #2b2f3680; background:transparent; color:var(--text)
-    }
-    .transaction-form input[type="number"]{ text-align:right }
-    .transaction-form button{ background:var(--accent); color:white; border:none; cursor:pointer; transition:.2s; font-weight:700 }
-    .transaction-form button:hover{ filter:brightness(.95) }
+        /* TABELA RESUMO (BLOCO 3) */
+        .resumo-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .resumo-table th { 
+            background: linear-gradient(90deg, #e8e8e8, #d8d8d8); 
+            border: 1px solid var(--vba-shd); 
+            padding: 8px 4px; 
+            font-weight: 600;
+            color: var(--vba-blue);
+            position: sticky; top: 0;
+        }
+        .resumo-table td { 
+            border: 1px solid #ddd; 
+            height: 70px; 
+            vertical-align: top; 
+            padding: 4px; 
+            background: #fff; 
+            transition: background 0.2s ease;
+        }
+        .resumo-table tr:hover td {
+            background: #f8f9ff;
+        }
+        
+        .prog-card { 
+            background: linear-gradient(145deg, #ffffe0, #fff8c9); 
+            border: 2px outset #c0c0c0; 
+            padding: 6px; 
+            margin-bottom: 4px; 
+            cursor: pointer; 
+            font-size: 10px; 
+            position: relative; 
+            border-left: 5px solid var(--vba-blue);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .prog-card:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .prog-card:hover .info-hover { 
+            display: block; 
+        }
+        .info-hover { 
+            display: none; 
+            position: absolute; 
+            z-index: 100; 
+            left: 105%; 
+            top: -10px; 
+            width: 320px; 
+            background: linear-gradient(145deg, #ffffe1, #fff8d1); 
+            border: 2px outset #c0c0c0; 
+            padding: 12px; 
+            border-radius: 6px;
+            box-shadow: 6px 6px 20px rgba(0,0,0,0.4); 
+            color: #000; 
+            font-size: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
 
-    .row-actions{ display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 6px }
-    .filters{ display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 18px }
-    .filters input, .filters select, .filters button{ padding:8px; border-radius:10px; border:1px solid #2b2f3680; background:transparent; color:var(--text) }
-    .filters .grow{ flex:1 1 220px }
+        /* PROGRESS BAR */
+        .progress-box { 
+            height: 20px; 
+            border: 2px inset #c0c0c0; 
+            background: linear-gradient(to right, #f0f0f0, #e0e0e0); 
+            margin: 12px 0; 
+            display: none; 
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--vba-green), #32cd32); 
+            width: 0%; 
+            transition: width 0.3s ease; 
+            border-radius: 10px 0 0 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        .progress-text { 
+            position: absolute; 
+            width: 100%; 
+            text-align: center; 
+            top: 2px; 
+            font-weight: 600; 
+            font-size: 11px; 
+            color: #000;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+        }
 
-    /* Melhora Responsividade Tabela */
-    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table{ width:100%; border-collapse:collapse; background:var(--card); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:16px }
-    th, td{ padding:12px; text-align:left; min-width: 100px; }
-    th{ background:var(--thead); color:white; font-weight:800 }
-    tr:nth-child(even){ background:var(--stripe) }
-    .income{ color:#22c55e; font-weight:800 }
-    .expense{ color:#ef4444; font-weight:800 }
-    .status-select{ border:none; font-weight:700; width:100%; background:transparent; cursor:pointer; color:inherit }
-    .export-btn, #toggle-charts{ background:var(--primary); color:white; padding:10px 15px; border:none; border-radius:10px; cursor:pointer; margin-bottom:12px; box-shadow:var(--shadow) }
-    .export-btn:hover, #toggle-charts:hover{ filter:brightness(.93) }
-    .charts-row{ display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-bottom:24px }
-    .chart-box{ background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:14px; flex:1 1 360px; min-width:300px; max-width:520px }
-    .chart-box canvas{ width:100% !important; height:300px !important }
-    #monthly-chart{ max-height:320px !important; margin-bottom:20px; width:100% !important }
-    tfoot td{ font-weight:800 }
+        /* MODAL GESTÃO (BLOCO 2 - EDIÇÃO) */
+        #modal-gestao { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 3000; 
+            display: none; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        .modal-body { 
+            background: linear-gradient(to bottom, var(--vba-bg), #c8c5bd); 
+            width: 700px; 
+            border: 3px outset #c0c0c0; 
+            padding: 20px; 
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
 
-    .anual { background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:44px; flex:1 1 360px; min-width:100%; max-width:100%; font-size: 10px; }
-    
-    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:800 }
-    .pill.pago{ background:#16a34a1a; color:#22c55e; border:1px solid #22c55e50 }
-    .pill.pendente{ background:#f59e0b1a; color:#f59e0b; border:1px solid #f59e0b50 }
-    .pill.atrasado{ background:#ef44441a; color:#ef4444; border:1px solid #ef444450 }
+        #login-scr { 
+            position: fixed; 
+            inset: 0; 
+            background: linear-gradient(135deg, #3a6ea5, #2a5a8a); 
+            z-index: 4000; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .hidden { 
+            display: none !important; 
+        }
 
-    .hint{ font-size:12px; color:var(--text-muted); margin-top:-6px; margin-bottom:8px }
-    
-    @media (max-width:700px){ 
-      .transaction-form{ grid-template-columns:1fr 1fr } 
-      header h1 { font-size: 16px; }
-      .btn { padding: 6px 8px; font-size: 12px; }
-    }
-  </style>
+        h3 {
+            color: var(--vba-blue);
+            font-size: 16px;
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(145deg, #c0c0c0, #a8a8a8);
+            border-radius: 6px;
+            border: 2px solid #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(145deg, #b8b8b8, #909090);
+        }
+    </style>
 </head>
 <body>
 
-<div id="login-overlay">
-  <div class="login-box">
-    <h2 style="color: #333">Acesso ARNALDO</h2>
-    <input type="text" id="user_login" placeholder="Usuário">
-    <input type="password" id="user_pass" placeholder="Senha">
-    <button onclick="realizarLogin()">Entrar</button>
-  </div>
+<div id="login-scr">
+    <div class="modal-body" id="box-login" style="width:360px">
+        <h3>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima- LOGIN</h3>
+        Email: <input type="email" id="l-user" value="arnaldo@sgo.com"><br><br>
+        Senha: <input type="password" id="l-pass" value="123"><br><br>
+        <button class="btn" style="width:100%; font-size:12px; font-weight:bold" onclick="app.login()">🚀 ENTRAR</button>
+        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #d4fcd4, #c8f4c8)" onclick="app.tabLogin('box-req')">📩 SOLICITAR ACESSO</button>
+    </div>
+    <div class="modal-body hidden" id="box-req" style="width:380px">
+        <h3>SOLICITAR ACESSO</h3>
+        <input type="text" id="r-nome" placeholder="Nome Completo">
+        <input type="text" id="r-setor" placeholder="Setor">
+        <input type="text" id="r-cargo" placeholder="Cargo">
+        <input type="email" id="r-email" placeholder="Email Corporativo">
+        <input type="password" id="r-pass" placeholder="Senha (mín. 6 caracteres)">
+        <button class="btn" style="width:100%; background:linear-gradient(145deg, #d4fcd4, #c8f4c8); font-weight:bold" onclick="app.requestAccess()">📤 ENVIAR SOLICITAÇÃO</button>
+        <button class="btn" style="width:100%; margin-top:8px" onclick="app.tabLogin('box-login')">🔙 VOLTAR</button>
+    </div>
 </div>
 
-<div id="app-wrapper">
-  <header>
-    <h1>Sistema de Controle Financeiro</h1>
-    <div class="header-actions">
-      <button id="theme-toggle" class="btn secondary" title="Alternar tema (Dark/Light)">🌗 Tema</button>
-      <button id="toggle-charts" class="btn secondary">📈 Mostrar Gráficos</button>
-      <button id="quick-report" class="btn accent">🧾 Relatório Todos os Registros (PDF)</button>
-      <button id="open-access" class="btn accent">🔑 Acessos</button>
-      <button id="open-comprovantes">Abrir Comprovantes</button>
+<div id="modal-gestao">
+    <div class="modal-body">
+        <div class="title-bar" style="margin-bottom:15px"><span>📋 DETALHES DA PROGRAMAÇÃO</span><span onclick="app.closeModal()" style="cursor:pointer; font-weight:bold; padding:4px" title="Fechar">[✕]</span></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+            <fieldset><legend>📊 Dados do Projeto</legend>
+                Projeto: <input type="text" id="m-proj" readonly style="background:#e8e8e8; font-weight:bold">
+                SI: <input type="text" id="m-si">
+                Data: <input type="text" id="m-data" readonly style="background:#e8e8e8">
+                Status Projeto: <select id="m-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option><option>SUSPENSO</option></select>
+            </fieldset>
+            <fieldset><legend>⚙️ Apontamento de Obra</legend>
+                Status Programação: <select id="m-st-prog"><option>PROGRAMADO</option><option>EXECUTANDO</option><option>CONCLUÍDO</option></select>
+                Etapa (Cor): <select id="m-cor"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
+            </fieldset>
+        </div>
+        <fieldset><legend>📝 Observações de Campo</legend>
+            <textarea id="m-obs" style="height:90px; font-family:monospace"></textarea>
+        </fieldset>
+        <button class="btn" style="width:100%; background:linear-gradient(145deg, #32cd32, #228b22); color:white; font-weight:bold; font-size:13px" onclick="app.updateProj()">💾 SALVAR ATUALIZAÇÃO</button>
     </div>
-  </header>
-
-  <div class="container">
-    <div class="dashboard">
-      <div class="card"><h3>Saldo Atual</h3><p id="balance">R$ 0,00</p></div>
-      <div class="card"><h3>Total Receitas</h3><p id="total-income">R$ 0,00</p></div>
-      <div class="card"><h3>Total Despesas</h3><p id="total-expense">R$ 0,00</p></div>
-      <div class="card"><h3>Despesas Pendentes</h3><p id="pending-count">0</p></div>
-    </div>
-
-    <div class="transaction-form" id="tx-form">
-      <div><input type="text" id="description" placeholder="Descrição da Dívida" required /><div class="hint"></div></div>
-      <div><input type="number" id="amount" placeholder="Valor da Dívida (R$)" required step="0.01" min="0" /><div class="hint"></div></div>
-      <div><select id="type"><option value="income">Receita</option><option value="expense">Despesa</option></select><div class="hint"></div></div>
-      <div><select id="category"><option value="salario">Salário</option><option value="alimentacao">Alimentação</option><option value="transporte">Transporte</option><option value="Farmácia">Farmácia</option><option value="Empréstimo">Empréstimo</option><option value="lazer">Lazer</option><option value="outros">Outros</option></select><div class="hint"></div></div>
-      <div><input type="date" id="date" required /><div class="hint"></div></div>
-      <div><input type="number" id="installments" placeholder="QTD Parcelas (opicional)" min="1" /><div class="hint"></div></div>
-      <div><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="is-recurring" /> Tornar mensal</label><div class="hint"></div></div>
-      <button id="add-transaction">Registrar</button>
-    </div>
-
-    <div class="row-actions">
-      <button class="btn" id="export-csv">Exportar CSV</button>
-      <button class="btn" id="export-xlsx">Exportar Excel</button>
-      <button class="btn" id="export-pdf">Exportar PDF (Filtrado)</button>
-      <button class="btn secondary" id="backup-local">Backup Local</button>
-      <button class="btn secondary" id="restore-local">Restaurar Backup</button>
-      <button class="btn danger" id="clear-all">Limpar Tudo</button>
-    </div>
-
-    <div class="filters">
-      <input type="date" id="filter-start" />
-      <input type="date" id="filter-end" />
-      <select id="filter-type"><option value="all">Todos</option><option value="income">Receitas</option><option value="expense">Despesas</option></select>
-      <select id="filter-category"><option value="all">Todas Categorias</option><option value="salario">Salário</option><option value="alimentacao">Alimentação</option><option value="transporte">Transporte</option><option value="Farmácia">Farmácia</option><option value="Empréstimo">Empréstimo</option><option value="lazer">Lazer</option><option value="outros">Outros</option></select>
-      <input id="search" class="grow" type="search" placeholder="Buscar por descrição (tempo real)..." />
-      <button id="apply-filters">Filtrar</button>
-    </div>
-
-    <div id="charts-container" class="charts-row" style="display:none;">
-      <div class="chart-box"><canvas id="chart"></canvas></div>
-      <div class="chart-box"><canvas id="status-chart"></canvas></div>
-      <div class="chart-box"><canvas id="category-chart"></canvas></div>
-    </div>
-
-    <div class="anual" style="margin-bottom:18px;"><canvas id="monthly-chart"></canvas></div>
-
-    <div class="table-responsive">
-      <table>
-        <thead><tr><th>Descrição</th><th>Valor</th><th>Tipo</th><th>Categoria</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody id="transactions-table"></tbody>
-        <tfoot><tr><td colspan="7" id="table-summary">0 itens • Receitas: R$ 0,00 • Despesas: R$ 0,00 • Saldo (visão): R$ 0,00</td></tr></tfoot>
-      </table>
-    </div>
-  </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+<div class="window">
+    <div class="title-bar">
+        <span>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima</span>
+        <span id="user-display" style="font-size:10px">---</span>
+    </div>
+    <div class="main">
+        <div class="sidebar">
+            <button class="btn btn-active" onclick="app.tab('v-resumo', this)">RESUMO PROGRAMAÇÃO</button>
+            <button class="btn" onclick="app.tab('v-cad', this)">CADASTRO PROGRAMAÇÃO</button>
+            <button class="btn" onclick="app.tab('v-relat', this)">RELATÓRIO PROGRAMAÇÃO</button>
+            <button class="btn" id="btn-perf" onclick="app.tab('v-perf', this)">⚙️Informação e Performance</button>
+            <div style="flex:1"></div>
+            <button class="btn" style="background:linear-gradient(145deg, #ff6b6b, #ee5a52); color:white; font-weight:bold" onclick="location.reload()">🚪 SAIR</button>
+        </div>
+        <div class="viewport">
+            
+            <div id="v-resumo">
+                <div class="kpi-row" id="kpi-area"></div>
+                <fieldset>
+                    <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap">
+                        <div style="flex:1; min-width:140px">👥 Equipe: <select id="f-eq"><option value="">TODAS</option></select></div>
+                        <div style="flex:1; min-width:140px">👷 Supervisor: <select id="f-sup"><option value="">TODOS</option></select></div>
+                        <div style="flex:1; min-width:140px">📅 Início: <input type="date" id="f-ini"></div>
+                        <div style="flex:1; min-width:140px">📅 Fim: <input type="date" id="f-fim"></div>
+                        <button class="btn" style="white-space:nowrap; padding:8px 16px" onclick="app.renderResumo()">🔍 FILTRAR</button>
+                    </div>
+                </fieldset>
+                <div id="resumo-render" style="overflow:auto; max-height:70vh"></div>
+            </div>
+
+            <div id="v-cad" class="hidden">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+                    <fieldset><legend>📋 0. Cabeçalho e 3. Projeto</legend>
+                        SETOR RESPONSÁVEL (0): <select id="p-setor"></select>
+                        Nº DA SI (0.1): <input type="number" id="p-si">
+                        TIPO PROGRAMAÇÃO (0.2): <select id="p-tipo">
+                            <option>PROXIMIDADE MT</option><option>PROXIMIDADE BT</option>
+                            <option>DESLIGAMENTO MT</option><option>DESLIGAMENTO BT</option>
+                            <option>PROXIMIDADE + DESLIGAMENTO</option>
+                        </select>
+                        Nº PROJETO (3): <input type="text" id="p-projeto" style="font-weight:bold; color:var(--vba-red); background:#ffe6e6">
+                        STATUS PROJETO (3.1): <select id="p-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option></select>
+                        LOCALIDADE (4): <input type="text" id="p-local">
+                    </fieldset>
+                    <fieldset><legend>👥 1. Supervisor, 2. Equipes e 7. Datas</legend>
+                        SUPERVISOR RESP. (1): <select id="p-super"></select>
+                        EQUIPE (2 - Múltipla): <select id="p-eqs" multiple style="height:85px"></select>
+                        DATA EXECUÇÃO (7): <input type="date" id="p-dt-in"> <button class="btn" style="width:auto; padding:6px 12px" onclick="app.addDt()">📅 ADICIONAR DATA</button>
+                        <div id="p-dt-list" style="color:var(--vba-blue); margin-top:8px; font-weight:bold; padding:8px; background:#e6f3ff; border-radius:4px; border-left:4px solid var(--vba-blue)"></div>
+                    </fieldset>
+                </div>
+                <fieldset><legend>💰 5. Atividades (Soma Automática)</legend>
+                    Pesquisar (Cod/Desc): <input type="text" onkeyup="app.filterServ(this.value)" placeholder="🔍 Filtrar serviços..." style="margin-bottom:8px">
+                    <select id="p-servs" multiple style="height:130px; margin-top:5px" onchange="app.calc()"></select>
+                    <div style="text-align:right; font-size:15px; margin-top:12px; padding:12px; background:linear-gradient(145deg, #e8f5e8, #d4f4d4); border-radius:6px; border-left:5px solid var(--vba-green)">
+                        VALOR DO PROJETO (5.2): <b id="p-total" style="color:var(--vba-green); font-size:18px">R$ 0,00</b>
+                    </div>
+                </fieldset>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px">
+                    <fieldset><legend>🎯 8. Status e 9. Aviso</legend>
+                        ETAPA (6 - Cor): <select id="p-etapa"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
+                        STATUS PROG (8): <select id="p-st-prog"><option>PROGRAMADO</option><option>EXECUTADO</option></select>
+                        AVISO SI/NO (9): <select id="p-aviso-bool"><option>NÃO</option><option>SIM</option></select>
+                        AVISO STATUS: <select id="p-aviso-st"><option>NÃO FEITO</option><option>FEITO</option></select>
+                    </fieldset>
+                    <div class="progress-box" id="p-loader"><div class="progress-bar" id="p-bar"></div><div class="progress-text" id="p-txt">0%</div></div>
+                    <button class="btn" id="btn-save-main" style="height:100%; background:linear-gradient(145deg, #32cd32, #228b22); color:white; font-weight:bold; font-size:14px" onclick="app.saveProg()">💾 10. GRAVAR E LIMPAR CAMPOS</button>
+                </div>
+            </div>
+
+            <div id="v-perf" class="hidden">
+                <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:15px">
+                    <fieldset><legend>👤 Informação e Performance: Usuários</legend>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
+                            <input type="text" id="u-nome" placeholder="Nome Completo">
+                            <input type="email" id="u-email" placeholder="Email Corporativo">
+                            <input type="password" id="u-pass" placeholder="Senha Segura">
+                            <select id="u-nivel"><option>OPERADOR</option><option>ADMINISTRADOR(VISUALIZAÇÃO)</option><option>Informação e Performance</option></select>
+                        </div>
+                        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #4169e1, #1e90ff); color:white" onclick="app.saveUser()">👤 SALVAR USUÁRIO</button>
+                        <div id="user-grid" style="margin-top:15px; max-height:300px; overflow:auto"></div>
+                    </fieldset>
+                    <fieldset><legend>📊 Cadastro de Serviços (Massa)</legend>
+                        <textarea id="csv-in" style="width:100%; height:90px; font-family:monospace; font-size:10px" placeholder="COD;DESC;VALOR&#10;ex: 001;Manutenção MT;1500,00"></textarea>
+                        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #ff8c00, #ff7f50)" onclick="app.importCSV()">⚡ PROCESSAR CSV</button>
+                    </fieldset>
+                </div>
+                <fieldset style="margin-top:15px"><legend>🏗️ Cadastros Base (Setores, Equipes, Supervisores)</legend>
+                    Nome: <input type="text" id="c-nome" style="width:250px">
+                    Tipo: <select id="c-tipo" style="width:180px">
+                        <option value="setores">🏢 SETOR</option><option value="equipes">👥 EQUIPE</option><option value="supervisores">👷 SUPERVISOR</option>
+                    </select>
+                    <button class="btn" style="width:auto; margin-left:10px; background:linear-gradient(145deg, #228b22, #32cd32); color:white" onclick="app.saveBase()">➕ ADICIONAR</button>
+                </fieldset>
+            </div>
+
+            <div id="v-relat" class="hidden">
+                <fieldset><legend>📈 Relatório Mensal (DD/MM/AAAA)</legend>
+                    Mês Ref: <input type="month" id="r-mes" onchange="app.renderRelat()" style="width:200px; display:inline-block">
+                    <button class="btn" style="margin-left:15px" onclick="app.renderRelat()">🔄 ATUALIZAR</button>
+                </fieldset>
+                <div id="relat-render" style="overflow:auto; max-height:70vh"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <script>
-/* ===================== LOGICA DE LOGIN ===================== */
-function realizarLogin() {
-  const user = document.getElementById('user_login').value;
-  const pass = document.getElementById('user_pass').value;
-  if(user === "ARNALDO" && pass === "61892903377") {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = 'block';
-    loadTransactions(); // Carrega após o login
-    setTimeout(applyRecurrences, 600);
-  } else {
-    alert("Usuário ou Senha inválidos!");
-  }
-}
-
-/* ===================== CONFIG FIREBASE (IGUAL) ===================== */
+// CONFIG FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyDXDB6jbRy3o1eXcdXqmd8zrplDk1IezqM",
-  authDomain: "sistema-financeiro-51295.firebaseapp.com",
-  projectId: "sistema-financeiro-51295",
-  storageBucket: "sistema-financeiro-51295.appspot.com",
-  messagingSenderId: "340721821688",
-  appId: "1:340721821688:web:77485712a056405f5f180d",
-  measurementId: "G-X30NBWCY92",
-  databaseURL: "https://sistema-financeiro-51295-default-rtdb.firebaseio.com"
+    apiKey: "AIzaSyDXDB6jbRy3o1eXcdXqmd8zrplDk1IezqM",
+    authDomain: "sistema-financeiro-51295.firebaseapp.com",
+    projectId: "sistema-financeiro-51295",
+    databaseURL: "https://sistema-financeiro-51295-default-rtdb.firebaseio.com"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-let useFirebase = false; let db = null;
-try { firebase.initializeApp(firebaseConfig); db = firebase.database(); useFirebase = true; console.log('Firebase conectado'); } catch (e) { console.warn('Firebase off'); }
+const app = {
+    user: null, tempDts: [], servCatalog: [], currentEditKey: null,
 
-/* ===================== ELEMENTOS UI ===================== */
-const balanceEl = document.getElementById('balance');
-const totalIncomeEl = document.getElementById('total-income');
-const totalExpenseEl = document.getElementById('total-expense');
-const pendingCountEl = document.getElementById('pending-count');
-const transactionsTable = document.getElementById('transactions-table');
-const addTransactionBtn = document.getElementById('add-transaction');
-const exportCsvBtn = document.getElementById('export-csv');
-const exportXlsxBtn = document.getElementById('export-xlsx');
-const exportPdfBtn = document.getElementById('export-pdf');
-const quickReportBtn = document.getElementById('quick-report');
-const toggleChartsBtn = document.getElementById('toggle-charts');
-const chartsContainer = document.getElementById('charts-container');
-const filterStart = document.getElementById('filter-start');
-const filterEnd = document.getElementById('filter-end');
-const filterType = document.getElementById('filter-type');
-const filterCategory = document.getElementById('filter-category');
-const searchInput = document.getElementById('search');
-const themeToggle = document.getElementById('theme-toggle');
-const tableSummary = document.getElementById('table-summary');
-const backupBtn = document.getElementById('backup-local');
-const restoreBtn = document.getElementById('restore-local');
-const clearAllBtn = document.getElementById('clear-all');
+    tabLogin: (id) => { 
+        document.getElementById('box-login').classList.add('hidden');
+        document.getElementById('box-req').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
+    },
 
-let transactions = []; let editMode = false; let editKey = null;
+    login: function() {
+        const u = document.getElementById('l-user').value;
+        const p = document.getElementById('l-pass').value;
+        if(u === 'arnaldo@sgo.com' && p === '123') {
+            this.user = {nome: 'Arnaldo', nivel: 'Informação e Performance'};
+            this.loginOk(); return;
+        }
+        db.ref('users').orderByChild('email').equalTo(u).once('value', s => {
+            const data = s.val();
+            if(!data) return alert("❌ Acesso Negado.");
+            const k = Object.keys(data)[0];
+            const user = data[k];
+            if(user.pass === p && user.status === 'APROVADO') { 
+                this.user = user; 
+                this.loginOk(); 
+            } else alert("❌ Erro de Login/Aprovação.");
+        });
+    },
 
-/* ===================== UTILITÁRIOS (IGUAL) ===================== */
-function formatCurrency(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0); }
-function formatDateBR(dStr) { if (!dStr) return ""; const [y, m, d] = dStr.split("-"); return `${d}/${m}/${y}`; }
-function addMonths(dStr, n) { if (!dStr) return ""; const [y, m, d] = dStr.split("-").map(Number); const newDate = new Date(y, m - 1 + n, d); return `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}-${String(newDate.getDate()).padStart(2, "0")}`; }
-function getStatus(t) { if (t.type === 'income') return 'Pago'; if (t.status) return t.status; const today = new Date().toISOString().split('T')[0]; return t.date < today ? 'Atrasado' : 'Pendente'; }
-function toast(m){ const el = document.createElement('div'); el.textContent = m; el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999;font-weight:800'; document.body.appendChild(el); setTimeout(()=> el.remove(), 2200); }
+    loginOk: function() {
+        document.getElementById('login-scr').classList.add('hidden');
+        document.getElementById('user-display').innerText = `${this.user.nome} [${this.user.nivel}]`;
+        if(this.user.nivel !== 'Informação e Performance') document.getElementById('btn-perf').classList.add('hidden');
+        this.init();
+    },
 
-/* ===================== PERSISTÊNCIA (IGUAL) ===================== */
-function loadTransactions() {
-  if (useFirebase && db) {
-    db.ref('transactions').on('value', snapshot => {
-      const val = snapshot.val();
-      transactions = val ? Object.entries(val).map(([k, v]) => ({ _key: k, ...v })) : [];
-      refreshAll();
-    });
-  } else { loadFromLocal(); }
-}
-function loadFromLocal() { transactions = JSON.parse(localStorage.getItem('transactions_backup') || '[]'); refreshAll(); }
-function saveLocal(){ localStorage.setItem('transactions_backup', JSON.stringify(transactions)); }
+    requestAccess: function() {
+        const d = { 
+            nome: document.getElementById('r-nome').value, 
+            email: document.getElementById('r-email').value, 
+            setor: document.getElementById('r-setor').value, 
+            cargo: document.getElementById('r-cargo').value,
+            pass: document.getElementById('r-pass').value, 
+            status: 'PENDENTE', 
+            nivel: 'OPERADOR' 
+        };
+        db.ref('users').push(d).then(() => { 
+            alert("✅ Solicitação enviada com sucesso! Aguarde aprovação."); 
+            this.tabLogin('box-login'); 
+        });
+    },
 
-/* ===================== CRUD (IGUAL) ===================== */
-function saveTransaction(data) {
-  if (useFirebase && db) { if (editMode && editKey) { db.ref(`transactions/${editKey}`).update(data); } else { db.ref('transactions').push(data); } }
-  else { if (editMode && editKey) { const idx = transactions.findIndex(t => t._key === editKey); if (idx >= 0) transactions[idx] = { ...transactions[idx], ...data }; } else { data._key = String(Date.now()); transactions.push(data); } saveLocal(); }
-  resetForm(); refreshAll();
-}
-function deleteTransaction(key) { if (!confirm('Confirmar exclusão?')) return; if (useFirebase && db) { db.ref(`transactions/${key}`).remove(); } else { transactions = transactions.filter(t => t._key !== key); saveLocal(); refreshAll(); } }
-function updateStatus(key, status) { if (useFirebase && db) { db.ref(`transactions/${key}`).update({ status }); } else { const trans = transactions.find(t => t._key === key); if (trans) trans.status = status; saveLocal(); refreshAll(); } }
-function editTransaction(key) {
-  const t = transactions.find(t => t._key === key); if (!t) return;
-  document.getElementById('description').value = t.description; document.getElementById('amount').value = t.amount; document.getElementById('type').value = t.type; document.getElementById('category').value = t.category; document.getElementById('date').value = t.date; document.getElementById('is-recurring').checked = !!t.isRecurring;
-  editMode = true; editKey = key; addTransactionBtn.textContent = 'Atualizar'; toast('Modo edição ativo');
-}
+    init: function() {
+        const hoje = new Date();
+        const d = hoje.getDay();
+        const diff = hoje.getDate() - d + (d === 0 ? -6 : 0);
+        document.getElementById('f-ini').value = new Date(new Date().setDate(diff)).toISOString().split('T')[0];
+        document.getElementById('f-fim').value = new Date(new Date().setDate(diff + 6)).toISOString().split('T')[0];
+        document.getElementById('r-mes').value = hoje.toISOString().slice(0, 7);
 
-/* ===================== RENDERIZAÇÃO (IGUAL) ===================== */
-function renderTable(data = transactions) {
-  transactionsTable.innerHTML = '';
-  data.forEach(t => {
-    const tr = document.createElement('tr');
-    const status = getStatus(t);
-    const statusHtml = (t.type === 'expense') ? `<select class="status-select" onchange="updateStatus('${t._key}', this.value)"><option value="Pendente" ${status==='Pendente'?'selected':''}>Pendente</option><option value="Pago" ${status==='Pago'?'selected':''}>Pago</option><option value="Atrasado" ${status==='Atrasado'?'selected':''}>Atrasado</option></select>` : `<span class="pill pago">Pago</span>`;
-    tr.innerHTML = `<td>${t.description}${t.installmentInfo ? ` <span class="pill secondary">${t.installmentInfo}</span>`:''}</td><td class="${t.type==='income'?'income':'expense'}">${formatCurrency(t.amount)}</td><td>${t.type}</td><td>${t.category}</td><td>${formatDateBR(t.date)}</td><td>${statusHtml}</td><td><button class="btn secondary" onclick="editTransaction('${t._key}')">Editar</button><button class="btn danger" onclick="deleteTransaction('${t._key}')">Excluir</button></td>`;
-    transactionsTable.appendChild(tr);
-  });
-}
-function updateDashboard(data = transactions) {
-  const inc = data.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-  const exp = data.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-  balanceEl.textContent = formatCurrency(inc - exp); totalIncomeEl.textContent = formatCurrency(inc); totalExpenseEl.textContent = formatCurrency(exp); pendingCountEl.textContent = data.filter(t => t.type==='expense' && ['Pendente','Atrasado'].includes(getStatus(t))).length;
-  tableSummary.textContent = `${data.length} itens • Saldo: ${formatCurrency(inc - exp)}`;
-}
+        this.sync('setores', 'p-setor');
+        this.sync('supervisores', 'p-super', 'f-sup');
+        this.sync('equipes', 'p-eqs', 'f-eq');
+        
+        db.ref('servicos').on('value', s => { 
+            this.servCatalog = Object.values(s.val()||{});
+            const sel = document.getElementById('p-servs'); 
+            sel.innerHTML = "";
+            this.servCatalog.forEach(x => sel.add(new Option(`${x.cod} - ${x.desc}`, x.cod)));
+        });
+        this.loadUsers();
+        this.renderResumo();
+    },
 
-/* ===================== FILTROS (IGUAL) ===================== */
-function applyFilters() {
-  let filtered = transactions.slice();
-  const start = filterStart.value, end = filterEnd.value, type = filterType.value, cat = filterCategory.value, q = searchInput.value.toLowerCase();
-  if (start) filtered = filtered.filter(t => t.date >= start); if (end) filtered = filtered.filter(t => t.date <= end);
-  if (type !== 'all') filtered = filtered.filter(t => t.type === type); if (cat !== 'all') filtered = filtered.filter(t => t.category === cat);
-  if (q) filtered = filtered.filter(t => t.description.toLowerCase().includes(q));
-  renderTable(filtered); updateDashboard(filtered); 
-  if (chartsContainer.style.display !== 'none') { updateCharts(filtered); updateMonthlyChart(filtered); }
-  return filtered;
-}
+    sync: function(path, ...ids) {
+        db.ref(path).on('value', s => {
+            const data = Object.values(s.val()||{}).sort();
+            ids.forEach(id => {
+                const el = document.getElementById(id); 
+                if(!el) return;
+                el.innerHTML = id.startsWith('f-') ? "<option value=''>TODAS</option>" : "";
+                data.forEach(v => el.add(new Option(v, v)));
+            });
+        });
+    },
 
-/* ===================== ADICIONAR (IGUAL) ===================== */
-function addTransaction() {
-  const desc = document.getElementById('description').value, amount = parseFloat(document.getElementById('amount').value), type = document.getElementById('type').value, cat = document.getElementById('category').value, date = document.getElementById('date').value, inst = parseInt(document.getElementById('installments').value || '0'), rec = document.getElementById('is-recurring').checked;
-  if (!desc || isNaN(amount) || !date) return alert('Campos vazios!');
-  if (editMode && editKey) { saveTransaction({ description: desc, amount, type, category: cat, date, isRecurring: rec }); return; }
-  if (inst > 1) { for (let i=0; i<inst; i++) { saveTransaction({ description: `${desc} (${i+1}/${inst})`, amount, type, category: cat, date: addMonths(date, i), installmentInfo: `${i+1}/${inst}`, isRecurring: false }); } }
-  else { saveTransaction({ description: desc, amount, type, category: cat, date, isRecurring: rec }); }
-}
+    addDt: function() {
+        const d = document.getElementById('p-dt-in').value;
+        if(d && !this.tempDts.includes(d)) {
+            this.tempDts.push(d);
+            document.getElementById('p-dt-list').innerText = this.tempDts.map(x => x.split('-').reverse().join('/')).join(" | ");
+        }
+    },
 
-function resetForm() { editMode = false; editKey = null; addTransactionBtn.textContent = 'Registrar'; document.getElementById('description').value = ''; document.getElementById('amount').value = ''; }
+    saveProg: function() {
+        if(!this.tempDts.length) return alert("❌ Selecione pelo menos uma data de execução.");
+        const btn = document.getElementById('btn-save-main');
+        const loader = document.getElementById('p-loader');
+        const bar = document.getElementById('p-bar');
+        const txt = document.getElementById('p-txt');
+        
+        btn.disabled = true; 
+        loader.style.display = 'block';
 
-/* ===================== GRÁFICOS (IGUAL) ===================== */
-Chart.register(ChartDataLabels);
-function updateCharts(data) {
-  const inc = data.filter(t=>t.type==='income').reduce((a,b)=>a+Number(b.amount),0), exp = data.filter(t=>t.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
-  const ctx = document.getElementById('chart').getContext('2d');
-  if (window.myChart) window.myChart.destroy();
-  window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Receitas', 'Despesas'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'] }] } });
-}
-function updateMonthlyChart(data) {
-  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const incM = Array(12).fill(0), expM = Array(12).fill(0);
-  data.forEach(t => { const d = new Date(t.date); if(!isNaN(d)) { const m = d.getMonth(); t.type === 'income' ? incM[m]+=Number(t.amount) : expM[m]+=Number(t.amount); } });
-  const ctx = document.getElementById('monthly-chart').getContext('2d');
-  if (window.mChart) window.mChart.destroy();
-  window.mChart = new Chart(ctx, { type: 'line', data: { labels: months, datasets: [{ label: 'Receitas', data: incM, borderColor: '#2ecc71' }, { label: 'Despesas', data: expM, borderColor: '#e74c3c' }] } });
-}
+        const data = {
+            projeto: document.getElementById('p-projeto').value,
+            si: document.getElementById('p-si').value,
+            setor: document.getElementById('p-setor').value,
+            local: document.getElementById('p-local').value,
+            supervisor: document.getElementById('p-super').value,
+            equipes: Array.from(document.getElementById('p-eqs').selectedOptions).map(o => o.value),
+            servicos: Array.from(document.getElementById('p-servs').selectedOptions).map(o => o.text),
+            valor: document.getElementById('p-total').innerText,
+            status_proj: document.getElementById('p-st-proj').value,
+            status_prog: document.getElementById('p-st-prog').value,
+            aviso: document.getElementById('p-aviso-bool').value,
+            etapa_cor: document.getElementById('p-etapa').value,
+            u_cad: this.user.nome, 
+            ts: new Date().toLocaleString('pt-BR')
+        };
 
-/* ===================== EXPORTAÇÕES (IGUAL) ===================== */
-function exportPDF(allData, filename='relatorio.pdf'){
-  const { jsPDF } = window.jspdf; const doc = new jsPDF({orientation:'l'});
-  const rows = allData.map(t => [t.description, formatCurrency(t.amount), t.type, t.category, formatDateBR(t.date), getStatus(t)]);
-  doc.autoTable({ head: [['Descrição','Valor','Tipo','Categoria','Data','Status']], body: rows });
-  doc.save(filename);
-}
+        let comp = 0;
+        this.tempDts.forEach(dt => {
+            db.ref('programacoes').push({...data, data_exec: dt}).then(() => {
+                comp++;
+                let p = Math.round((comp / this.tempDts.length) * 100);
+                bar.style.width = p + "%"; 
+                txt.innerText = p + "%";
+                if(comp === this.tempDts.length) {
+                    alert("✅ GRAVADO COM SUCESSO!"); 
+                    loader.style.display = 'none'; 
+                    bar.style.width = "0%"; 
+                    btn.disabled = false;
+                    this.tempDts = []; 
+                    document.getElementById('p-dt-list').innerText = "";
+                    document.getElementById('p-projeto').value = "";
+                    document.getElementById('p-servs').selectedIndex = -1;
+                    app.calc();
+                }
+            }).catch(err => {
+                alert("❌ Erro ao salvar: " + err.message);
+                loader.style.display = 'none'; 
+                btn.disabled = false;
+            });
+        });
+    },
 
-/* ===================== RECORRENCIA (IGUAL) ===================== */
-function applyRecurrences(){
-  const now = new Date(); const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  transactions.filter(t => t.isRecurring).forEach(t => {
-    if (!transactions.some(x => x.description === t.description && x.date.startsWith(ym))) {
-      saveTransaction({ ...t, date: `${ym}-${t.date.split('-')[2]}`, _key: null });
+    renderResumo: function() {
+        const ini = document.getElementById('f-ini').value;
+        const fim = document.getElementById('f-fim').value;
+        const fEq = document.getElementById('f-eq').value;
+        const fSup = document.getElementById('f-sup').value;
+
+        db.ref('equipes').once('value', eS => {
+            const eqs = Object.values(eS.val()||{}).sort();
+            db.ref('programacoes').once('value', pS => {
+                const all = pS.val() || {};
+                const list = Object.keys(all).map(k => ({...all[k], key: k}));
+                
+                let progTotal = 0;
+                let dts = []; 
+                let curr = new Date(ini + "T12:00:00"); 
+                let end = new Date(fim + "T12:00:00");
+                while(curr <= end) { 
+                    dts.push(curr.toISOString().split('T')[0]); 
+                    curr.setDate(curr.getDate() + 1); 
+                }
+
+                let html = `<table class="resumo-table"><thead><tr><th style="width:150px">👥 EQUIPE / 📅 DATA</th>`;
+                dts.forEach(d => html += `<th style="font-size:10px">${d.split('-').reverse().slice(0,2).join('/')}<br><span style="font-size:9px;opacity:0.7">${d.split('-')[0]}</span></th>`);
+                html += `</tr></thead><tbody>`;
+
+                eqs.forEach(eq => {
+                    if(fEq && eq !== fEq) return;
+                    html += `<tr><td style="background:linear-gradient(90deg, #e0e0e0, #d0d0d0); font-weight:600"><b>${eq}</b></td>`;
+                    dts.forEach(dt => {
+                        const cell = list.filter(p => p.data_exec === dt && p.equipes.includes(eq));
+                        if(cell.length > 0) progTotal++;
+                        html += `<td>`;
+                        cell.forEach(p => {
+                            if(fSup && p.supervisor !== fSup) return;
+                            html += `
+                            <div class="prog-card" style="border-left-color:${p.etapa_cor === 'green' ? 'var(--vba-green)' : p.etapa_cor === 'blue' ? '#4169e1' : '#808080'}" onclick="app.openModal('${p.key}')">
+                                <b style="color:var(--vba-blue); font-size:11px">${p.projeto}</b><br>
+                                <span style="color:#666; font-size:9px">${p.status_proj}</span><br>
+                                <span style="font-weight:600; color:${p.status_prog === 'EXECUTADO' ? 'var(--vba-green)' : 'var(--vba-red)'}">${p.status_prog}</span>
+                                <div class="info-hover">
+                                    <b>👤 LOG:</b> ${p.u_cad} em ${p.ts}<br><hr style="margin:8px 0">
+                                    <b>🔢 SI:</b> ${p.si} | <b>📍 LOCAL:</b> ${p.local}<br>
+                                    <b>💰 VALOR:</b> <span style="color:var(--vba-green); font-weight:bold">${p.valor}</span><br>
+                                    <b>🔧 SERVIÇOS:</b><br>${(p.servicos||[]).join('<br>')}
+                                </div>
+                            </div>`;
+                        });
+                        html += `</td>`;
+                    });
+                    html += `</tr>`;
+                });
+                document.getElementById('resumo-render').innerHTML = html + "</tbody></table>";
+                
+                // KPIs BLOCO 3
+                const cap = eqs.length * dts.length;
+                const perc = cap > 0 ? ((progTotal / cap) * 100).toFixed(1) : 0;
+                document.getElementById('kpi-area').innerHTML = `
+                    <div class="kpi-card"><span class="kpi-val">${eqs.length}</span>👥 EQUIPES</div>
+                    <div class="kpi-card"><span class="kpi-val">${perc}%</span>📊 PROGRAMADO</div>
+                    <div class="kpi-card" style="border-left-color:var(--vba-green)"><span class="kpi-val">${(100-perc).toFixed(1)}%</span>✅ DISPONÍVEL</div>
+                `;
+            });
+        });
+    },
+
+    openModal: function(key) {
+        db.ref('programacoes/'+key).once('value', s => {
+            const p = s.val(); 
+            this.currentEditKey = key;
+            document.getElementById('m-proj').value = p.projeto;
+            document.getElementById('m-si').value = p.si;
+            document.getElementById('m-data').value = p.data_exec.split('-').reverse().join('/');
+            document.getElementById('m-st-proj').value = p.status_proj;
+            document.getElementById('m-st-prog').value = p.status_prog;
+            document.getElementById('m-cor').value = p.etapa_cor;
+            document.getElementById('m-obs').value = p.obs || "";
+            document.getElementById('modal-gestao').style.display = 'flex';
+        });
+    },
+
+    updateProj: function() {
+        if(!this.currentEditKey) return alert("❌ Nenhum projeto selecionado.");
+        db.ref('programacoes/'+this.currentEditKey).update({
+            si: document.getElementById('m-si').value,
+            status_proj: document.getElementById('m-st-proj').value,
+            status_prog: document.getElementById('m-st-prog').value,
+            etapa_cor: document.getElementById('m-cor').value,
+            obs: document.getElementById('m-obs').value
+        }).then(() => { 
+            alert("✅ Projeto atualizado com sucesso!"); 
+            this.closeModal(); 
+            this.renderResumo(); 
+        }).catch(err => alert("❌ Erro ao atualizar: " + err.message));
+    },
+
+    closeModal: () => document.getElementById('modal-gestao').style.display = 'none',
+
+    renderRelat: function() {
+        const mes = document.getElementById('r-mes').value;
+        db.ref('programacoes').once('value', s => {
+            const all = s.val() || {};
+            let html = `<table class="resumo-table"><thead><tr>
+                <th style="width:120px">📅 DATA</th>
+                <th style="width:200px">🏗️ PROJETO</th>
+                <th style="width:120px">👥 EQUIPE</th>
+                <th>📊 STATUS</th>
+            </tr></thead><tbody>`;
+            let total = 0;
+            for(let k in all) {
+                const p = all[k];
+                if(p.data_exec.startsWith(mes)) {
+                    total++;
+                    html += `<tr style="font-size:10px">
+                        <td style="text-align:center; font-weight:600">${p.data_exec.split('-').reverse().join('/')}</td>
+                        <td style="font-weight:500">${p.projeto}</td>
+                        <td>${(p.equipes||[]).join(', ')}</td>
+                        <td style="color:${p.status_proj === 'EM ANDAMENTO' ? 'var(--vba-blue)' : p.status_proj === 'CANCELADO' ? 'var(--vba-red)' : 'var(--vba-green)'}; font-weight:600">${p.status_proj}</td>
+                    </tr>`;
+                }
+            }
+            html += `<tr style="background:linear-gradient(90deg, #e8f5e8, #d4f4d4)"><td colspan="4" style="text-align:right; font-weight:bold; font-size:12px">📈 Total do mês: ${total} programações</td></tr>`;
+            document.getElementById('relat-render').innerHTML = html + "</tbody></table>";
+        });
+    },
+
+    loadUsers: function() {
+        db.ref('users').on('value', s => {
+            const list = document.getElementById('user-grid'); 
+            list.innerHTML = "";
+            s.forEach(c => {
+                const u = c.val();
+                const statusColor = u.status === 'APROVADO' ? 'var(--vba-green)' : 'var(--vba-red)';
+                list.innerHTML += `<div style="border-bottom:1px solid #ddd; padding:8px 4px; display:flex; justify-content:space-between; align-items:center; background:#f8f9fa">
+                    <span style="font-weight:500">${u.nome} [<span style="color:${statusColor}">${u.nivel}</span>]</span> 
+                    ${u.status==='PENDENTE' ? 
+                        `<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-green); color:white" onclick="app.approveUser('${c.key}')">✅ APROVAR</button>` : 
+                        `<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-red); color:white" onclick="app.delUser('${c.key}')">🗑️ EXCLUIR</button>`
+                    }
+                </div>`;
+            });
+        });
+    },
+    
+    approveUser: (k) => db.ref('users/'+k).update({status: 'APROVADO'}).then(() => alert("✅ Usuário aprovado!")),
+    delUser: (k) => { if(confirm("🗑️ Confirmar exclusão do usuário?")) db.ref('users/'+k).remove().then(() => alert("✅ Usuário excluído!")); },
+    
+    saveUser: function() { 
+        const nome = document.getElementById('u-nome').value;
+        const email = document.getElementById('u-email').value;
+        const pass = document.getElementById('u-pass').value;
+        if(!nome || !email || !pass) return alert("❌ Preencha todos os campos!");
+        db.ref('users').push({
+            nome, email, pass, 
+            nivel: document.getElementById('u-nivel').value, 
+            status: 'APROVADO'
+        }).then(() => { 
+            alert("✅ Usuário criado com sucesso!"); 
+            document.getElementById('u-nome').value = '';
+            document.getElementById('u-email').value = '';
+            document.getElementById('u-pass').value = '';
+        });
+    },
+    
+    saveBase: function() { 
+        const nome = document.getElementById('c-nome').value;
+        const tipo = document.getElementById('c-tipo').value;
+        if(!nome) return alert("❌ Digite um nome!");
+        db.ref(tipo).push(nome).then(() => { 
+            alert("✅ Cadastro realizado!"); 
+            document.getElementById('c-nome').value=""; 
+        });
+    },
+    
+    importCSV: function() {
+        const lines = document.getElementById('csv-in').value.split('\n').filter(l => l.trim());
+        let count = 0;
+        lines.forEach(l => {
+            const [cod, desc, val] = l.split(';').map(s => s.trim());
+            if(cod && desc && val) {
+                db.ref('servicos').push({
+                    cod, 
+                    desc, 
+                    valor: parseFloat(val.replace(',','.').replace('R$',''))
+                });
+                count++;
+            }
+        });
+        alert(`✅ ${count} serviços importados com sucesso!`);
+        document.getElementById('csv-in').value = '';
+    },
+    
+    tab: function(id, btn) {
+        document.querySelectorAll('.viewport > div').forEach(v => v.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.querySelectorAll('.sidebar .btn').forEach(b => b.classList.remove('btn-active'));
+        btn.classList.add('btn-active');
+        if(id === 'v-resumo') this.renderResumo();
+        if(id === 'v-relat') this.renderRelat();
+    },
+    
+    calc: function() {
+        let t = 0; 
+        Array.from(document.getElementById('p-servs').selectedOptions).forEach(o => {
+            const s = this.servCatalog.find(x => x.cod === o.value);
+            if(s) t += s.valor;
+        });
+        document.getElementById('p-total').innerText = 'R$ ' + t.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    },
+    
+    filterServ: function(t) {
+        const el = document.getElementById('p-servs'); 
+        el.innerHTML = "";
+        this.servCatalog.forEach(s => {
+            if(s.cod.includes(t) || s.desc.toLowerCase().includes(t.toLowerCase())) {
+                el.add(new Option(`${s.cod} - ${s.desc}`, s.cod));
+            }
+        });
     }
-  });
-}
-
-function refreshAll() { applyFilters(); }
-
-/* ===================== EVENTOS (IGUAL) ===================== */
-addTransactionBtn.addEventListener('click', addTransaction);
-document.getElementById('apply-filters').addEventListener('click', applyFilters);
-themeToggle.addEventListener('click', () => { document.body.classList.toggle('dark'); });
-toggleChartsBtn.addEventListener('click', () => { chartsContainer.style.display = (chartsContainer.style.display==='none') ? 'flex' : 'none'; refreshAll(); });
-quickReportBtn.addEventListener('click', () => exportPDF(transactions, 'completo.pdf'));
-exportPdfBtn.addEventListener('click', () => exportPDF(applyFilters(), 'filtrado.pdf'));
-backupBtn.addEventListener('click', () => { saveLocal(); toast('Backup Local OK'); });
-restoreBtn.addEventListener('click', () => { loadFromLocal(); toast('Restaurado'); });
-clearAllBtn.addEventListener('click', () => { if(confirm('Limpar tudo?')){ if(useFirebase) db.ref('transactions').remove(); else {transactions=[]; saveLocal(); refreshAll();} } });
-document.getElementById('open-access').addEventListener('click', () => { window.location.href = 'acessos.html'; });
-document.getElementById('open-comprovantes').addEventListener('click', () => { window.location.href = 'comprovantes.html'; });
-
-// Impede carregar dados antes do login real
-window.onload = () => { 
-  const t = localStorage.getItem('theme'); if(t==='dark') document.body.classList.add('dark');
-  const now = new Date();
-  filterStart.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
 };
 </script>
 </body>
