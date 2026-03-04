@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { 
             --vba-bg: #d4d0c8; 
@@ -15,6 +16,7 @@
             --vba-gold: #ffd700;
             --vba-green: #228b22;
             --vba-red: #dc143c;
+            --vba-orange: #ff8c00;
         }
         * { 
             box-sizing: border-box; 
@@ -28,7 +30,6 @@
             height: 100vh; 
             overflow: hidden; 
         }
-        
         .window { 
             background: var(--vba-bg); 
             border: 3px outset #c0c0c0; 
@@ -50,7 +51,6 @@
             border-top-right-radius: 5px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
-        
         .main { 
             display: flex; 
             flex: 1; 
@@ -77,7 +77,6 @@
             position: relative;
             border-radius: 6px;
         }
-
         .btn { 
             background: linear-gradient(145deg, #e8e8e8, var(--vba-bg)); 
             border: 2px outset #c0c0c0; 
@@ -104,7 +103,6 @@
             color: #000 !important;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        
         fieldset { 
             border: 2px groove var(--vba-shd); 
             margin-bottom: 12px; 
@@ -134,724 +132,800 @@
             box-shadow: 0 0 0 2px rgba(0,0,128,0.2);
             background: white;
         }
-
-        /* KPIs */
-        .kpi-row { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-        }
-        .kpi-card { 
-            flex: 1; 
-            background: linear-gradient(145deg, #ffffff, #f8f8f8); 
-            border: 2px outset #c0c0c0; 
-            padding: 12px; 
-            text-align: center; 
-            border-left: 6px solid var(--vba-blue); 
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-        .kpi-val { 
-            font-size: 20px; 
-            font-weight: 700; 
-            display: block; 
-            color: var(--vba-blue); 
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            margin-bottom: 4px;
-        }
-
-        /* TABELA RESUMO (BLOCO 3) */
-        .resumo-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            table-layout: fixed;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .resumo-table th { 
-            background: linear-gradient(90deg, #e8e8e8, #d8d8d8); 
-            border: 1px solid var(--vba-shd); 
-            padding: 8px 4px; 
-            font-weight: 600;
-            color: var(--vba-blue);
-            position: sticky; top: 0;
-        }
-        .resumo-table td { 
-            border: 1px solid #ddd; 
-            height: 70px; 
-            vertical-align: top; 
-            padding: 4px; 
-            background: #fff; 
-            transition: background 0.2s ease;
-        }
-        .resumo-table tr:hover td {
-            background: #f8f9ff;
-        }
-        
-        .prog-card { 
-            background: linear-gradient(145deg, #ffffe0, #fff8c9); 
-            border: 2px outset #c0c0c0; 
-            padding: 6px; 
-            margin-bottom: 4px; 
-            cursor: pointer; 
-            font-size: 10px; 
-            position: relative; 
-            border-left: 5px solid var(--vba-blue);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .prog-card:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .prog-card:hover .info-hover { 
-            display: block; 
-        }
-        .info-hover { 
-            display: none; 
-            position: absolute; 
-            z-index: 100; 
-            left: 105%; 
-            top: -10px; 
-            width: 320px; 
-            background: linear-gradient(145deg, #ffffe1, #fff8d1); 
-            border: 2px outset #c0c0c0; 
-            padding: 12px; 
-            border-radius: 6px;
-            box-shadow: 6px 6px 20px rgba(0,0,0,0.4); 
-            color: #000; 
-            font-size: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        /* PROGRESS BAR */
-        .progress-box { 
-            height: 20px; 
-            border: 2px inset #c0c0c0; 
-            background: linear-gradient(to right, #f0f0f0, #e0e0e0); 
-            margin: 12px 0; 
-            display: none; 
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-bar { 
-            height: 100%; 
-            background: linear-gradient(90deg, var(--vba-green), #32cd32); 
-            width: 0%; 
-            transition: width 0.3s ease; 
-            border-radius: 10px 0 0 10px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-        }
-        .progress-text { 
-            position: absolute; 
-            width: 100%; 
-            text-align: center; 
-            top: 2px; 
-            font-weight: 600; 
-            font-size: 11px; 
-            color: #000;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
-        }
-
-        /* MODAL GESTÃO (BLOCO 2 - EDIÇÃO) */
-        #modal-gestao { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.6); 
-            z-index: 3000; 
-            display: none; 
-            justify-content: center; 
-            align-items: center;
-            backdrop-filter: blur(3px);
-        }
-        .modal-body { 
-            background: linear-gradient(to bottom, var(--vba-bg), #c8c5bd); 
-            width: 700px; 
-            border: 3px outset #c0c0c0; 
-            padding: 20px; 
-            border-radius: 10px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        #login-scr { 
-            position: fixed; 
-            inset: 0; 
-            background: linear-gradient(135deg, #3a6ea5, #2a5a8a); 
-            z-index: 4000; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
-        .hidden { 
-            display: none !important; 
-        }
-
-        h3 {
-            color: var(--vba-blue);
-            font-size: 16px;
-            margin: 0 0 15px 0;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        /* Scrollbar customizada */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 6px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(145deg, #c0c0c0, #a8a8a8);
-            border-radius: 6px;
-            border: 2px solid #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(145deg, #b8b8b8, #909090);
-        }
+        .kpi-row { display:flex; gap:10px; margin-bottom:15px; }
+        .kpi-card { flex:1; background:linear-gradient(145deg,#ffffff,#f8f8f8); border:2px outset #c0c0c0; padding:12px; text-align:center; border-left:6px solid var(--vba-blue); border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+        .kpi-val { font-size:20px; font-weight:700; display:block; color:var(--vba-blue); }
+        .resumo-table { width:100%; border-collapse:collapse; table-layout:fixed; background:white; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+        .resumo-table th { background:linear-gradient(90deg,#e8e8e8,#d8d8d8); border:1px solid var(--vba-shd); padding:8px 4px; font-weight:600; color:var(--vba-blue); position:sticky; top:0; z-index:10; }
+        .resumo-table td { border:1px solid #ddd; height:50px; vertical-align:top; padding:2px; background:#fff; }
+        .prog-card { background:linear-gradient(145deg,#ffffe0,#fff8c9); border:2px outset #c0c0c0; padding:4px; margin-bottom:2px; cursor:pointer; font-size:9px; position:relative; border-left:5px solid var(--vba-blue); border-radius:4px; }
+        .prog-card-selected { background:linear-gradient(145deg,#d4f4ff,#b3e5fc); border:2px solid var(--vba-blue); }
+        .prog-checkbox { position:absolute; top:2px; right:2px; width:14px; height:14px; cursor:pointer; }
+        .info-hover { display:none; position:absolute; z-index:9999; left:105%; top:-10px; width:400px; background:linear-gradient(145deg,#ffffe1,#fff8d1); border:2px outset #c0c0c0; padding:12px; border-radius:6px; box-shadow:6px 6px 20px rgba(0,0,0,0.4); font-size:10px; max-height:500px; overflow-y:auto; }
+        .prog-card:hover .info-hover { display:block; }
+        #modal-gestao { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:3000; display:none; justify-content:center; align-items:center; }
+        .modal-body { background:linear-gradient(to bottom,var(--vba-bg),#c8c5bd); width:700px; border:3px outset #c0c0c0; padding:20px; border-radius:10px; box-shadow:0 20px 40px rgba(0,0,0,0.4); max-height:90vh; overflow-y:auto; }
+        #login-scr { position:fixed; inset:0; background:linear-gradient(135deg,#3a6ea5,#2a5a8a); z-index:4000; display:flex; justify-content:center; align-items:center; }
+        .hidden { display:none !important; }
+        #btn-relatorio-campo { position:fixed; bottom:20px; right:20px; padding:12px 24px; background:linear-gradient(145deg,#1e90ff,#1084d0); color:white; border:2px outset #1084d0; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:1000; display:none; }
     </style>
 </head>
 <body>
-
 <div id="login-scr">
-    <div class="modal-body" id="box-login" style="width:360px">
-        <h3>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima- LOGIN</h3>
-        Email: <input type="email" id="l-user" value="arnaldo@sgo.com"><br><br>
-        Senha: <input type="password" id="l-pass" value="123"><br><br>
-        <button class="btn" style="width:100%; font-size:12px; font-weight:bold" onclick="app.login()">🚀 ENTRAR</button>
-        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #d4fcd4, #c8f4c8)" onclick="app.tabLogin('box-req')">📩 SOLICITAR ACESSO</button>
-    </div>
-    <div class="modal-body hidden" id="box-req" style="width:380px">
-        <h3>SOLICITAR ACESSO</h3>
-        <input type="text" id="r-nome" placeholder="Nome Completo">
-        <input type="text" id="r-setor" placeholder="Setor">
-        <input type="text" id="r-cargo" placeholder="Cargo">
-        <input type="email" id="r-email" placeholder="Email Corporativo">
-        <input type="password" id="r-pass" placeholder="Senha (mín. 6 caracteres)">
-        <button class="btn" style="width:100%; background:linear-gradient(145deg, #d4fcd4, #c8f4c8); font-weight:bold" onclick="app.requestAccess()">📤 ENVIAR SOLICITAÇÃO</button>
-        <button class="btn" style="width:100%; margin-top:8px" onclick="app.tabLogin('box-login')">🔙 VOLTAR</button>
-    </div>
+  <div class="modal-body" id="box-login" style="width:360px">
+    <h3>GESTÃO OPERACIONAL GEOM - LOGIN</h3>
+    Email: <input type="email" id="l-user" value="arnaldo@sgo.com"><br><br>
+    Senha: <input type="password" id="l-pass" value="123"><br><br>
+    <button class="btn" style="width:100%; font-size:12px; font-weight:bold" onclick="app.login()">ENTRAR</button>
+    <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg,#d4fcd4,#c8f4c8)" onclick="app.tabLogin('box-req')">SOLICITAR ACESSO</button>
+  </div>
+  <div class="modal-body hidden" id="box-req" style="width:380px">
+    <h3>SOLICITAR ACESSO</h3>
+    <input type="text" id="r-nome" placeholder="Nome Completo">
+    <input type="text" id="r-setor" placeholder="Setor">
+    <input type="text" id="r-cargo" placeholder="Cargo">
+    <input type="email" id="r-email" placeholder="Email Corporativo">
+    <input type="password" id="r-pass" placeholder="Senha (mín. 6 caracteres)">
+    <button class="btn" style="width:100%; background:linear-gradient(145deg,#d4fcd4,#c8f4c8); font-weight:bold" onclick="app.requestAccess()">ENVIAR SOLICITAÇÃO</button>
+    <button class="btn" style="width:100%; margin-top:8px" onclick="app.tabLogin('box-login')">VOLTAR</button>
+  </div>
 </div>
 
 <div id="modal-gestao">
-    <div class="modal-body">
-        <div class="title-bar" style="margin-bottom:15px"><span>📋 DETALHES DA PROGRAMAÇÃO</span><span onclick="app.closeModal()" style="cursor:pointer; font-weight:bold; padding:4px" title="Fechar">[✕]</span></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
-            <fieldset><legend>📊 Dados do Projeto</legend>
-                Projeto: <input type="text" id="m-proj" readonly style="background:#e8e8e8; font-weight:bold">
-                SI: <input type="text" id="m-si">
-                Data: <input type="text" id="m-data" readonly style="background:#e8e8e8">
-                Status Projeto: <select id="m-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option><option>SUSPENSO</option></select>
-            </fieldset>
-            <fieldset><legend>⚙️ Apontamento de Obra</legend>
-                Status Programação: <select id="m-st-prog"><option>PROGRAMADO</option><option>EXECUTANDO</option><option>CONCLUÍDO</option></select>
-                Etapa (Cor): <select id="m-cor"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
-            </fieldset>
-        </div>
-        <fieldset><legend>📝 Observações de Campo</legend>
-            <textarea id="m-obs" style="height:90px; font-family:monospace"></textarea>
-        </fieldset>
-        <button class="btn" style="width:100%; background:linear-gradient(145deg, #32cd32, #228b22); color:white; font-weight:bold; font-size:13px" onclick="app.updateProj()">💾 SALVAR ATUALIZAÇÃO</button>
+  <div class="modal-body">
+    <div class="title-bar" style="margin-bottom:15px">
+      <span>DETALHES DA PROGRAMAÇÃO</span>
+      <span onclick="app.closeModal()" style="cursor:pointer; font-weight:bold; padding:4px" title="Fechar">[X]</span>
     </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+      <fieldset><legend>Dados do Projeto</legend>
+        Projeto: <input type="text" id="m-proj" readonly style="background:#e8e8e8; font-weight:bold">
+        SI: <input type="text" id="m-si">
+        Data: <input type="text" id="m-data" readonly style="background:#e8e8e8">
+        Status Projeto:
+        <select id="m-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option><option>SUSPENSO</option></select>
+      </fieldset>
+      <fieldset><legend>Apontamento de Obra</legend>
+        Status Programação:
+        <select id="m-st-prog"><option>PROGRAMADO</option><option>EXECUTANDO</option><option>CONCLUÍDO</option></select>
+        Etapa (Cor):
+        <select id="m-cor"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
+      </fieldset>
+    </div>
+    <fieldset><legend>Observações de Campo</legend>
+      <textarea id="m-obs" style="height:90px; font-family:monospace"></textarea>
+    </fieldset>
+    <button class="btn" style="width:100%; background:linear-gradient(145deg,#32cd32,#228b22); color:white; font-weight:bold; font-size:13px" onclick="app.updateProj()">SALVAR ATUALIZAÇÃO</button>
+  </div>
 </div>
 
 <div class="window">
-    <div class="title-bar">
-        <span>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima</span>
-        <span id="user-display" style="font-size:10px">---</span>
+  <div class="title-bar">
+    <span>GESTÃO OPERACIONAL GEOM - copy@ArnaldoS. Lima</span>
+    <span id="user-display" style="font-size:10px">---</span>
+  </div>
+  <div class="main">
+    <div class="sidebar">
+      <button class="btn btn-active" onclick="app.tab('v-resumo', this)">RESUMO PROGRAMAÇÃO</button>
+      <button class="btn" onclick="app.tab('v-cad', this)">CADASTRO PROGRAMAÇÃO</button>
+      <button class="btn" onclick="app.tab('v-relat', this)">RELATÓRIO PROGRAMAÇÃO</button>
+      <button class="btn" id="btn-perf" onclick="app.tab('v-perf', this)">Informação e Performance</button>
+      <div style="flex:1"></div>
+      <button class="btn" style="background:linear-gradient(145deg,#ff6b6b,#ee5a52); color:white; font-weight:bold" onclick="location.reload()">SAIR</button>
     </div>
-    <div class="main">
-        <div class="sidebar">
-            <button class="btn btn-active" onclick="app.tab('v-resumo', this)">RESUMO PROGRAMAÇÃO</button>
-            <button class="btn" onclick="app.tab('v-cad', this)">CADASTRO PROGRAMAÇÃO</button>
-            <button class="btn" onclick="app.tab('v-relat', this)">RELATÓRIO PROGRAMAÇÃO</button>
-            <button class="btn" id="btn-perf" onclick="app.tab('v-perf', this)">⚙️Informação e Performance</button>
-            <div style="flex:1"></div>
-            <button class="btn" style="background:linear-gradient(145deg, #ff6b6b, #ee5a52); color:white; font-weight:bold" onclick="location.reload()">🚪 SAIR</button>
+    <div class="viewport">
+      <div id="v-resumo">
+        <div class="kpi-row" id="kpi-area"></div>
+        <fieldset>
+          <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap">
+            <div style="flex:1; min-width:140px">Equipe:
+              <select id="f-eq"><option value="">TODAS</option></select>
+            </div>
+            <div style="flex:1; min-width:140px">Supervisor:
+              <select id="f-sup"><option value="">TODOS</option></select>
+            </div>
+            <div style="flex:1; min-width:140px">Início: <input type="date" id="f-ini"></div>
+            <div style="flex:1; min-width:140px">Fim: <input type="date" id="f-fim"></div>
+            <button class="btn" style="white-space:nowrap; padding:8px 16px" onclick="app.renderResumo()">FILTRAR</button>
+          </div>
+        </fieldset>
+        <div id="resumo-render" style="overflow:auto; max-height:70vh"></div>
+      </div>
+
+      <div id="v-cad" class="hidden">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+          <fieldset><legend>0. Cabeçalho e 3. Projeto</legend>
+            SETOR RESPONSÁVEL (0): <select id="p-setor"></select>
+            Nº DA SI (0.1): <input type="number" id="p-si">
+            TIPO PROGRAMAÇÃO (0.2):
+            <select id="p-tipo">
+              <option>PROXIMIDADE MT</option><option>PROXIMIDADE BT</option><option>DESLIGAMENTO MT</option><option>DESLIGAMENTO BT</option><option>PROXIMIDADE + DESLIGAMENTO</option>
+            </select>
+            Nº PROJETO (3): <input type="text" id="p-projeto">
+            STATUS PROJETO (3.1): <select id="p-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option></select>
+            LOCALIDADE (4): <input type="text" id="p-local">
+          </fieldset>
+          <fieldset><legend>1. Supervisor, 2. Equipes e 7. Datas</legend>
+            SUPERVISOR RESP. (1): <select id="p-super"></select>
+            EQUIPE (2 - Múltipla): <select id="p-eqs" multiple style="height:85px"></select>
+            DATA EXECUÇÃO (7): <input type="date" id="p-dt-in"> <button class="btn" style="width:auto; padding:6px 12px" onclick="app.addDt()">ADICIONAR DATA</button>
+            <div id="p-dt-list" style="margin-top:8px; font-weight:bold; padding:8px; background:#e6f3ff; border-radius:4px; border-left:4px solid var(--vba-blue)"></div>
+          </fieldset>
         </div>
-        <div class="viewport">
-            
-            <div id="v-resumo">
-                <div class="kpi-row" id="kpi-area"></div>
-                <fieldset>
-                    <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap">
-                        <div style="flex:1; min-width:140px">👥 Equipe: <select id="f-eq"><option value="">TODAS</option></select></div>
-                        <div style="flex:1; min-width:140px">👷 Supervisor: <select id="f-sup"><option value="">TODOS</option></select></div>
-                        <div style="flex:1; min-width:140px">📅 Início: <input type="date" id="f-ini"></div>
-                        <div style="flex:1; min-width:140px">📅 Fim: <input type="date" id="f-fim"></div>
-                        <button class="btn" style="white-space:nowrap; padding:8px 16px" onclick="app.renderResumo()">🔍 FILTRAR</button>
-                    </div>
-                </fieldset>
-                <div id="resumo-render" style="overflow:auto; max-height:70vh"></div>
+        <fieldset><legend>5. Atividades (Soma Automática)</legend>
+          Pesquisar (Cod/Desc): <input type="text" onkeyup="app.filterServ(this.value)" placeholder="Filtrar serviços..." style="margin-bottom:8px">
+          <select id="p-servs" multiple style="height:130px; margin-top:5px" onchange="app.calc()"></select>
+          <div style="text-align:right; font-size:15px; margin-top:12px; padding:12px; background:linear-gradient(145deg,#e8f5e8,#d4f4d4); border-radius:6px; border-left:5px solid var(--vba-green)">
+            VALOR DO PROJETO (5.2): <b id="p-total" style="color:var(--vba-green); font-size:18px">R$ 0,00</b>
+          </div>
+        </fieldset>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px">
+          <fieldset><legend>8. Status e 9. Aviso</legend>
+            ETAPA (6 - Cor): <select id="p-etapa"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
+            STATUS PROG (8): <select id="p-st-prog"><option>PROGRAMADO</option><option>EXECUTADO</option></select>
+            <div id="p-aviso-box">
+              AVISO SI/NO (9): <select id="p-aviso-bool"><option>NÃO</option><option>SIM</option></select>
+              AVISO STATUS: <select id="p-aviso-st"><option>NÃO FEITO</option><option>FEITO</option></select>
             </div>
-
-            <div id="v-cad" class="hidden">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
-                    <fieldset><legend>📋 0. Cabeçalho e 3. Projeto</legend>
-                        SETOR RESPONSÁVEL (0): <select id="p-setor"></select>
-                        Nº DA SI (0.1): <input type="number" id="p-si">
-                        TIPO PROGRAMAÇÃO (0.2): <select id="p-tipo">
-                            <option>PROXIMIDADE MT</option><option>PROXIMIDADE BT</option>
-                            <option>DESLIGAMENTO MT</option><option>DESLIGAMENTO BT</option>
-                            <option>PROXIMIDADE + DESLIGAMENTO</option>
-                        </select>
-                        Nº PROJETO (3): <input type="text" id="p-projeto" style="font-weight:bold; color:var(--vba-red); background:#ffe6e6">
-                        STATUS PROJETO (3.1): <select id="p-st-proj"><option>EM ANDAMENTO</option><option>CANCELADO</option></select>
-                        LOCALIDADE (4): <input type="text" id="p-local">
-                    </fieldset>
-                    <fieldset><legend>👥 1. Supervisor, 2. Equipes e 7. Datas</legend>
-                        SUPERVISOR RESP. (1): <select id="p-super"></select>
-                        EQUIPE (2 - Múltipla): <select id="p-eqs" multiple style="height:85px"></select>
-                        DATA EXECUÇÃO (7): <input type="date" id="p-dt-in"> <button class="btn" style="width:auto; padding:6px 12px" onclick="app.addDt()">📅 ADICIONAR DATA</button>
-                        <div id="p-dt-list" style="color:var(--vba-blue); margin-top:8px; font-weight:bold; padding:8px; background:#e6f3ff; border-radius:4px; border-left:4px solid var(--vba-blue)"></div>
-                    </fieldset>
-                </div>
-                <fieldset><legend>💰 5. Atividades (Soma Automática)</legend>
-                    Pesquisar (Cod/Desc): <input type="text" onkeyup="app.filterServ(this.value)" placeholder="🔍 Filtrar serviços..." style="margin-bottom:8px">
-                    <select id="p-servs" multiple style="height:130px; margin-top:5px" onchange="app.calc()"></select>
-                    <div style="text-align:right; font-size:15px; margin-top:12px; padding:12px; background:linear-gradient(145deg, #e8f5e8, #d4f4d4); border-radius:6px; border-left:5px solid var(--vba-green)">
-                        VALOR DO PROJETO (5.2): <b id="p-total" style="color:var(--vba-green); font-size:18px">R$ 0,00</b>
-                    </div>
-                </fieldset>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px">
-                    <fieldset><legend>🎯 8. Status e 9. Aviso</legend>
-                        ETAPA (6 - Cor): <select id="p-etapa"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
-                        STATUS PROG (8): <select id="p-st-prog"><option>PROGRAMADO</option><option>EXECUTADO</option></select>
-                        AVISO SI/NO (9): <select id="p-aviso-bool"><option>NÃO</option><option>SIM</option></select>
-                        AVISO STATUS: <select id="p-aviso-st"><option>NÃO FEITO</option><option>FEITO</option></select>
-                    </fieldset>
-                    <div class="progress-box" id="p-loader"><div class="progress-bar" id="p-bar"></div><div class="progress-text" id="p-txt">0%</div></div>
-                    <button class="btn" id="btn-save-main" style="height:100%; background:linear-gradient(145deg, #32cd32, #228b22); color:white; font-weight:bold; font-size:14px" onclick="app.saveProg()">💾 10. GRAVAR E LIMPAR CAMPOS</button>
-                </div>
-            </div>
-
-            <div id="v-perf" class="hidden">
-                <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:15px">
-                    <fieldset><legend>👤 Informação e Performance: Usuários</legend>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
-                            <input type="text" id="u-nome" placeholder="Nome Completo">
-                            <input type="email" id="u-email" placeholder="Email Corporativo">
-                            <input type="password" id="u-pass" placeholder="Senha Segura">
-                            <select id="u-nivel"><option>OPERADOR</option><option>ADMINISTRADOR(VISUALIZAÇÃO)</option><option>Informação e Performance</option></select>
-                        </div>
-                        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #4169e1, #1e90ff); color:white" onclick="app.saveUser()">👤 SALVAR USUÁRIO</button>
-                        <div id="user-grid" style="margin-top:15px; max-height:300px; overflow:auto"></div>
-                    </fieldset>
-                    <fieldset><legend>📊 Cadastro de Serviços (Massa)</legend>
-                        <textarea id="csv-in" style="width:100%; height:90px; font-family:monospace; font-size:10px" placeholder="COD;DESC;VALOR&#10;ex: 001;Manutenção MT;1500,00"></textarea>
-                        <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg, #ff8c00, #ff7f50)" onclick="app.importCSV()">⚡ PROCESSAR CSV</button>
-                    </fieldset>
-                </div>
-                <fieldset style="margin-top:15px"><legend>🏗️ Cadastros Base (Setores, Equipes, Supervisores)</legend>
-                    Nome: <input type="text" id="c-nome" style="width:250px">
-                    Tipo: <select id="c-tipo" style="width:180px">
-                        <option value="setores">🏢 SETOR</option><option value="equipes">👥 EQUIPE</option><option value="supervisores">👷 SUPERVISOR</option>
-                    </select>
-                    <button class="btn" style="width:auto; margin-left:10px; background:linear-gradient(145deg, #228b22, #32cd32); color:white" onclick="app.saveBase()">➕ ADICIONAR</button>
-                </fieldset>
-            </div>
-
-            <div id="v-relat" class="hidden">
-                <fieldset><legend>📈 Relatório Mensal (DD/MM/AAAA)</legend>
-                    Mês Ref: <input type="month" id="r-mes" onchange="app.renderRelat()" style="width:200px; display:inline-block">
-                    <button class="btn" style="margin-left:15px" onclick="app.renderRelat()">🔄 ATUALIZAR</button>
-                </fieldset>
-                <div id="relat-render" style="overflow:auto; max-height:70vh"></div>
-            </div>
-
+          </fieldset>
+          <div class="progress-box" id="p-loader"><div class="progress-bar" id="p-bar"></div><div class="progress-text" id="p-txt">0%</div></div>
+          <button class="btn" id="btn-save-main" style="height:100%; background:linear-gradient(145deg,#32cd32,#228b22); color:white; font-weight:bold; font-size:14px" onclick="app.saveProg()">GRAVAR E LIMPAR CAMPOS</button>
         </div>
+      </div>
+
+      <div id="v-perf" class="hidden">
+        <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:15px">
+          <fieldset><legend>Informação e Performance: Usuários</legend>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
+              <input type="text" id="u-nome" placeholder="Nome Completo">
+              <input type="email" id="u-email" placeholder="Email Corporativo">
+              <input type="password" id="u-pass" placeholder="Senha Segura">
+              <select id="u-nivel"><option>OPERADOR</option><option>ADMINISTRADOR(VISUALIZAÇÃO)</option><option>Informação e Performance</option></select>
+            </div>
+            <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg,#4169e1,#1e90ff); color:white" onclick="app.saveUser()">SALVAR USUÁRIO</button>
+            <div id="user-grid" style="margin-top:15px; max-height:300px; overflow:auto"></div>
+          </fieldset>
+          <fieldset><legend>Cadastro de Serviços (Massa)</legend>
+            <textarea id="csv-in" style="width:100%; height:90px; font-family:monospace; font-size:10px" placeholder="COD;DESC;VALOR&#10;ex: 001;Manutenção MT;1500,00"></textarea>
+            <button class="btn" style="width:100%; margin-top:8px; background:linear-gradient(145deg,#ff8c00,#ff7f50)" onclick="app.importCSV()">PROCESSAR CSV</button>
+          </fieldset>
+        </div>
+        <fieldset style="margin-top:15px"><legend>Cadastros Base (Setores, Equipes, Supervisores)</legend>
+          Nome: <input type="text" id="c-nome" style="width:250px">
+          Tipo: <select id="c-tipo" style="width:180px"><option value="setores">SETOR</option><option value="equipes">EQUIPE</option><option value="supervisores">SUPERVISOR</option></select>
+          <button class="btn" style="width:auto; margin-left:10px; background:linear-gradient(145deg,#228b22,#32cd32); color:white" onclick="app.saveBase()">ADICIONAR</button>
+        </fieldset>
+      </div>
+
+      <div id="v-relat" class="hidden">
+        <fieldset><legend>Relatório Programações (Intervalo)</legend>
+          Início: <input type="date" id="r-ini"> Fim: <input type="date" id="r-fim">
+          <button class="btn" style="margin-left:15px" onclick="app.renderRelat()">ATUALIZAR</button>
+        </fieldset>
+        <div id="relat-render" style="overflow:auto; max-height:70vh"></div>
+      </div>
     </div>
+  </div>
 </div>
 
+<button id="btn-relatorio-campo" class="btn" onclick="app.gerarRelatorioCampoPDF()">Gerar Relatorio de Campo</button>
+
 <script>
-// CONFIG FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyDXDB6jbRy3o1eXcdXqmd8zrplDk1IezqM",
-    authDomain: "sistema-financeiro-51295.firebaseapp.com",
-    projectId: "sistema-financeiro-51295",
-    databaseURL: "https://sistema-financeiro-51295-default-rtdb.firebaseio.com"
+const firebaseConfig = { 
+  apiKey:"AIzaSyDXDB6jbRy3o1eXcdXqmd8zrplDk1IezqM", 
+  authDomain:"sistema-financeiro-51295.firebaseapp.com", 
+  projectId:"sistema-financeiro-51295", 
+  databaseURL:"https://sistema-financeiro-51295-default-rtdb.firebaseio.com" 
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const app = {
-    user: null, tempDts: [], servCatalog: [], currentEditKey: null,
+  user:null,
+  tempDts:[],
+  servCatalog:[],
+  currentEditKey:null,
+  selecionadas:[],
+  _ultimoRelatorio:[],
 
-    tabLogin: (id) => { 
-        document.getElementById('box-login').classList.add('hidden');
-        document.getElementById('box-req').classList.add('hidden');
-        document.getElementById(id).classList.remove('hidden');
-    },
+  tabLogin(id){
+    document.getElementById('box-login').classList.add('hidden');
+    document.getElementById('box-req').classList.add('hidden');
+    document.getElementById(id).classList.remove('hidden');
+  },
 
-    login: function() {
-        const u = document.getElementById('l-user').value;
-        const p = document.getElementById('l-pass').value;
-        if(u === 'arnaldo@sgo.com' && p === '123') {
-            this.user = {nome: 'Arnaldo', nivel: 'Informação e Performance'};
-            this.loginOk(); return;
-        }
-        db.ref('users').orderByChild('email').equalTo(u).once('value', s => {
-            const data = s.val();
-            if(!data) return alert("❌ Acesso Negado.");
-            const k = Object.keys(data)[0];
-            const user = data[k];
-            if(user.pass === p && user.status === 'APROVADO') { 
-                this.user = user; 
-                this.loginOk(); 
-            } else alert("❌ Erro de Login/Aprovação.");
-        });
-    },
-
-    loginOk: function() {
-        document.getElementById('login-scr').classList.add('hidden');
-        document.getElementById('user-display').innerText = `${this.user.nome} [${this.user.nivel}]`;
-        if(this.user.nivel !== 'Informação e Performance') document.getElementById('btn-perf').classList.add('hidden');
-        this.init();
-    },
-
-    requestAccess: function() {
-        const d = { 
-            nome: document.getElementById('r-nome').value, 
-            email: document.getElementById('r-email').value, 
-            setor: document.getElementById('r-setor').value, 
-            cargo: document.getElementById('r-cargo').value,
-            pass: document.getElementById('r-pass').value, 
-            status: 'PENDENTE', 
-            nivel: 'OPERADOR' 
-        };
-        db.ref('users').push(d).then(() => { 
-            alert("✅ Solicitação enviada com sucesso! Aguarde aprovação."); 
-            this.tabLogin('box-login'); 
-        });
-    },
-
-    init: function() {
-        const hoje = new Date();
-        const d = hoje.getDay();
-        const diff = hoje.getDate() - d + (d === 0 ? -6 : 0);
-        document.getElementById('f-ini').value = new Date(new Date().setDate(diff)).toISOString().split('T')[0];
-        document.getElementById('f-fim').value = new Date(new Date().setDate(diff + 6)).toISOString().split('T')[0];
-        document.getElementById('r-mes').value = hoje.toISOString().slice(0, 7);
-
-        this.sync('setores', 'p-setor');
-        this.sync('supervisores', 'p-super', 'f-sup');
-        this.sync('equipes', 'p-eqs', 'f-eq');
-        
-        db.ref('servicos').on('value', s => { 
-            this.servCatalog = Object.values(s.val()||{});
-            const sel = document.getElementById('p-servs'); 
-            sel.innerHTML = "";
-            this.servCatalog.forEach(x => sel.add(new Option(`${x.cod} - ${x.desc}`, x.cod)));
-        });
-        this.loadUsers();
-        this.renderResumo();
-    },
-
-    sync: function(path, ...ids) {
-        db.ref(path).on('value', s => {
-            const data = Object.values(s.val()||{}).sort();
-            ids.forEach(id => {
-                const el = document.getElementById(id); 
-                if(!el) return;
-                el.innerHTML = id.startsWith('f-') ? "<option value=''>TODAS</option>" : "";
-                data.forEach(v => el.add(new Option(v, v)));
-            });
-        });
-    },
-
-    addDt: function() {
-        const d = document.getElementById('p-dt-in').value;
-        if(d && !this.tempDts.includes(d)) {
-            this.tempDts.push(d);
-            document.getElementById('p-dt-list').innerText = this.tempDts.map(x => x.split('-').reverse().join('/')).join(" | ");
-        }
-    },
-
-    saveProg: function() {
-        if(!this.tempDts.length) return alert("❌ Selecione pelo menos uma data de execução.");
-        const btn = document.getElementById('btn-save-main');
-        const loader = document.getElementById('p-loader');
-        const bar = document.getElementById('p-bar');
-        const txt = document.getElementById('p-txt');
-        
-        btn.disabled = true; 
-        loader.style.display = 'block';
-
-        const data = {
-            projeto: document.getElementById('p-projeto').value,
-            si: document.getElementById('p-si').value,
-            setor: document.getElementById('p-setor').value,
-            local: document.getElementById('p-local').value,
-            supervisor: document.getElementById('p-super').value,
-            equipes: Array.from(document.getElementById('p-eqs').selectedOptions).map(o => o.value),
-            servicos: Array.from(document.getElementById('p-servs').selectedOptions).map(o => o.text),
-            valor: document.getElementById('p-total').innerText,
-            status_proj: document.getElementById('p-st-proj').value,
-            status_prog: document.getElementById('p-st-prog').value,
-            aviso: document.getElementById('p-aviso-bool').value,
-            etapa_cor: document.getElementById('p-etapa').value,
-            u_cad: this.user.nome, 
-            ts: new Date().toLocaleString('pt-BR')
-        };
-
-        let comp = 0;
-        this.tempDts.forEach(dt => {
-            db.ref('programacoes').push({...data, data_exec: dt}).then(() => {
-                comp++;
-                let p = Math.round((comp / this.tempDts.length) * 100);
-                bar.style.width = p + "%"; 
-                txt.innerText = p + "%";
-                if(comp === this.tempDts.length) {
-                    alert("✅ GRAVADO COM SUCESSO!"); 
-                    loader.style.display = 'none'; 
-                    bar.style.width = "0%"; 
-                    btn.disabled = false;
-                    this.tempDts = []; 
-                    document.getElementById('p-dt-list').innerText = "";
-                    document.getElementById('p-projeto').value = "";
-                    document.getElementById('p-servs').selectedIndex = -1;
-                    app.calc();
-                }
-            }).catch(err => {
-                alert("❌ Erro ao salvar: " + err.message);
-                loader.style.display = 'none'; 
-                btn.disabled = false;
-            });
-        });
-    },
-
-    renderResumo: function() {
-        const ini = document.getElementById('f-ini').value;
-        const fim = document.getElementById('f-fim').value;
-        const fEq = document.getElementById('f-eq').value;
-        const fSup = document.getElementById('f-sup').value;
-
-        db.ref('equipes').once('value', eS => {
-            const eqs = Object.values(eS.val()||{}).sort();
-            db.ref('programacoes').once('value', pS => {
-                const all = pS.val() || {};
-                const list = Object.keys(all).map(k => ({...all[k], key: k}));
-                
-                let progTotal = 0;
-                let dts = []; 
-                let curr = new Date(ini + "T12:00:00"); 
-                let end = new Date(fim + "T12:00:00");
-                while(curr <= end) { 
-                    dts.push(curr.toISOString().split('T')[0]); 
-                    curr.setDate(curr.getDate() + 1); 
-                }
-
-                let html = `<table class="resumo-table"><thead><tr><th style="width:150px">👥 EQUIPE / 📅 DATA</th>`;
-                dts.forEach(d => html += `<th style="font-size:10px">${d.split('-').reverse().slice(0,2).join('/')}<br><span style="font-size:9px;opacity:0.7">${d.split('-')[0]}</span></th>`);
-                html += `</tr></thead><tbody>`;
-
-                eqs.forEach(eq => {
-                    if(fEq && eq !== fEq) return;
-                    html += `<tr><td style="background:linear-gradient(90deg, #e0e0e0, #d0d0d0); font-weight:600"><b>${eq}</b></td>`;
-                    dts.forEach(dt => {
-                        const cell = list.filter(p => p.data_exec === dt && p.equipes.includes(eq));
-                        if(cell.length > 0) progTotal++;
-                        html += `<td>`;
-                        cell.forEach(p => {
-                            if(fSup && p.supervisor !== fSup) return;
-                            html += `
-                            <div class="prog-card" style="border-left-color:${p.etapa_cor === 'green' ? 'var(--vba-green)' : p.etapa_cor === 'blue' ? '#4169e1' : '#808080'}" onclick="app.openModal('${p.key}')">
-                                <b style="color:var(--vba-blue); font-size:11px">${p.projeto}</b><br>
-                                <span style="color:#666; font-size:9px">${p.status_proj}</span><br>
-                                <span style="font-weight:600; color:${p.status_prog === 'EXECUTADO' ? 'var(--vba-green)' : 'var(--vba-red)'}">${p.status_prog}</span>
-                                <div class="info-hover">
-                                    <b>👤 LOG:</b> ${p.u_cad} em ${p.ts}<br><hr style="margin:8px 0">
-                                    <b>🔢 SI:</b> ${p.si} | <b>📍 LOCAL:</b> ${p.local}<br>
-                                    <b>💰 VALOR:</b> <span style="color:var(--vba-green); font-weight:bold">${p.valor}</span><br>
-                                    <b>🔧 SERVIÇOS:</b><br>${(p.servicos||[]).join('<br>')}
-                                </div>
-                            </div>`;
-                        });
-                        html += `</td>`;
-                    });
-                    html += `</tr>`;
-                });
-                document.getElementById('resumo-render').innerHTML = html + "</tbody></table>";
-                
-                // KPIs BLOCO 3
-                const cap = eqs.length * dts.length;
-                const perc = cap > 0 ? ((progTotal / cap) * 100).toFixed(1) : 0;
-                document.getElementById('kpi-area').innerHTML = `
-                    <div class="kpi-card"><span class="kpi-val">${eqs.length}</span>👥 EQUIPES</div>
-                    <div class="kpi-card"><span class="kpi-val">${perc}%</span>📊 PROGRAMADO</div>
-                    <div class="kpi-card" style="border-left-color:var(--vba-green)"><span class="kpi-val">${(100-perc).toFixed(1)}%</span>✅ DISPONÍVEL</div>
-                `;
-            });
-        });
-    },
-
-    openModal: function(key) {
-        db.ref('programacoes/'+key).once('value', s => {
-            const p = s.val(); 
-            this.currentEditKey = key;
-            document.getElementById('m-proj').value = p.projeto;
-            document.getElementById('m-si').value = p.si;
-            document.getElementById('m-data').value = p.data_exec.split('-').reverse().join('/');
-            document.getElementById('m-st-proj').value = p.status_proj;
-            document.getElementById('m-st-prog').value = p.status_prog;
-            document.getElementById('m-cor').value = p.etapa_cor;
-            document.getElementById('m-obs').value = p.obs || "";
-            document.getElementById('modal-gestao').style.display = 'flex';
-        });
-    },
-
-    updateProj: function() {
-        if(!this.currentEditKey) return alert("❌ Nenhum projeto selecionado.");
-        db.ref('programacoes/'+this.currentEditKey).update({
-            si: document.getElementById('m-si').value,
-            status_proj: document.getElementById('m-st-proj').value,
-            status_prog: document.getElementById('m-st-prog').value,
-            etapa_cor: document.getElementById('m-cor').value,
-            obs: document.getElementById('m-obs').value
-        }).then(() => { 
-            alert("✅ Projeto atualizado com sucesso!"); 
-            this.closeModal(); 
-            this.renderResumo(); 
-        }).catch(err => alert("❌ Erro ao atualizar: " + err.message));
-    },
-
-    closeModal: () => document.getElementById('modal-gestao').style.display = 'none',
-
-    renderRelat: function() {
-        const mes = document.getElementById('r-mes').value;
-        db.ref('programacoes').once('value', s => {
-            const all = s.val() || {};
-            let html = `<table class="resumo-table"><thead><tr>
-                <th style="width:120px">📅 DATA</th>
-                <th style="width:200px">🏗️ PROJETO</th>
-                <th style="width:120px">👥 EQUIPE</th>
-                <th>📊 STATUS</th>
-            </tr></thead><tbody>`;
-            let total = 0;
-            for(let k in all) {
-                const p = all[k];
-                if(p.data_exec.startsWith(mes)) {
-                    total++;
-                    html += `<tr style="font-size:10px">
-                        <td style="text-align:center; font-weight:600">${p.data_exec.split('-').reverse().join('/')}</td>
-                        <td style="font-weight:500">${p.projeto}</td>
-                        <td>${(p.equipes||[]).join(', ')}</td>
-                        <td style="color:${p.status_proj === 'EM ANDAMENTO' ? 'var(--vba-blue)' : p.status_proj === 'CANCELADO' ? 'var(--vba-red)' : 'var(--vba-green)'}; font-weight:600">${p.status_proj}</td>
-                    </tr>`;
-                }
-            }
-            html += `<tr style="background:linear-gradient(90deg, #e8f5e8, #d4f4d4)"><td colspan="4" style="text-align:right; font-weight:bold; font-size:12px">📈 Total do mês: ${total} programações</td></tr>`;
-            document.getElementById('relat-render').innerHTML = html + "</tbody></table>";
-        });
-    },
-
-    loadUsers: function() {
-        db.ref('users').on('value', s => {
-            const list = document.getElementById('user-grid'); 
-            list.innerHTML = "";
-            s.forEach(c => {
-                const u = c.val();
-                const statusColor = u.status === 'APROVADO' ? 'var(--vba-green)' : 'var(--vba-red)';
-                list.innerHTML += `<div style="border-bottom:1px solid #ddd; padding:8px 4px; display:flex; justify-content:space-between; align-items:center; background:#f8f9fa">
-                    <span style="font-weight:500">${u.nome} [<span style="color:${statusColor}">${u.nivel}</span>]</span> 
-                    ${u.status==='PENDENTE' ? 
-                        `<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-green); color:white" onclick="app.approveUser('${c.key}')">✅ APROVAR</button>` : 
-                        `<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-red); color:white" onclick="app.delUser('${c.key}')">🗑️ EXCLUIR</button>`
-                    }
-                </div>`;
-            });
-        });
-    },
-    
-    approveUser: (k) => db.ref('users/'+k).update({status: 'APROVADO'}).then(() => alert("✅ Usuário aprovado!")),
-    delUser: (k) => { if(confirm("🗑️ Confirmar exclusão do usuário?")) db.ref('users/'+k).remove().then(() => alert("✅ Usuário excluído!")); },
-    
-    saveUser: function() { 
-        const nome = document.getElementById('u-nome').value;
-        const email = document.getElementById('u-email').value;
-        const pass = document.getElementById('u-pass').value;
-        if(!nome || !email || !pass) return alert("❌ Preencha todos os campos!");
-        db.ref('users').push({
-            nome, email, pass, 
-            nivel: document.getElementById('u-nivel').value, 
-            status: 'APROVADO'
-        }).then(() => { 
-            alert("✅ Usuário criado com sucesso!"); 
-            document.getElementById('u-nome').value = '';
-            document.getElementById('u-email').value = '';
-            document.getElementById('u-pass').value = '';
-        });
-    },
-    
-    saveBase: function() { 
-        const nome = document.getElementById('c-nome').value;
-        const tipo = document.getElementById('c-tipo').value;
-        if(!nome) return alert("❌ Digite um nome!");
-        db.ref(tipo).push(nome).then(() => { 
-            alert("✅ Cadastro realizado!"); 
-            document.getElementById('c-nome').value=""; 
-        });
-    },
-    
-    importCSV: function() {
-        const lines = document.getElementById('csv-in').value.split('\n').filter(l => l.trim());
-        let count = 0;
-        lines.forEach(l => {
-            const [cod, desc, val] = l.split(';').map(s => s.trim());
-            if(cod && desc && val) {
-                db.ref('servicos').push({
-                    cod, 
-                    desc, 
-                    valor: parseFloat(val.replace(',','.').replace('R$',''))
-                });
-                count++;
-            }
-        });
-        alert(`✅ ${count} serviços importados com sucesso!`);
-        document.getElementById('csv-in').value = '';
-    },
-    
-    tab: function(id, btn) {
-        document.querySelectorAll('.viewport > div').forEach(v => v.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        document.querySelectorAll('.sidebar .btn').forEach(b => b.classList.remove('btn-active'));
-        btn.classList.add('btn-active');
-        if(id === 'v-resumo') this.renderResumo();
-        if(id === 'v-relat') this.renderRelat();
-    },
-    
-    calc: function() {
-        let t = 0; 
-        Array.from(document.getElementById('p-servs').selectedOptions).forEach(o => {
-            const s = this.servCatalog.find(x => x.cod === o.value);
-            if(s) t += s.valor;
-        });
-        document.getElementById('p-total').innerText = 'R$ ' + t.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-    },
-    
-    filterServ: function(t) {
-        const el = document.getElementById('p-servs'); 
-        el.innerHTML = "";
-        this.servCatalog.forEach(s => {
-            if(s.cod.includes(t) || s.desc.toLowerCase().includes(t.toLowerCase())) {
-                el.add(new Option(`${s.cod} - ${s.desc}`, s.cod));
-            }
-        });
+  login(){
+    const u=document.getElementById('l-user').value;
+    const p=document.getElementById('l-pass').value;
+    if(u==='arnaldo@sgo.com' && p==='123'){
+      this.user={nome:'Arnaldo',nivel:'Informação e Performance'};
+      this.loginOk();
+      return;
     }
+    db.ref('users').orderByChild('email').equalTo(u).once('value',s=>{
+      const data=s.val();
+      if(!data) return alert('Acesso Negado.');
+      const k=Object.keys(data)[0];
+      const user=data[k];
+      if(user.pass===p && user.status==='APROVADO'){
+        this.user=user;
+        this.loginOk();
+      }else alert('Erro de Login/Aprovação.');
+    });
+  },
+
+  loginOk(){
+    document.getElementById('login-scr').classList.add('hidden');
+    document.getElementById('user-display').innerText=this.user.nome+' ['+this.user.nivel+']';
+    if(this.user.nivel!=='Informação e Performance')
+      document.getElementById('btn-perf').classList.add('hidden');
+    this.init();
+  },
+
+  requestAccess(){
+    const d={ 
+      nome:document.getElementById('r-nome').value,
+      email:document.getElementById('r-email').value,
+      setor:document.getElementById('r-setor').value,
+      cargo:document.getElementById('r-cargo').value,
+      pass:document.getElementById('r-pass').value,
+      status:'PENDENTE',
+      nivel:'OPERADOR'
+    };
+    db.ref('users').push(d).then(()=>{
+      alert('Solicitação enviada. Aguarde aprovação.');
+      this.tabLogin('box-login');
+    });
+  },
+
+  init(){
+    const hoje=new Date();
+    const d=hoje.getDay();
+    const diff=hoje.getDate()-d+(d===0?-6:0);
+    document.getElementById('f-ini').value=new Date(new Date().setDate(diff)).toISOString().split('T')[0];
+    document.getElementById('f-fim').value=new Date(new Date().setDate(diff+6)).toISOString().split('T')[0];
+    document.getElementById('r-ini').value=hoje.toISOString().split('T')[0];
+    document.getElementById('r-fim').value=hoje.toISOString().split('T')[0];
+
+    this.sync('setores','p-setor');
+    this.sync('supervisores','p-super','f-sup');
+    this.sync('equipes','p-eqs','f-eq');
+
+    db.ref('servicos').on('value',s=>{
+      this.servCatalog=Object.values(s.val()||{});
+      const sel=document.getElementById('p-servs');
+      sel.innerHTML='';
+      this.servCatalog.forEach(x=>sel.add(new Option(x.cod+' - '+x.desc,x.cod)));
+    });
+
+    const tipoSel=document.getElementById('p-tipo');
+    const avisoBox=document.getElementById('p-aviso-box');
+    const toggleAviso=()=>{
+      const t=tipoSel.value||'';
+      const habilita=(t==='DESLIGAMENTO MT'||t==='DESLIGAMENTO BT'||t==='PROXIMIDADE + DESLIGAMENTO');
+      avisoBox.style.display=habilita?'block':'none';
+      if(!habilita){
+        document.getElementById('p-aviso-bool').value='NÃO';
+        document.getElementById('p-aviso-st').value='NÃO FEITO';
+      }
+    };
+    tipoSel.addEventListener('change',toggleAviso);
+    toggleAviso();
+
+    this.loadUsers();
+    this.renderResumo();
+  },
+
+  sync(path,...ids){
+    db.ref(path).on('value',s=>{
+      const data=Object.values(s.val()||{}).sort();
+      ids.forEach(id=>{
+        const el=document.getElementById(id);
+        if(!el) return;
+        el.innerHTML=id.startsWith('f-')?"<option value=''>TODAS</option>":'';
+        data.forEach(v=>el.add(new Option(v,v)));
+      });
+    });
+  },
+
+  addDt(){
+    const d=document.getElementById('p-dt-in').value;
+    if(d && !this.tempDts.includes(d)){
+      this.tempDts.push(d);
+      document.getElementById('p-dt-list').innerText=
+        this.tempDts.map(x=>x.split('-').reverse().join('/')).join(' | ');
+    }
+  },
+
+  saveProg(){
+    if(!this.tempDts.length) return alert('Selecione pelo menos uma data de execução.');
+    const btn=document.getElementById('btn-save-main');
+    const loader=document.getElementById('p-loader');
+    const bar=document.getElementById('p-bar');
+    const txt=document.getElementById('p-txt');
+    btn.disabled=true;
+    loader.style.display='block';
+
+    const data={
+      projeto:document.getElementById('p-projeto').value,
+      si:document.getElementById('p-si').value,
+      setor:document.getElementById('p-setor').value,
+      local:document.getElementById('p-local').value,
+      supervisor:document.getElementById('p-super').value,
+      equipes:Array.from(document.getElementById('p-eqs').selectedOptions).map(o=>o.value),
+      servicos:Array.from(document.getElementById('p-servs').selectedOptions).map(o=>o.text),
+      valor:document.getElementById('p-total').innerText,
+      status_proj:document.getElementById('p-st-proj').value,
+      status_prog:document.getElementById('p-st-prog').value,
+      aviso:document.getElementById('p-aviso-bool').value,
+      aviso_status:document.getElementById('p-aviso-st').value,
+      etapa_cor:document.getElementById('p-etapa').value,
+      tipo_prog:document.getElementById('p-tipo').value,
+      u_cad:this.user.nome,
+      ts:new Date().toLocaleString('pt-BR')
+    };
+
+    let comp=0;
+    this.tempDts.forEach(dt=>{
+      db.ref('programacoes').push({...data,data_exec:dt}).then(()=>{
+        comp++;
+        const p=Math.round((comp/this.tempDts.length)*100);
+        bar.style.width=p+'%';
+        txt.innerText=p+'%';
+        if(comp===this.tempDts.length){
+          alert('Gravado com sucesso.');
+          loader.style.display='none';
+          bar.style.width='0%';
+          btn.disabled=false;
+          this.tempDts=[];
+          document.getElementById('p-dt-list').innerText='';
+          document.getElementById('p-projeto').value='';
+          document.getElementById('p-servs').selectedIndex=-1;
+          this.calc();
+        }
+      }).catch(err=>{
+        alert('Erro ao salvar: '+err.message);
+        loader.style.display='none';
+        btn.disabled=false;
+      });
+    });
+  },
+
+  toggleSelecionada(key,checked){
+    const idx=this.selecionadas.indexOf(key);
+    if(checked && idx===-1) this.selecionadas.push(key);
+    else if(!checked && idx!==-1) this.selecionadas.splice(idx,1);
+    document.getElementById('btn-relatorio-campo').style.display=this.selecionadas.length?'block':'none';
+  },
+
+  renderResumo(){
+    const ini=document.getElementById('f-ini').value;
+    const fim=document.getElementById('f-fim').value;
+    const fEq=document.getElementById('f-eq').value;
+    const fSup=document.getElementById('f-sup').value;
+
+    db.ref('equipes').once('value',eS=>{
+      const eqs=Object.values(eS.val()||{}).sort();
+      db.ref('programacoes').once('value',pS=>{
+        const all=pS.val()||{};
+        const list=Object.keys(all).map(k=>({...all[k],key:k}));
+        let progTotal=0;
+        const dts=[];
+        let curr=new Date(ini+'T12:00:00');
+        const end=new Date(fim+'T12:00:00');
+        while(curr<=end){
+          dts.push(curr.toISOString().split('T')[0]);
+          curr.setDate(curr.getDate()+1);
+        }
+
+        let html='<table class="resumo-table"><thead><tr><th>Equipe / Data</th>';
+        dts.forEach(d=>{
+          const dia=d.split('-').reverse().slice(0,2).join('/');
+          const ano=d.split('-')[0];
+          html+='<th style="font-size:10px">'+dia+'<br><span style="font-size:9px;opacity:0.7">'+ano+'</span></th>';
+        });
+        html+='</tr></thead><tbody>';
+
+        const corStatus=st=>{
+          if(st==='EXECUTADO'||st==='CONCLUÍDO') return 'var(--vba-green)';
+          if(st==='EXECUTANDO') return 'var(--vba-orange)';
+          return 'var(--vba-blue)';
+        };
+
+        eqs.forEach(eq=>{
+          if(fEq && eq!==fEq) return;
+          html+='<tr><td style="background:linear-gradient(90deg,#e0e0e0,#d0d0d0); font-weight:600"><b>'+eq+'</b></td>';
+          dts.forEach(dt=>{
+            const cell=list.filter(p=>
+              p.data_exec===dt &&
+              p.equipes && p.equipes.includes(eq) &&
+              p.status_proj!=='CANCELADO'
+            );
+            if(cell.length>0) progTotal++;
+            html+='<td>';
+            cell.forEach(p=>{
+              if(fSup && p.supervisor!==fSup) return;
+              const feito=(p.status_prog==='EXECUTADO'||p.status_prog==='CONCLUÍDO')?'SIM':'NÃO';
+              const selecionada=this.selecionadas.includes(p.key);
+              html+='<div class="prog-card'+(selecionada?' prog-card-selected':'')+'" style="border-left-color:'+corStatus(p.status_prog)+'" onclick="app.openModal(\''+p.key+'\')">'+
+                    '<input type="checkbox" class="prog-checkbox" onclick="event.stopPropagation(); app.toggleSelecionada(\''+p.key+'\', this.checked)" '+(selecionada?'checked':'')+'>'+
+                    '<div><b>Projeto:</b> '+(p.projeto||'-')+'</div>'+
+                    '<div><b>Status Projeto:</b> '+(p.status_proj||'-')+'</div>'+
+                    '<div><b>Status Programação:</b> '+(p.status_prog||'-')+'</div>'+
+                    '<div><b>SI:</b> '+(p.si||'-')+'</div>'+
+                    '<div><b>Localidade:</b> '+(p.local||'-')+'</div>'+
+                    '<div><b>Valor:</b> '+(p.valor||'')+'</div>'+
+                    '<div class="info-hover">'+
+                      '<b>Dados Gerais</b><br>'+
+                      'Projeto: '+(p.projeto||'-')+'<br>'+
+                      'Tipo Programação: '+(p.tipo||'-')+'<br>'+
+                      'Setor: '+(p.setor||'-')+'<br>'+
+                      'Status Projeto: '+(p.status_proj||'-')+'<br>'+
+                      'Status Programação: '+(p.status_prog||'-')+'<br>'+
+                      'Etapa (cor): '+(p.etapa_cor||'-')+'<br>'+
+                      'Data Execução: '+(p.data_exec||'-')+'<br>'+
+                      'Equipe(s): '+((p.equipes||[]).join(", ")||'-')+'<br>'+
+                      'Supervisor: '+(p.supervisor||'-')+'<br>'+
+                      'Aviso (sino): '+(p.aviso||'-')+'<br>'+
+                      'Aviso status: '+(p.aviso_status||'-')+'<br><br>'+
+                      '<b>Serviços</b><br>'+
+                      ((p.servicos||[]).length ? (p.servicos||[]).join('<br>') : 'Nenhum serviço cadastrado.')+'<br><br>'+
+                      '<b>Log de Cadastro</b><br>'+
+                      'Usuário cadastro: '+(p.u_cad||'-')+'<br>'+
+                      'Data/Hora cadastro: '+(p.ts||'-')+'<br>'+
+                      'Já executado: '+feito+
+                    '</div>'+
+                  '</div>';
+            });
+            html+='</td>';
+          });
+          html+='</tr>';
+        });
+        html+='</tbody></table>';
+        document.getElementById('resumo-render').innerHTML=html;
+
+        const cap=eqs.length*dts.length;
+        const perc=cap>0?((progTotal/cap)*100).toFixed(1):0;
+        document.getElementById('kpi-area').innerHTML=
+          '<div class="kpi-card"><span class="kpi-val">'+eqs.length+'</span>Equipes</div>'+
+          '<div class="kpi-card"><span class="kpi-val">'+perc+'%</span>Programado</div>'+
+          '<div class="kpi-card" style="border-left-color:var(--vba-green)"><span class="kpi-val">'+(100-perc).toFixed(1)+'%</span>Disponível</div>';
+      });
+    });
+  },
+
+  openModal(key){
+    db.ref('programacoes/'+key).once('value',s=>{
+      const p=s.val()||{};
+      this.currentEditKey=key;
+      document.getElementById('m-proj').value=p.projeto||'';
+      document.getElementById('m-si').value=p.si||'';
+      document.getElementById('m-data').value=(p.data_exec||'').split('-').reverse().join('/');
+      document.getElementById('m-st-proj').value=p.status_proj||'EM ANDAMENTO';
+      document.getElementById('m-st-prog').value=p.status_prog||'PROGRAMADO';
+      document.getElementById('m-cor').value=p.etapa_cor||'gray';
+      document.getElementById('m-obs').value=p.obs||'';
+      document.getElementById('modal-gestao').style.display='flex';
+    });
+  },
+
+  updateProj(){
+    if(!this.currentEditKey) return alert('Nenhuma programação selecionada.');
+    db.ref('programacoes/'+this.currentEditKey).update({
+      si:document.getElementById('m-si').value,
+      status_proj:document.getElementById('m-st-proj').value,
+      status_prog:document.getElementById('m-st-prog').value,
+      etapa_cor:document.getElementById('m-cor').value,
+      obs:document.getElementById('m-obs').value
+    }).then(()=>{
+      alert('Programação atualizada.');
+      this.closeModal();
+      this.renderResumo();
+    }).catch(err=>alert('Erro ao atualizar: '+err.message));
+  },
+
+  closeModal(){
+    document.getElementById('modal-gestao').style.display='none';
+  },
+
+  renderRelat(){
+    const ini=document.getElementById('r-ini').value;
+    const fim=document.getElementById('r-fim').value;
+    if(!ini||!fim) return;
+    db.ref('programacoes').once('value',s=>{
+      const all=s.val()||{};
+      let list=Object.keys(all).map(k=>({...all[k],key:k}));
+      list=list.filter(p=>p.data_exec && p.data_exec>=ini && p.data_exec<=fim);
+      this._ultimoRelatorio=list;
+
+      let html='<div style="margin-bottom:8px"><button class="btn" onclick="app.exportRelatorioCSV()">Exportar CSV</button></div>';
+      html+='<table class="resumo-table"><thead><tr>'+
+            '<th>Data Execução</th><th>Projeto</th><th>Tipo Prog.</th><th>Setor</th><th>Equipe(s)</th>'+
+            '<th>Supervisor</th><th>Status Projeto</th><th>Status Programação</th><th>Etapa (Cor)</th>'+
+            '<th>SI</th><th>Localidade</th><th>Valor</th><th>Aviso</th><th>Aviso Status</th>'+
+            '<th>Serviços</th><th>Usuário Cad.</th><th>Data/Hora Cad.</th></tr></thead><tbody>';
+
+      let total=0;
+      list.forEach(p=>{
+        total++;
+        html+='<tr style="font-size:10px">'+
+          '<td>'+ (p.data_exec||'').split('-').reverse().join('/') +'</td>'+
+          '<td>'+(p.projeto||'')+'</td>'+
+          '<td>'+(p.tipo_prog||'')+'</td>'+
+          '<td>'+(p.setor||'')+'</td>'+
+          '<td>'+((p.equipes||[]).join(', '))+'</td>'+
+          '<td>'+(p.supervisor||'')+'</td>'+
+          '<td>'+(p.status_proj||'')+'</td>'+
+          '<td>'+(p.status_prog||'')+'</td>'+
+          '<td>'+(p.etapa_cor||'')+'</td>'+
+          '<td>'+(p.si||'')+'</td>'+
+          '<td>'+(p.local||'')+'</td>'+
+          '<td>'+(p.valor||'')+'</td>'+
+          '<td>'+(p.aviso||'')+'</td>'+
+          '<td>'+(p.aviso_status||'')+'</td>'+
+          '<td>'+((p.servicos||[]).join(' | '))+'</td>'+
+          '<td>'+(p.u_cad||'')+'</td>'+
+          '<td>'+(p.ts||'')+'</td>'+
+        '</tr>';
+      });
+
+      html+='<tr style="background:linear-gradient(90deg,#e8f5e8,#d4f4d4)"><td colspan="17" style="text-align:right; font-weight:bold; font-size:12px">Total no período: '+total+' programações</td></tr>';
+      html+='</tbody></table>';
+      document.getElementById('relat-render').innerHTML=html;
+    });
+  },
+
+  exportRelatorioCSV(){
+    const data=this._ultimoRelatorio||[];
+    if(!data.length){
+      alert('Nenhum dado para exportar.');
+      return;
+    }
+    const header=[
+      'data_exec','projeto','tipo_prog','setor','equipes','supervisor',
+      'status_proj','status_prog','etapa_cor','si','local','valor',
+      'aviso','aviso_status','servicos','u_cad','ts'
+    ];
+    const linhas=[header.join(';')];
+    data.forEach(p=>{
+      linhas.push([
+        p.data_exec||'',
+        p.projeto||'',
+        p.tipo_prog||'',
+        p.setor||'',
+        (p.equipes||[]).join(', '),
+        p.supervisor||'',
+        p.status_proj||'',
+        p.status_prog||'',
+        p.etapa_cor||'',
+        p.si||'',
+        p.local||'',
+        (p.valor||'').replace(/;/g,','),
+        p.aviso||'',
+        p.aviso_status||'',
+        (p.servicos||[]).join(' | ').replace(/;/g,','),
+        p.u_cad||'',
+        p.ts||''
+      ].join(';'));
+    });
+    const blob=new Blob([linhas.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='relatorio_programacoes.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
+  gerarRelatorioCampoPDF(){
+    if(!this.selecionadas.length){
+      alert('Selecione pelo menos uma programação.');
+      return;
+    }
+    const {jsPDF}=window.jspdf||{};
+    if(!jsPDF){
+      alert('Biblioteca jsPDF não carregada.');
+      return;
+    }
+    db.ref('programacoes').once('value',s=>{
+      const all=s.val()||{};
+      const selecionadas=this.selecionadas.map(k=>({...all[k],key:k})).filter(p=>p&&p.key);
+      if(!selecionadas.length){
+        alert('Não foi possível localizar as programações selecionadas.');
+        return;
+      }
+      const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+      let y=15;
+      const x=15;
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(14);
+      doc.text('Relatorio de Campo - Programacoes',x,y);
+      y+=8;
+      doc.setFontSize(9);
+      doc.setFont('helvetica','normal');
+      doc.text('Gerado em: '+new Date().toLocaleString('pt-BR'),x,y);
+      y+=8;
+
+      selecionadas.forEach((p,idx)=>{
+        if(y>270){ doc.addPage(); y=15; }
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.2);
+        doc.rect(x-3,y-4,180,70);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(11);
+        doc.text('Programacao '+(idx+1),x,y);
+        y+=6;
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9);
+        const linha=(t,v)=>{ doc.text(t+': '+(v||'-'),x,y); y+=5; };
+
+        linha('Projeto',p.projeto);
+        linha('Tipo Programacao',p.tipo_prog);
+        linha('Setor',p.setor);
+        linha('Status Projeto',p.status_proj);
+        linha('Status Programacao',p.status_prog);
+        linha('Etapa (cor)',p.etapa_cor);
+        linha('Data Execucao',p.data_exec);
+        linha('Equipe(s)',(p.equipes||[]).join(', '));
+        linha('Supervisor',p.supervisor);
+        linha('SI',p.si);
+        linha('Localidade',p.local);
+        linha('Valor do Projeto',p.valor);
+        linha('Aviso (sino)',p.aviso);
+        linha('Aviso status',p.aviso_status);
+
+        doc.setFont('helvetica','bold');
+        doc.text('Servicos:',x,y);
+        y+=5;
+        doc.setFont('helvetica','normal');
+        const servicos=p.servicos||[];
+        if(!servicos.length){
+          doc.text('- Nenhum servico cadastrado.',x,y);
+          y+=5;
+        }else{
+          servicos.forEach(sv=>{
+            const linhas=doc.splitTextToSize('- '+sv,175);
+            linhas.forEach(l=>{
+              if(y>280){ doc.addPage(); y=15; }
+              doc.text(l,x,y);
+              y+=4;
+            });
+          });
+        }
+
+        doc.setFont('helvetica','bold');
+        doc.text('Observacoes de Campo:',x,y);
+        y+=5;
+        doc.setFont('helvetica','normal');
+        const obs=p.obs||'';
+        if(obs){
+          const obsLinhas=doc.splitTextToSize(obs,175);
+          obsLinhas.forEach(l=>{
+            if(y>280){ doc.addPage(); y=15; }
+            doc.text(l,x,y);
+            y+=4;
+          });
+        }else{
+          doc.text('- Sem observacoes registradas.',x,y);
+          y+=5;
+        }
+
+        doc.setFont('helvetica','bold');
+        doc.text('Log de Cadastro:',x,y);
+        y+=5;
+        doc.setFont('helvetica','normal');
+        linha('Usuario cadastro',p.u_cad);
+        linha('Data/Hora cadastro',p.ts);
+        y+=3;
+      });
+
+      doc.save('relatorio_campo_programacoes.pdf');
+    });
+  },
+
+  loadUsers(){
+    db.ref('users').on('value',s=>{
+      const list=document.getElementById('user-grid');
+      if(!list) return;
+      list.innerHTML='';
+      s.forEach(c=>{
+        const u=c.val();
+        const cor=u.status==='APROVADO'?'var(--vba-green)':'var(--vba-red)';
+        list.innerHTML+='<div style="border-bottom:1px solid #ddd; padding:8px 4px; display:flex; justify-content:space-between; align-items:center; background:#f8f9fa">'+
+          '<span style="font-weight:500">'+u.nome+' [<span style="color:'+cor+'">'+u.nivel+'</span>]</span>'+
+          (u.status==='PENDENTE'
+            ?'<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-green); color:white" onclick="app.approveUser(\''+c.key+'\')">Aprovar</button>'
+            :'<button class="btn" style="padding:4px 8px; font-size:10px; background:var(--vba-red); color:white" onclick="app.delUser(\''+c.key+'\')">Excluir</button>'
+          )+
+        '</div>';
+      });
+    });
+  },
+
+  approveUser(k){
+    db.ref('users/'+k).update({status:'APROVADO'}).then(()=>alert('Usuário aprovado.'));
+  },
+
+  delUser(k){
+    if(confirm('Confirmar exclusão do usuário?'))
+      db.ref('users/'+k).remove().then(()=>alert('Usuário excluído.'));
+  },
+
+  saveUser(){
+    if(!document.getElementById('u-nome').value || !document.getElementById('u-email').value || !document.getElementById('u-pass').value)
+      return alert('Preencha todos os campos.');
+    db.ref('users').push({
+      nome:document.getElementById('u-nome').value,
+      email:document.getElementById('u-email').value,
+      pass:document.getElementById('u-pass').value,
+      nivel:document.getElementById('u-nivel').value,
+      status:'APROVADO'
+    }).then(()=>{
+      alert('Usuário criado.');
+      document.getElementById('u-nome').value='';
+      document.getElementById('u-email').value='';
+      document.getElementById('u-pass').value='';
+    });
+  },
+
+  saveBase(){
+    if(!document.getElementById('c-nome').value) return alert('Digite um nome.');
+    db.ref(document.getElementById('c-tipo').value).push(document.getElementById('c-nome').value).then(()=>{
+      alert('Cadastro realizado.');
+      document.getElementById('c-nome').value='';
+    });
+  },
+
+  importCSV(){
+    const lines=document.getElementById('csv-in').value.split('\n').filter(l=>l.trim());
+    let count=0;
+    lines.forEach(l=>{
+      const parts=l.split(';').map(s=>s.trim());
+      const cod=parts[0],desc=parts[1],val=parts[2];
+      if(cod && desc && val){
+        db.ref('servicos').push({
+          cod,
+          desc,
+          valor:parseFloat(val.replace(',','.').replace('R$',''))
+        });
+        count++;
+      }
+    });
+    alert(count+' serviços importados.');
+    document.getElementById('csv-in').value='';
+  },
+
+  tab(id,btn){
+    document.querySelectorAll('.viewport > div').forEach(v=>v.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    document.querySelectorAll('.sidebar .btn').forEach(b=>b.classList.remove('btn-active'));
+    btn.classList.add('btn-active');
+    if(id==='v-resumo') this.renderResumo();
+    if(id==='v-relat') this.renderRelat();
+  },
+
+  calc(){
+    let t=0;
+    Array.from(document.getElementById('p-servs').selectedOptions).forEach(o=>{
+      const s=this.servCatalog.find(x=>x.cod===o.value);
+      if(s) t+=s.valor;
+    });
+    document.getElementById('p-total').innerText='R$ '+t.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  },
+
+  filterServ(t){
+    const el=document.getElementById('p-servs');
+    el.innerHTML='';
+    this.servCatalog.forEach(s=>{
+      if(s.cod.includes(t) || s.desc.toLowerCase().includes(t.toLowerCase()))
+        el.add(new Option(s.cod+' - '+s.desc,s.cod));
+    });
+  }
 };
+
+window.addEventListener('load',()=>app.init());
 </script>
 </body>
 </html>
