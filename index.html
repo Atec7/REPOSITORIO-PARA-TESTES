@@ -153,7 +153,8 @@
 <body>
 <div id="login-scr">
   <div class="modal-body" id="box-login" style="width:360px">
-    <h3>GESTÃO OPERACIONAL GEOM - LOGIN</h3>
+    <h3>GESTÃO PROGRAMAÇÃO GEOM - LOGIN</h3>
+    <p>Atenção! <br>esta ferramenta é de mero apoio ao sistema principal GPM e foi desenvolvido em caráter temporário. USE SEMPRE O GPM E GARANTA CONFORMIDADE.</p>
     Email: <input type="email" id="l-user" value="arnaldo@sgo.com"><br><br>
     Senha: <input type="password" id="l-pass" value="123"><br><br>
     <button class="btn" style="width:100%; font-size:12px; font-weight:bold" onclick="app.login()">ENTRAR</button>
@@ -261,8 +262,8 @@
         </fieldset>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px">
           <fieldset><legend>8. Status e 9. Aviso</legend>
-            ETAPA (6 - Cor): <select id="p-etapa"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
-            STATUS PROG (8): <select id="p-st-prog"><option>PROGRAMADO</option><option>EXECUTADO</option></select>
+            ETAPA: <select id="p-etapa"><option value="gray">Planejamento</option><option value="blue">Aguardando</option><option value="green">Executado</option></select>
+            STATUS PROG: <select id="p-st-prog"><option>PROGRAMADO</option><option>EXECUTADO</option></select>
             <div id="p-aviso-box">
               AVISO SI/NO (9): <select id="p-aviso-bool"><option>NÃO</option><option>SIM</option></select>
               AVISO STATUS: <select id="p-aviso-st"><option>NÃO FEITO</option><option>FEITO</option></select>
