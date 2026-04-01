@@ -180,15 +180,23 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
 .pcard[draggable=true]{cursor:grab}
 .pcard[draggable=true]:active{cursor:grabbing}
 .pcard.dragging{opacity:.3}
-.pcard-title{font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3}
+/* CHECKBOX DE SELEÇÃO — agora visível como botão de lista */
+.pcard-sel{
+  position:absolute;top:7px;right:7px;
+  width:16px;height:16px;
+  accent-color:var(--blue);cursor:pointer;
+  border-radius:3px;
+}
+.pcard.selected{
+  border-left-color:var(--blue);
+  background:rgba(59,130,246,.07);
+  box-shadow:0 0 0 1.5px rgba(59,130,246,.35);
+}
+.pcard-title{font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;padding-right:22px}
 .pcard-meta{color:var(--text2);font-size:10.5px;line-height:1.5}
 .pcard-badge{
   display:inline-block;font-size:9.5px;font-weight:600;
   padding:1px 6px;border-radius:20px;margin-top:3px
-}
-.pcard-chk{
-  position:absolute;top:7px;right:7px;width:14px;height:14px;
-  accent-color:var(--blue);cursor:pointer
 }
 .pcard-del-req{position:absolute;top:6px;right:26px;font-size:9px;
   background:var(--red-g);color:var(--red);padding:1px 5px;
@@ -588,7 +596,8 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
   </div>
   <div class="subheader">
     <div class="fld"><label>Equipe</label><select class="inp-sel" id="f-eq" style="min-width:130px"><option value="">Todas</option></select></div>
-    <div class="fld"><label>Supervisor</label><select class="inp-sel" id="f-sup" style="min-width:130px"><option value="">Todos</option></select></div>
+    <!-- MUDANÇA: Supervisor → Encarregado -->
+    <div class="fld"><label>Encarregado</label><select class="inp-sel" id="f-sup" style="min-width:130px"><option value="">Todos</option></select></div>
     <div class="fld"><label>Status</label>
       <select class="inp-sel" id="f-st">
         <option value="">Todos</option>
@@ -628,9 +637,10 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
       </div>
 
       <div class="section">
-        <div class="sec-title">Equipe e Supervisor</div>
+        <!-- MUDANÇA: Supervisor → Encarregado -->
+        <div class="sec-title">Equipe e Encarregado</div>
         <div class="fg fg2">
-          <div class="fl"><label>Supervisor Responsável</label><select id="p-super"></select></div>
+          <div class="fl"><label>Encarregado Responsável</label><select id="p-super"></select></div>
           <div class="fl"><label>Equipe(s) — Ctrl para múltipla</label><select id="p-eqs" multiple onchange="app._buildEqCards()"></select></div>
         </div>
         <!-- Cards de equipe com drop de serviços -->
@@ -697,6 +707,8 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
   <div class="subheader">
     <div class="fld"><label>Início</label><input class="inp" type="date" id="r-ini"></div>
     <div class="fld"><label>Fim</label><input class="inp" type="date" id="r-fim"></div>
+    <!-- MUDANÇA: Filtro por Nº Projeto adicionado -->
+    <div class="fld"><label>Nº Projeto</label><input class="inp" type="text" id="r-proj" placeholder="ex: PJ-2024-001" style="width:140px"></div>
     <div class="fld"><label>Setor</label><select class="inp-sel" id="r-setor" style="min-width:130px"><option value="">Todos</option></select></div>
     <div class="fld"><label>Equipe</label><select class="inp-sel" id="r-eq" style="min-width:130px"><option value="">Todas</option></select></div>
     <div class="fld"><label>Status</label>
@@ -777,7 +789,8 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
               <select id="c-tipo" style="width:130px">
                 <option value="setores">Setor</option>
                 <option value="equipes">Equipe</option>
-                <option value="supervisores">Supervisor</option>
+                <!-- MUDANÇA: Supervisor → Encarregado -->
+                <option value="supervisores">Encarregado</option>
               </select>
             </div>
             <button class="btn btn-success" onclick="app.saveBase()">Adicionar</button>
@@ -858,9 +871,10 @@ textarea.inp{height:auto;padding:8px 10px;resize:vertical;min-height:72px}
         </div>
       </div>
       <div class="section">
-        <div class="sec-title">Equipe e Supervisor</div>
+        <!-- MUDANÇA: Supervisor → Encarregado -->
+        <div class="sec-title">Equipe e Encarregado</div>
         <div class="fg fg2">
-          <div class="fl"><label>Supervisor</label><select id="me-super"></select></div>
+          <div class="fl"><label>Encarregado</label><select id="me-super"></select></div>
           <div class="fl"><label>Equipe(s)</label><select id="me-eqs" multiple></select></div>
         </div>
       </div>
@@ -1154,6 +1168,7 @@ const app = {
     document.getElementById('fn-fim').value=hoje;
 
     this._sync('setores',['p-setor','me-setor','r-setor','fn-setor'],true);
+    // MUDANÇA: label interno mantido como 'supervisores' no Firebase para compatibilidade
     this._sync('supervisores',['p-super','me-super','f-sup'],true);
     this._sync('equipes',['p-eqs','me-eqs','f-eq','r-eq'],false);
     this._syncBaseLists();
@@ -1197,7 +1212,6 @@ const app = {
         el.innerHTML=(isFilter||addAll)?'<option value="">Todos</option>':'';
         vals.forEach(v=>{const o=new Option(v,v);el.add(o);});
         prev.forEach(pv=>{const o=Array.from(el.options).find(op=>op.value===pv);if(o)o.selected=true;});
-        // rebuild eq cards if needed
         if(id==='p-eqs') this._buildEqCards();
       });
     });
@@ -1209,7 +1223,8 @@ const app = {
       Promise.all(['setores','equipes','supervisores'].map(p=>
         db.ref(p).once('value').then(s=>({p,vals:Object.entries(s.val()||{}).sort((a,b)=>a[1].localeCompare(b[1]))}))
       )).then(results=>{
-        const titles={setores:'Setores',equipes:'Equipes',supervisores:'Supervisores'};
+        // MUDANÇA: Supervisor → Encarregado nos títulos
+        const titles={setores:'Setores',equipes:'Equipes',supervisores:'Encarregados'};
         el.innerHTML=results.map(r=>`
           <div>
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px">${titles[r.p]}</div>
@@ -1256,7 +1271,6 @@ const app = {
   // ── EQUIPE CARDS (cadastro drag/drop serviços) ──
   _buildEqCards() {
     const sel=Array.from(document.getElementById('p-eqs').selectedOptions).map(o=>o.value);
-    // remove eqs not selected
     Object.keys(this._eqServMap).forEach(eq=>{if(!sel.includes(eq))delete this._eqServMap[eq];});
     sel.forEach(eq=>{if(!this._eqServMap[eq])this._eqServMap[eq]=[];});
 
@@ -1332,7 +1346,6 @@ const app = {
   },
 
   _toggleServClick(cod) {
-    // Click on a service in source list: add/remove from all selected equipes
     const eqs=Array.from(document.getElementById('p-eqs').selectedOptions).map(o=>o.value);
     if(!eqs.length){toast('Selecione uma equipe primeiro.','info');return;}
     const eq=eqs[0];
@@ -1387,7 +1400,6 @@ const app = {
     const btn=document.getElementById('btn-save');
     btn.disabled=true;btn.textContent='Gravando...';
 
-    // Coletar serviços: de cada equipe ou geral
     const eqsSelected=Array.from(document.getElementById('p-eqs').selectedOptions).map(o=>o.value);
     const allCods=new Set();
     Object.values(this._eqServMap).forEach(cods=>cods.forEach(c=>allCods.add(c)));
@@ -1395,10 +1407,9 @@ const app = {
       const s=this.servCat.find(x=>x.cod===cod);
       return s?`${s.cod} — ${s.desc}`:cod;
     });
-    const valorNum=0;let vt=0;
+    let vt=0;
     Array.from(allCods).forEach(cod=>{const s=this.servCat.find(x=>x.cod===cod);if(s)vt+=parseFloat(s.valor)||0;});
 
-    // Build equipe->serviços map for storage
     const eqServStored={};
     Object.entries(this._eqServMap).forEach(([eq,cods])=>{
       eqServStored[eq]=cods.map(cod=>{const s=this.servCat.find(x=>x.cod===cod);return s?`${s.cod} — ${s.desc}`:cod;});
@@ -1450,6 +1461,7 @@ const app = {
   },
 
   // ── RENDER PROGRAMAÇÃO ──
+  // MUDANÇA: cards mostram Tipo Programação no lugar de Supervisor; checkboxes visíveis para seleção em lista
   renderProg() {
     const ini=document.getElementById('f-ini').value;
     const fim=document.getElementById('f-fim').value;
@@ -1507,7 +1519,9 @@ const app = {
             const delReq=p.del_pending?'<span class="pcard-del-req">Excl. Pendente</span>':'';
             const eqServs=(p.equipes_servicos||{})[eq]||[];
             const eqServHtml=eqServs.length?`<div style="font-size:9.5px;color:var(--text3);margin-top:3px">${eqServs.slice(0,2).map(s=>s.split(' — ')[0]).join(', ')}${eqServs.length>2?'...':''}</div>`:'';
-            html+=`<div class="pcard s-${sc}"
+            // MUDANÇA: pcard-meta agora mostra tipo_prog, não supervisor
+            // MUDANÇA: checkbox como elemento de lista visual (pcard-sel)
+            html+=`<div class="pcard s-${sc}${sel?' selected':''}"
               draggable="true"
               ondragstart="app._dStart(event,'${p.key}')"
               ondragend="app._dEnd(event)"
@@ -1515,13 +1529,14 @@ const app = {
               data-key="${p.key}">
               ${delReq}
               <div class="pcard-title">${p.projeto||'—'}</div>
-              <div class="pcard-meta">${p.supervisor||'—'} · SI ${p.si||'—'}</div>
+              <div class="pcard-meta">${p.tipo_prog||'—'} · SI ${p.si||'—'}</div>
               <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:3px">
                 <span class="pcard-badge badge-${sc}">${p.status_prog||'PROGRAMADO'}</span>
                 <span class="badge ${etapaClass(p.etapa)}" style="font-size:9px;padding:1px 5px">${etapaLabel(p.etapa)}</span>
               </div>
               ${eqServHtml}
-              <input type="checkbox" class="pcard-chk"
+              <input type="checkbox" class="pcard-sel"
+                title="Selecionar para relatório de campo"
                 onclick="event.stopPropagation();app._toggleSel('${p.key}',this.checked)"
                 ${sel?'checked':''}>
             </div>`;
@@ -1585,7 +1600,7 @@ const app = {
         </div>
         <div class="rp-item-tooltip">
           ${[['Projeto',p.projeto],['SI',p.si],['Setor',p.setor],['Local',p.local],
-            ['Supervisor',p.supervisor],['Equipe(s)',(p.equipes||[]).join(', ')],
+            ['Encarregado',p.supervisor],['Equipe(s)',(p.equipes||[]).join(', ')],
             ['Status Proj.',p.status_proj],['Status Prog.',p.status_prog],
             ['Etapa',etapaLabel(p.etapa)],['Valor',p.valor],['Obs.',p.obs]]
             .map(([k,v])=>`<div class="rp-item-tooltip-row"><span class="rp-tooltip-k">${k}</span><span class="rp-tooltip-v">${v||'—'}</span></div>`).join('')}
@@ -1618,6 +1633,9 @@ const app = {
   _toggleSel(key,checked) {
     if(checked&&!this.selecionadas.includes(key))this.selecionadas.push(key);
     else if(!checked)this.selecionadas=this.selecionadas.filter(k=>k!==key);
+    // Atualiza classe visual do card
+    const card=document.querySelector(`.pcard[data-key="${key}"]`);
+    if(card)card.classList.toggle('selected',checked);
     const btn=document.getElementById('btn-campo');
     btn.classList.toggle('show',this.selecionadas.length>0);
     document.getElementById('sel-cnt').textContent=this.selecionadas.length;
@@ -1717,10 +1735,11 @@ const app = {
     document.getElementById('mv-title').textContent=p.projeto||'Programação';
     document.getElementById('mv-sub').textContent=`${fmtDate(p.data_exec)} · ${(p.equipes||[]).join(', ')}`;
 
+    // MUDANÇA: label "Supervisor" → "Encarregado" no modal de visualização
     const rows=[
       ['Nº Projeto',p.projeto],['Nº SI',p.si],
       ['Tipo Programação',p.tipo_prog],['Setor',p.setor],
-      ['Localidade',p.local],['Supervisor',p.supervisor],
+      ['Localidade',p.local],['Encarregado',p.supervisor],
       ['Equipe(s)',(p.equipes||[]).join(', ')],
       ['Data Execução',fmtDate(p.data_exec)],
       ['Status Projeto',badge(p.status_proj)],
@@ -1739,7 +1758,6 @@ const app = {
     });
     html+=`</div>`;
 
-    // Serviços por equipe
     if(p.equipes_servicos&&Object.keys(p.equipes_servicos).length){
       html+=`<div style="margin-top:16px"><div class="sec-title">Serviços por Equipe</div>`;
       Object.entries(p.equipes_servicos).forEach(([eq,servs])=>{
@@ -1803,7 +1821,6 @@ const app = {
       this.calcTotalEdit();
     },80);
 
-    // Outras programações do mesmo projeto
     const sameProjList=Object.entries(this.progs)
       .filter(([k,pp])=>pp.projeto===p.projeto&&k!==key&&!pp.deleted)
       .map(([k,pp])=>({...pp,key:k}));
@@ -1881,17 +1898,21 @@ const app = {
   },
 
   // ── RELATÓRIO ──
+  // MUDANÇA: filtro de Nº Projeto adicionado
   renderRel() {
     const ini=document.getElementById('r-ini').value,fim=document.getElementById('r-fim').value;
     if(!ini||!fim){toast('Selecione um período.','err');return;}
     const fSetor=document.getElementById('r-setor').value;
     const fEq=document.getElementById('r-eq').value;
     const fSt=document.getElementById('r-st').value;
+    const fProj=(document.getElementById('r-proj').value||'').trim().toLowerCase();
 
     let list=Object.keys(this.progs).map(k=>({...this.progs[k],key:k}))
       .filter(p=>p.data_exec&&p.data_exec>=ini&&p.data_exec<=fim
         &&(!fSetor||p.setor===fSetor)
-        &&(!fSt||p.status_prog===fSt));
+        &&(!fSt||p.status_prog===fSt)
+        &&(!fProj||(p.projeto||'').toLowerCase().includes(fProj))
+      );
 
     const expanded=[];
     list.forEach(p=>{
@@ -1910,7 +1931,7 @@ const app = {
     </div>
     <table class="data-table"><thead><tr>
       <th>Data Programação</th><th>Projeto</th><th>Tipo</th><th>Setor</th>
-      <th>Equipe</th><th>Supervisor</th>
+      <th>Equipe</th><th>Encarregado</th>
       <th>Status Proj.</th><th>Status Prog.</th><th>Etapa</th>
       <th>SI</th><th>Localidade</th><th>Valor</th>
       <th>Aviso</th><th>Serviços</th>
@@ -1942,7 +1963,7 @@ const app = {
     if(!this._relData.length){toast('Gere o relatório primeiro.','info');return;}
     this._downloadCSV('relatorio_geom',this._relData.map(p=>({
       data_exec:p.data_exec,projeto:p.projeto,tipo_prog:p.tipo_prog,
-      setor:p.setor,equipe:p._eq,supervisor:p.supervisor,
+      setor:p.setor,equipe:p._eq,encarregado:p.supervisor,
       status_proj:p.status_proj,status_prog:p.status_prog,
       etapa:etapaLabel(p.etapa),si:p.si,local:p.local,
       valor:p.valor,aviso:p.aviso,aviso_status:p.aviso_status,
@@ -1961,7 +1982,7 @@ const app = {
     doc.text('GEOM — Relatório de Programações',14,y);y+=7;
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100);
     doc.text('Gerado em '+new Date().toLocaleString('pt-BR'),14,y);y+=8;
-    const cols=['Data','Projeto','Setor','Equipe','Supervisor','Status','Etapa','Valor','Local'];
+    const cols=['Data','Projeto','Setor','Equipe','Encarregado','Status','Etapa','Valor','Local'];
     const colW=[22,32,24,28,28,22,20,22,38];
     doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(80);
     let cx=14;cols.forEach((c,i)=>{doc.text(c,cx,y);cx+=colW[i];});y+=5;
@@ -2027,7 +2048,6 @@ const app = {
       stResumo[s].count++;stResumo[s].total+=p.valor_num||0;
     });
 
-    // Evolução por mês
     const byMonth={};
     list.forEach(p=>{
       if(!p.data_exec)return;
@@ -2119,7 +2139,7 @@ const app = {
     });
     html+=`</tbody></table></div></div>
       <div><div class="sec-title">Programações</div>
-      <table class="data-table"><thead><tr><th>Data</th><th>Projeto</th><th>Equipe(s)</th><th>Supervisor</th><th>Status</th><th>Etapa</th><th>Valor</th></tr></thead><tbody>`;
+      <table class="data-table"><thead><tr><th>Data</th><th>Projeto</th><th>Equipe(s)</th><th>Encarregado</th><th>Status</th><th>Etapa</th><th>Valor</th></tr></thead><tbody>`;
     d.items.sort((a,b)=>a.data_exec.localeCompare(b.data_exec)).forEach(p=>{
       html+=`<tr>
         <td class="text-mono">${fmtDate(p.data_exec)}</td>
@@ -2139,7 +2159,7 @@ const app = {
     if(!this._finData.length){toast('Atualize o financeiro primeiro.','info');return;}
     this._downloadCSV('financeiro_geom',this._finData.map(p=>({
       data_exec:p.data_exec,projeto:p.projeto,setor:p.setor,
-      equipes:(p.equipes||[]).join(', '),supervisor:p.supervisor,
+      equipes:(p.equipes||[]).join(', '),encarregado:p.supervisor,
       status_proj:p.status_proj,status_prog:p.status_prog,
       etapa:etapaLabel(p.etapa),valor:p.valor,valor_num:p.valor_num
     })));
@@ -2170,7 +2190,7 @@ const app = {
         const lines=doc.splitTextToSize(String(v||'—'),pw-48);
         doc.text(lines[0]||'',x+44,y);y+=5;
       };
-      L('Tipo',p.tipo_prog);L('Setor',p.setor);L('Supervisor',p.supervisor);
+      L('Tipo',p.tipo_prog);L('Setor',p.setor);L('Encarregado',p.supervisor);
       L('Equipe(s)',(p.equipes||[]).join(', '));L('Data',fmtDate(p.data_exec));
       L('Status',`${p.status_prog} | Etapa: ${etapaLabel(p.etapa)}`);
       L('SI',p.si);L('Local',p.local);L('Valor',p.valor);
@@ -2413,7 +2433,6 @@ const app = {
 
   // ── TABS ──
   tab(id,btn) {
-    // Check permissions
     const tabMap={'v-prog':'prog','v-cad':'cad','v-rel':'rel','v-fin':'fin','v-adm':'adm'};
     const needed=tabMap[id];
     if(needed&&this.user.nivel!=='ADMINISTRADOR'&&!(this.user.perms||[]).includes(needed)){
