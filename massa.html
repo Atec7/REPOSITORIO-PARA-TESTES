@@ -366,7 +366,8 @@ function remMassEpi(i){
 async function saveSecurely(doc, filename, metadata = {}) {
   const totalPages = doc.internal.getNumberOfPages();
   const docId = uid();
-  const validationUrl = window.location.origin + '/verificar.html?id=' + docId;
+  const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  const validationUrl = baseDir + 'verificar.html?id=' + docId;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
   
   try {
