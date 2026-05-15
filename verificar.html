@@ -76,7 +76,15 @@
         <div id="status-icon" class="icon"></div>
         <h1 id="status-title">Verificando...</h1>
         <p id="status-msg">Por favor, aguarde enquanto validamos a autenticidade do documento.</p>
-<p id="tamper-warning" style="display:none;font-size:12px;color:var(--danger);margin-top:10px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px"><i class="fa-solid fa-triangle-exclamation"></i> <strong>ALERTA:</strong> O hash deste PDF não corresponde ao registro oficial. O documento pode ter sido adulterado.</p>
+<div id="manual-input" style="display:none;margin-bottom:20px">
+            <p style="font-size:14px;color:#666;margin-bottom:12px">Digite o ID de validação que aparece no rodapé do PDF:</p>
+            <div style="display:flex;gap:8px">
+                <input id="manual-id" type="text" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:14px" placeholder="Cole o ID aqui...">
+                <button id="verify-btn" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Verificar</button>
+            </div>
+        </div>
+        
+        <p id="tamper-warning" style="display:none;font-size:12px;color:var(--danger);margin-top:10px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px"><i class="fa-solid fa-triangle-exclamation"></i> <strong>ALERTA:</strong> O hash deste PDF não corresponde ao registro oficial. O documento pode ter sido adulterado.</p>
         
         <div id="details-box" class="details" style="display:none;">
             <div class="detail-item">
@@ -109,10 +117,19 @@
 
         async function verify() {
             const urlParams = new URLSearchParams(window.location.search);
-            const docId = urlParams.get('id');
+            const hashParams = new URLSearchParams((window.location.hash||'').replace(/^#/,''));
+            let docId = urlParams.get('id') || hashParams.get('id');
             
             if (!docId) {
-                updateStatus(false, "ID ausente", "Não foi fornecido um ID de validação válido.");
+                document.getElementById('manual-input').style.display = 'block';
+                document.getElementById('verify-btn').onclick = function(){
+                    const val = document.getElementById('manual-id').value.trim();
+                    if(val){
+                        history.replaceState(null,'','?id='+encodeURIComponent(val));
+                        verify();
+                    }
+                };
+                updateStatus(false, "ID ausente", "Forneça o ID de validação que está no rodapé do PDF.");
                 return;
             }
 
@@ -122,6 +139,7 @@
                 
                 if (data) {
                     updateStatus(true, "Documento Autêntico", "Este documento foi gerado oficialmente pela plataforma WS Engenharia.");
+                    document.getElementById('manual-input').style.display = 'none';
                     document.getElementById('details-box').style.display = 'block';
                     document.getElementById('det-filename').textContent = data.filename || 'Não informado';
                     document.getElementById('det-date').textContent = data.ts ? new Date(data.ts).toLocaleString('pt-BR') : 'Não informada';
@@ -132,7 +150,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                updateStatus(false, "Erro na Verificação", "Houve um problema ao conectar ao servidor de validação.");
+                updateStatus(false, "Erro na Verificação", "Falha ao conectar ao servidor de validação: " + e.message);
             }
         }
 
@@ -156,6 +174,5 @@
 
         window.onload = verify;
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
 </body>
 </html>
