@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verificação de Autenticidade - WS Engenharia</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1c1c1e;
+            --accent: #f59e0b;
+            --bg: #f4f4f5;
+            --text: #18181b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .success { color: var(--success); }
+        .danger { color: var(--danger); }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        p { font-size: 16px; color: #666; margin-bottom: 30px; }
+        .details {
+            text-align: left;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .detail-label { font-weight: bold; color: #888; }
+        .detail-value { color: #333; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="status-icon" class="icon"></div>
+        <h1 id="status-title">Verificando...</h1>
+        <p id="status-msg">Por favor, aguarde enquanto validamos a autenticidade do documento.</p>
+<p id="tamper-warning" style="display:none;font-size:12px;color:var(--danger);margin-top:10px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px"><i class="fa-solid fa-triangle-exclamation"></i> <strong>ALERTA:</strong> O hash deste PDF não corresponde ao registro oficial. O documento pode ter sido adulterado.</p>
+        
+        <div id="details-box" class="details" style="display:none;">
+            <div class="detail-item">
+                <span class="detail-label">Documento:</span>
+                <span id="det-filename" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Data de Emissão:</span>
+                <span id="det-date" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">ID de Validação:</span>
+                <span id="det-id" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Hash SHA-256:</span>
+                <span id="det-hash" class="detail-value" style="font-size:10px;word-break:break-all;font-family:monospace"></span>
+            </div>
+        </div>
+        
+        <a href="index.html" class="btn">Voltar ao Sistema</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script>
+        const FIREBASE_CONFIG={apiKey:"AIzaSyBehqlRiCiDniyPi3bjHtkH7q2-Px-KoZc",authDomain:"cadastr-produtos-clevir.firebaseapp.com",databaseURL:"https://cadastr-produtos-clevir-default-rtdb.firebaseio.com",projectId:"cadastr-produtos-clevir",storageBucket:"cadastr-produtos-clevir.firebasestorage.app",messagingSenderId:"1028296092810",appId:"1:1028296092810:web:86859328b19c1fdf511173"};
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.database();
+
+        async function verify() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const docId = urlParams.get('id');
+            
+            if (!docId) {
+                updateStatus(false, "ID ausente", "Não foi fornecido um ID de validação válido.");
+                return;
+            }
+
+            try {
+                const snapshot = await db.ref('doc_auth/' + docId).once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    updateStatus(true, "Documento Autêntico", "Este documento foi gerado oficialmente pela plataforma WS Engenharia.");
+                    document.getElementById('details-box').style.display = 'block';
+                    document.getElementById('det-filename').textContent = data.filename || 'Não informado';
+                    document.getElementById('det-date').textContent = data.ts ? new Date(data.ts).toLocaleString('pt-BR') : 'Não informada';
+                    document.getElementById('det-id').textContent = docId;
+                    document.getElementById('det-hash').textContent = data.hash || 'Não disponível';
+                } else {
+                    updateStatus(false, "Documento Inválido", "Não encontramos registros deste documento em nossa base de dados. Este arquivo pode ser fraudulento.");
+                }
+            } catch (e) {
+                console.error(e);
+                updateStatus(false, "Erro na Verificação", "Houve um problema ao conectar ao servidor de validação.");
+            }
+        }
+
+        function updateStatus(success, title, msg) {
+            const icon = document.getElementById('status-icon');
+            const titleEl = document.getElementById('status-title');
+            const msgEl = document.getElementById('status-msg');
+            
+            if (success) {
+                icon.innerHTML = '<i class="fa-solid fa-circle-check success"></i>';
+                titleEl.textContent = title;
+                titleEl.className = 'success';
+                msgEl.textContent = msg;
+            } else {
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark danger"></i>';
+                titleEl.textContent = title;
+                titleEl.className = 'danger';
+                msgEl.textContent = msg;
+            }
+        }
+
+        window.onload = verify;
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
+</body>
+</html>
