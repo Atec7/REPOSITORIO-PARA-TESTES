@@ -584,109 +584,6 @@ button.danger:hover { background: #c82333; }
 </div>
 
 <script type="module">
-// ── SECURITY ENGINE ─────────────────────────────────────────────────────
-async function saveSecurely(pdfBlob, filename, metadata = {}) {
-    const arrayBuffer = await pdfBlob.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-    const pages = pdfDoc.getPages();
-    const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-    const docId = push(ref(db, 'doc_auth')).key;
-    const validationUrl = baseDir + 'verificar.html?id=' + docId;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
-
-    // ID + validation URL on EVERY page
-    const pdfLibFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-    const pdfLibFontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    for(let i = 0; i < pages.length; i++){
-        const pg = pages[i];
-        const pw = pg.getWidth();
-        const ph = pg.getHeight();
-        pg.drawText('ID: ' + docId, {
-            x: 12, y: 3, size: 5, font: pdfLibFont,
-            color: PDFLib.rgb(0.7, 0.7, 0.7)
-        });
-        pg.drawText('Aut.: ' + validationUrl, {
-            x: pw - 12, y: 3, size: 5, font: pdfLibFont,
-            color: PDFLib.rgb(0.7, 0.7, 0.7)
-        });
-        // Verification seal
-        const sealX = pw - 55, sealY = 4, sealW = 50, sealH = 16;
-        pg.drawRectangle({
-            x: sealX, y: sealY, width: sealW, height: sealH,
-            borderColor: PDFLib.rgb(0.78, 0.78, 0.78),
-            color: PDFLib.rgb(0.97, 0.97, 0.97),
-            borderWidth: 0.5
-        });
-        const tw1 = pdfLibFontBold.widthOfTextAtSize('DOCUMENTO DIGITAL', 4.5);
-        pg.drawText('DOCUMENTO DIGITAL', {
-            x: sealX + (sealW - tw1)/2, y: sealY + 10, size: 4.5, font: pdfLibFontBold,
-            color: PDFLib.rgb(0.4, 0.4, 0.4)
-        });
-        const tw2 = pdfLibFont.widthOfTextAtSize('ID: ' + docId.slice(0,12) + '..', 4.5);
-        pg.drawText('ID: ' + docId.slice(0,12) + '..', {
-            x: sealX + (sealW - tw2)/2, y: sealY + 6, size: 4.5, font: pdfLibFont,
-            color: PDFLib.rgb(0.4, 0.4, 0.4)
-        });
-    }
-
-    // QR code on the LAST page
-    try {
-        const qrImgBytes = await fetch(qrUrl).then(res => res.arrayBuffer());
-        const qrImg = await pdfDoc.embedPng(qrImgBytes);
-        const lastPage = pages[pages.length - 1];
-        lastPage.drawImage(qrImg, {
-            x: lastPage.getWidth() - 28,
-            y: 8,
-            width: 18,
-            height: 18,
-        });
-        const qrFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-        lastPage.drawText('Validar Autenticidade', {
-            x: lastPage.getWidth() - 19, y: 4, size: 4, font: qrFont,
-            color: PDFLib.rgb(0.6, 0.6, 0.6)
-        });
-    } catch (e) { console.error('QR Code error:', e); }
-
-    pdfDoc.setTitle(filename);
-    let finalBytes = await pdfDoc.save();
-    let finalBlob = new Blob([finalBytes], { type: 'application/pdf' });
-
-    // SHA-256 + Firebase doc_auth
-    try {
-        const fbArray = await finalBlob.arrayBuffer();
-        const hashBuffer = await crypto.subtle.digest('SHA-256', fbArray);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-        await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), hash: hashHex, ...metadata });
-        // Add hash to every page (second pass)
-        for(let i = 0; i < pages.length; i++){
-            const pg = pages[i];
-            pg.drawText('SHA256: ' + hashHex.slice(0,10) + '..', {
-                x: 12, y: 8, size: 3.5, font: pdfLibFont,
-                color: PDFLib.rgb(0.5, 0.5, 0.5)
-            });
-        }
-        finalBytes = await pdfDoc.save();
-        finalBlob = new Blob([finalBytes], { type: 'application/pdf' });
-        const fbArray2 = await finalBlob.arrayBuffer();
-        const hashBuffer2 = await crypto.subtle.digest('SHA-256', fbArray2);
-        const hashArray2 = Array.from(new Uint8Array(hashBuffer2));
-        const hashHex2 = hashArray2.map(b => b.toString(16).padStart(2,'0')).join('');
-        await update(ref(db, 'doc_auth/' + docId), { hash: hashHex2 });
-    } catch (e) {
-        console.error('Hash error:', e);
-        if(!hashHex) await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), ...metadata });
-    }
-
-    const url = URL.createObjectURL(finalBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1000);
-}
-
   // Importações do Firebase
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
@@ -1342,10 +1239,9 @@ async function gerarCertificados(){
             html2canvas: { scale: 2, useCORS: true, allowTaint: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        
+
         const blobPresenca = await html2pdf().from(tempContainerPresenca).set(optionsPresenca).output('blob');
         await saveSecurely(blobPresenca, 'listas_presenca.pdf', { empresaId: empresa.id });
-    }
     }
 
     try {
@@ -1356,6 +1252,53 @@ async function gerarCertificados(){
         console.error("Erro ao salvar certificados gerados:", e);
         alert("Erro ao salvar os certificados no Firebase.");
     }
+}
+
+async function saveSecurely(pdfBlob, filename, metadata = {}) {
+    const arrayBuffer = await pdfBlob.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+    const pages = pdfDoc.getPages();
+    const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    const docId = push(ref(db, 'doc_auth')).key;
+    const validationUrl = baseDir + 'verificar.html?id=' + docId;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
+
+    const pdfLibFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    for(let i = 0; i < pages.length; i++){
+        const pg = pages[i];
+        const pw = pg.getWidth();
+        pg.drawText('ID: ' + docId, { x: 12, y: 3, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
+        pg.drawText('Aut.: ' + validationUrl, { x: pw - 12, y: 3, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
+    }
+
+    try {
+        const qrImgBytes = await fetch(qrUrl).then(res => res.arrayBuffer());
+        const qrImg = await pdfDoc.embedPng(qrImgBytes);
+        const lastPage = pages[pages.length - 1];
+        lastPage.drawImage(qrImg, { x: lastPage.getWidth() - 28, y: 8, width: 18, height: 18 });
+        lastPage.drawText('Validar Autenticidade', { x: lastPage.getWidth() - 19, y: 4, size: 4, font: pdfLibFont, color: PDFLib.rgb(0.6, 0.6, 0.6) });
+    } catch (e) { console.error('QR Code error:', e); }
+
+    pdfDoc.setTitle(filename);
+    const finalBytes = await pdfDoc.save();
+    const finalBlob = new Blob([finalBytes], { type: 'application/pdf' });
+
+    try {
+        const fbArray = await finalBlob.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-256', fbArray);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+        await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), hash: hashHex, ...metadata });
+    } catch (e) {
+        console.error('Hash error:', e);
+        await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), ...metadata });
+    }
+
+    const url = URL.createObjectURL(finalBlob);
+    const link = document.createElement('a');
+    link.href = url; link.download = filename;
+    document.body.appendChild(link); link.click();
+    setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1000);
 }
 
 async function downloadPDF(targetElement, filename = 'certificados_gerados.pdf') {
@@ -1388,7 +1331,7 @@ async function downloadPDF(targetElement, filename = 'certificados_gerados.pdf')
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
-    
+
     const blob = await html2pdf().from(tempContainer).set(options).output('blob');
     await saveSecurely(blob, filename);
 }
