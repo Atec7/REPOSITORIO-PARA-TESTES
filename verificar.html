@@ -100,8 +100,20 @@
                 <span id="det-id" class="detail-value"></span>
             </div>
             <div class="detail-item">
+                <span class="detail-label">Emissão:</span>
+                <span id="det-ago" class="detail-value" style="font-size:12px"></span>
+            </div>
+            <div class="detail-item">
                 <span class="detail-label">Hash SHA-256:</span>
                 <span id="det-hash" class="detail-value" style="font-size:10px;word-break:break-all;font-family:monospace"></span>
+            </div>
+            <div style="text-align:center;margin-top:12px">
+                <button onclick="copyHash()" style="padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px"><i class="fa-solid fa-copy"></i> Copiar Hash</button>
+            </div>
+            <div id="verify-upload" style="margin-top:14px;padding:12px;background:#f0f5ff;border:1px solid #d0d8e8;border-radius:8px;font-size:11px;color:#444;text-align:left">
+                <strong>Verificação automática:</strong> Faça upload do PDF para confirmar se o hash corresponde.<br><br>
+                <input type="file" id="pdf-upload" accept=".pdf" style="font-size:12px;margin-bottom:6px">
+                <div id="upload-result" style="font-weight:600;margin-top:6px"></div>
             </div>
         </div>
         
@@ -142,9 +154,16 @@
                     document.getElementById('manual-input').style.display = 'none';
                     document.getElementById('details-box').style.display = 'block';
                     document.getElementById('det-filename').textContent = data.filename || 'Não informado';
-                    document.getElementById('det-date').textContent = data.ts ? new Date(data.ts).toLocaleString('pt-BR') : 'Não informada';
+                    const ts = data.ts || 0;
+                    document.getElementById('det-date').textContent = ts ? new Date(ts).toLocaleString('pt-BR') : 'Não informada';
                     document.getElementById('det-id').textContent = docId;
                     document.getElementById('det-hash').textContent = data.hash || 'Não disponível';
+                    if(ts){
+                        const diff = Date.now() - ts;
+                        const days = Math.floor(diff / 86400000);
+                        const hours = Math.floor((diff % 86400000) / 3600000);
+                        document.getElementById('det-ago').textContent = days > 0 ? days + ' dia(s) atrás' : hours > 0 ? hours + ' hora(s) atrás' : 'Menos de 1 hora';
+                    }
                 } else {
                     updateStatus(false, "Documento Inválido", "Não encontramos registros deste documento em nossa base de dados. Este arquivo pode ser fraudulento.");
                 }
@@ -171,6 +190,44 @@
                 msgEl.textContent = msg;
             }
         }
+
+        function copyHash(){
+            const hash = document.getElementById('det-hash').textContent;
+            if(hash && hash !== 'Não disponível'){
+                if(navigator.clipboard){navigator.clipboard.writeText(hash);}
+                else{const ta=document.createElement('textarea');ta.value=hash;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+                alert('Hash copiado!');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.getElementById('pdf-upload')?.addEventListener('change', async function(e){
+                const file = e.target.files?.[0];
+                if(!file) return;
+                const resultEl = document.getElementById('upload-result');
+                const storedHash = document.getElementById('det-hash').textContent;
+                if(!storedHash || storedHash === 'Não disponível'){
+                    resultEl.innerHTML = '<span style="color:#888">Carregue um ID de validação primeiro.</span>';
+                    return;
+                }
+                resultEl.innerHTML = '<span style="color:#888">Calculando hash do arquivo...</span>';
+                try{
+                    const buf = await file.arrayBuffer();
+                    const hb = await crypto.subtle.digest('SHA-256', buf);
+                    const ha = Array.from(new Uint8Array(hb));
+                    const fileHash = ha.map(b=>b.toString(16).padStart(2,'0')).join('');
+                    if(fileHash === storedHash){
+                        resultEl.innerHTML = '<span style="color:var(--success)"><i class="fa-solid fa-check-circle"></i> Hash corresponde! Documento autêntico.</span>';
+                        document.getElementById('tamper-warning').style.display = 'none';
+                    }else{
+                        resultEl.innerHTML = '<span style="color:var(--danger)"><i class="fa-solid fa-circle-xmark"></i> Hash NÃO corresponde! Documento adulterado.</span>';
+                        document.getElementById('tamper-warning').style.display = 'block';
+                    }
+                }catch(err){
+                    resultEl.innerHTML = '<span style="color:var(--danger)">Erro ao ler o PDF.</span>';
+                }
+            });
+        });
 
         window.onload = verify;
     </script>

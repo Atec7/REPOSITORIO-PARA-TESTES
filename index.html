@@ -1512,29 +1512,62 @@ async function saveSecurely(doc, filename, metadata = {}) {
     doc.text('Validar Autenticidade', PAG.PW - 14.5, PAG.PH - 7, { align: 'center' });
   } catch (e) { console.error('QR Code error:', e); }
 
-  for(let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(5);
-    doc.setTextColor(180, 180, 180);
-    doc.text('ID: ' + docId, PAG.PM, PAG.PH - 1);
-    doc.text('Aut.: ' + validationUrl, PAG.PW - PAG.PM, PAG.PH - 1, { align: 'right' });
-  }
+  let hashHex=null;
+  try {
+    for(let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(5);
+      doc.setTextColor(180,180,180);
+      doc.text('ID: '+docId, PAG.PM, PAG.PH-1);
+      doc.text('Aut.: '+validationUrl, PAG.PW-PAG.PM, PAG.PH-1,{align:'right'});
+      doc.setDrawColor(200,200,200);
+      doc.setFillColor(248,248,248);
+      doc.roundedRect(PAG.PW-50, PAG.PH-17, 46, 14, 2, 2, 'FD');
+      doc.setFontSize(4.5);
+      doc.setTextColor(100,100,100);
+      doc.text('DOCUMENTO DIGITAL', PAG.PW-27, PAG.PH-12.5,{align:'center'});
+      doc.text('ID: '+docId.slice(0,12)+'..', PAG.PW-27, PAG.PH-8,{align:'center'});
+      doc.setFontSize(3.5);
+      doc.text(hashHex?'SHA256: '+hashHex.slice(0,10)+'..':'AGUARDE...', PAG.PW-27, PAG.PH-4.5,{align:'center'});
+    }
+  }catch(e){console.error('Badge error:',e);}
   
   try {
     const pdfBlob = doc.output('blob');
     const pdfBytes = await pdfBlob.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-    db.ref('doc_auth/' + docId).set({ filename, ts: Date.now(), hash: hashHex, ...metadata });
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),hash:hashHex,...metadata});
+    const finalBlob = doc.output('blob');
+    try{
+      for(let i=1;i<=totalPages;i++){
+        doc.setPage(i);
+        doc.setFontSize(3.5);
+        doc.setTextColor(120,120,120);
+        doc.text('SHA256: '+hashHex.slice(0,10)+'..', PAG.PW-27, PAG.PH-4.5,{align:'center'});
+      }
+      const finalBlob2=doc.output('blob');
+      const finalBytes2=await finalBlob2.arrayBuffer();
+      const hashBuffer2=await crypto.subtle.digest('SHA-256', finalBytes2);
+      const hashArray2=Array.from(new Uint8Array(hashBuffer2));
+      const hashHex2=hashArray2.map(b=>b.toString(16).padStart(2,'0')).join('');
+      db.ref('doc_auth/'+docId).update({hash:hashHex2});
+      const url=URL.createObjectURL(finalBlob2);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }catch(e2){
+      const url=URL.createObjectURL(pdfBlob);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }
   } catch (e) {
     console.error('Sec error:', e);
-    db.ref('doc_auth/' + docId).set({ filename, ts: Date.now(), ...metadata });
+    db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),...metadata});
     doc.save(filename);
   }
 }

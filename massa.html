@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 :root{
@@ -48,6 +49,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--hi);box-shadow:0 0 0 
 textarea{resize:vertical;min-height:75px}
 input[type="file"]{padding:5px;font-size:12px}
 .cl{max-height:190px;overflow-y:auto;border:1px solid var(--bd);border-radius:6px;background:var(--sf)}
+.fis{width:100%;padding:5px 8px;border:1px solid var(--bd);border-radius:5px;font-size:11px;margin-bottom:4px;box-sizing:border-box;background:var(--bg)}
 .ci{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd);font-size:12px}
 .ci:last-child{border-bottom:none}
 .ci input[type="checkbox"]{width:14px;height:14px;cursor:pointer;flex-shrink:0;accent-color:var(--hi)}
@@ -93,9 +95,9 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
     <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
       <div class="card" style="position:sticky;top:0">
         <div class="ct"><i class="fa-solid fa-filter"></i> Filtros</div>
-        <div class="fg"><label class="fl">Empresa</label><select id="m-e" onchange="fltMCargos()"><option value="">Selecione...</option></select></div>
-        <div class="fg"><label class="fl">Fun&ccedil;&atilde;o / Cargo</label><select id="m-c" onchange="fltM()"><option value="">Todos os cargos</option></select></div>
-        <div class="fg"><label class="fl">Colaboradores</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mChk',true)">Todos</button><button class="bxs bxd" onclick="selAll('mChk',false)">Nenhum</button></div><div id="m-f-list" class="cl" style="max-height:260px"><div class="es">Selecione uma empresa</div></div></div>
+        <div class="fg"><label class="fl">Empresa</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mEChk',true);fltMCargos()">Todos</button><button class="bxs bxd" onclick="selAll('mEChk',false);fltMCargos()">Nenhum</button></div><input id="m-e-src" class="fis" placeholder="Pesquisar empresa..." onkeyup="filterCheckList('m-e-list','m-e-src')"><div id="m-e-list" class="cl" style="max-height:120px"><div class="es">Carregando...</div></div></div>
+        <div class="fg"><label class="fl">Fun&ccedil;&atilde;o / Cargo</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mCgChk',true);fltM()">Todos</button><button class="bxs bxd" onclick="selAll('mCgChk',false);fltM()">Nenhum</button></div><input id="m-c-src" class="fis" placeholder="Pesquisar cargo..." onkeyup="filterCheckList('m-c-list','m-c-src')"><div id="m-c-list" class="cl" style="max-height:150px"><div class="es">Nenhum cargo</div></div></div>
+        <div class="fg"><label class="fl">Colaboradores</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mChk',true)">Todos</button><button class="bxs bxd" onclick="selAll('mChk',false)">Nenhum</button></div><input id="m-f-src" class="fis" placeholder="Pesquisar colaborador..." onkeyup="filterCheckList('m-f-list','m-f-src')"><div id="m-f-list" class="cl" style="max-height:260px"><div class="es">Carregando...</div></div></div>
       </div>
 
       <div>
@@ -217,7 +219,7 @@ function updateMassFieldsVisibility(){
   if(listaEl)listaEl.style.display=types.docLista?'block':'none';
   if(epiEl)epiEl.style.display=types.docEpi?'block':'none';
 }
-function renderAll(){populateSelects();populateMassEpiSel();if(document.getElementById('m-e').value)fltM();}
+function renderAll(){populateSelects();populateMassEpiSel();fltMCargos();}
 function populateMassEpiSel(){
   const sel=document.getElementById('m-epi-sel');if(!sel)return;
   const cur=sel.value;
@@ -277,57 +279,78 @@ function resolveCargoEpis(cargoId){
   });
   return items;
 }
+function filterCheckList(listId,srcId){
+  const q=document.getElementById(srcId).value.toLowerCase();
+  const items=document.getElementById(listId).querySelectorAll('.ci');
+  items.forEach(el=>{
+    const txt=(el.textContent||'').toLowerCase();
+    el.style.display=txt.includes(q)?'':'none';
+  });
+}
+
+function getCheckedEmpresas(){
+  const ids=getChecked('mEChk');
+  if(!ids.length)ids.push('');
+  return ids;
+}
+
 function populateSelects(){
   const emps=toArr(DATA.empresas);
-  const opts='<option value="">Selecione...</option>'+emps.map(e=>`<option value="${esc(e.id)}">${esc(e.nome)}</option>`).join('');
-  const mE=document.getElementById('m-e');
-  if(mE){const cur=mE.value;mE.innerHTML=opts;if(cur)mE.value=cur;}
-  const cargos=toArr(DATA.cargos);
-  const mC=document.getElementById('m-c');
-  if(mC){const cur=mC.value;mC.innerHTML='<option value="">Todos os cargos</option>'+cargos.map(c=>`<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join('');if(cur)mC.value=cur;}
+  const el=document.getElementById('m-e-list');
+  if(!emps.length){el.innerHTML='<div class="es">Nenhuma empresa</div>';return;}
+  el.innerHTML=emps.map(e=>`<div class="ci"><input type="checkbox" name="mEChk" value="${esc(e.id)}" id="ck_mEChk_${e.id}" onchange="fltMCargos()"><label for="ck_mEChk_${e.id}">${esc(e.nome)}</label></div>`).join('');
 }
 
 // ── FILTROS ─────────────────────────────────────────────────────
 function fltMCargos(){
-  const eid=document.getElementById('m-e').value;
+  const empIds=getCheckedEmpresas();
+  const hasEmpFilter=empIds.length>0&&empIds[0]!=='';
   const cargos=toArr(DATA.cargos);
-  const mC=document.getElementById('m-c');
-  if(!eid){
-    mC.innerHTML='<option value="">Todos os cargos</option>'+cargos.map(c=>`<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join('');
-    fltM();
-    return;
+  const el=document.getElementById('m-c-list');
+  let filtered=cargos;
+  if(hasEmpFilter){
+    const funcs=toArr(DATA.funcionarios).filter(f=>empIds.includes(String(f.empresaId||'').trim()));
+    const cargoIds=new Set();
+    funcs.forEach(f=>{if(f.funcao)cargoIds.add(String(f.funcao).trim());});
+    filtered=cargos.filter(c=>cargoIds.has(String(c.id).trim()));
   }
-  const funcs=toArr(DATA.funcionarios).filter(f=>String(f.empresaId||'').trim()===String(eid).trim());
-  const cargoIds=new Set();
-  funcs.forEach(f=>{if(f.funcao)cargoIds.add(String(f.funcao).trim());});
-  const filtered=cargos.filter(c=>cargoIds.has(String(c.id).trim()));
-  mC.innerHTML='<option value="">Todos os cargos</option>'+filtered.map(c=>`<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join('');
+  if(!filtered.length){el.innerHTML='<div class="es">Nenhum cargo</div>';fltM();return;}
+  el.innerHTML=filtered.map(c=>`<div class="ci"><input type="checkbox" name="mCgChk" value="${esc(c.id)}" id="ck_mCgChk_${c.id}" onchange="fltM()"><label for="ck_mCgChk_${c.id}">${esc(c.nome)}</label></div>`).join('');
   fltM();
 }
 
-function fltM(){
-  const eid=document.getElementById('m-e').value;
-  const cid=document.getElementById('m-c').value;
-  const el=document.getElementById('m-f-list');
-  if(!eid){el.innerHTML='<div class="es">Selecione uma empresa</div>';document.getElementById('m-os-textos').innerHTML='<div class="es">Selecione um cargo primeiro</div>';return;}
-  let funcs=toArr(DATA.funcionarios).filter(f=>String(f.empresaId||'').trim()===String(eid).trim());
-  if(cid)funcs=funcs.filter(f=>String(f.funcao||'').trim()===String(cid).trim());
-  el.innerHTML=funcs.length?funcs.map(f=>`<div class="ci"><input type="checkbox" name="mChk" value="${f.id}" id="ck_mChk_${f.id}"><label for="ck_mChk_${f.id}">${esc(f.nome)} <span>(${esc(resolveCargo(f.funcao)?.nome||f.funcao||'')})</span></label></div>`).join(''):'<div class="es">Nenhum colaborador encontrado</div>';
-  fltMTextos(cid);
+function getCheckedCargos(){
+  const ids=getChecked('mCgChk');
+  if(!ids.length)ids.push(''); // "todos" when none checked
+  return ids;
 }
 
-function fltMTextos(cid){
+function fltM(){
+  const empIds=getCheckedEmpresas();
+  const cargoIds=getCheckedCargos();
+  const el=document.getElementById('m-f-list');
+  const hasEmpFilter=empIds.length>0&&empIds[0]!=='';
+  const hasCgFilter=cargoIds.length>0&&cargoIds[0]!=='';
+  let funcs=toArr(DATA.funcionarios);
+  if(hasEmpFilter)funcs=funcs.filter(f=>empIds.includes(String(f.empresaId||'').trim()));
+  if(hasCgFilter)funcs=funcs.filter(f=>cargoIds.includes(String(f.funcao||'').trim()));
+  el.innerHTML=funcs.length?funcs.map(f=>`<div class="ci"><input type="checkbox" name="mChk" value="${f.id}" id="ck_mChk_${f.id}"><label for="ck_mChk_${f.id}">${esc(f.nome)} <span>(${esc(resolveCargo(f.funcao)?.nome||f.funcao||'')})</span></label></div>`).join(''):'<div class="es">Nenhum colaborador encontrado</div>';
+  document.getElementById('m-f-src').value='';
+  fltMTextos(hasCgFilter?cargoIds:null);
+}
+
+function fltMTextos(cids){
   const el=document.getElementById('m-os-textos');
   let textos;
-  if(!cid){
+  if(!cids){
     textos=toArr(DATA.textos);
     if(!textos.length){el.innerHTML='<div class="es">Nenhum texto cadastrado</div>';updateMassFieldsVisibility();return;}
   }else{
     textos=toArr(DATA.textos).filter(t=>{
       const vinculados = t.cargosVinculados || [];
-      return vinculados.some(c=>String(c).trim()===String(cid).trim());
+      return vinculados.some(c=>cids.includes(String(c).trim()));
     });
-    if(!textos.length){el.innerHTML='<div class="es">Nenhum texto vinculado a este cargo.</div>';updateMassFieldsVisibility();return;}
+    if(!textos.length){el.innerHTML='<div class="es">Nenhum texto vinculado a este(s) cargo(s).</div>';updateMassFieldsVisibility();return;}
   }
   el.innerHTML=textos.map(t=>`<div class="ci"><input type="checkbox" name="mOsChk" value="${t.id}" id="ck_mOsChk_${t.id}" checked onchange="updateMassFieldsVisibility()"><label for="ck_mOsChk_${t.id}">${esc(t.titulo)} <span class="bdg">${esc(t.categoria||'')}</span></label></div>`).join('');
   updateMassFieldsVisibility();
@@ -363,7 +386,7 @@ function remMassEpi(i){
 }
 
 // ── SECURITY ENGINE ─────────────────────────────────────────────────────
-async function saveSecurely(doc, filename, metadata = {}) {
+async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) {
   const totalPages = doc.internal.getNumberOfPages();
   const docId = uid();
   const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
@@ -379,29 +402,67 @@ async function saveSecurely(doc, filename, metadata = {}) {
     doc.text('Validar Autenticidade', PAG.PW - 14.5, PAG.PH - 7, { align: 'center' });
   } catch (e) { console.error('QR Code error:', e); }
 
-  for(let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(5);
-    doc.setTextColor(180, 180, 180);
-    doc.text('ID: ' + docId, PAG.PM, PAG.PH - 1);
-    doc.text('Aut.: ' + validationUrl, PAG.PW - PAG.PM, PAG.PH - 1, { align: 'right' });
-  }
+  let hashHex=null;
+  try {
+    for(let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(5);
+      doc.setTextColor(180,180,180);
+      doc.text('ID: '+docId, PAG.PM, PAG.PH-1);
+      doc.text('Aut.: '+validationUrl, PAG.PW-PAG.PM, PAG.PH-1,{align:'right'});
+      doc.setDrawColor(200,200,200);
+      doc.setFillColor(248,248,248);
+      doc.roundedRect(PAG.PW-50, PAG.PH-17, 46, 14, 2, 2, 'FD');
+      doc.setFontSize(4.5);
+      doc.setTextColor(100,100,100);
+      doc.text('DOCUMENTO DIGITAL', PAG.PW-27, PAG.PH-12.5,{align:'center'});
+      doc.text('ID: '+docId.slice(0,12)+'..', PAG.PW-27, PAG.PH-8,{align:'center'});
+      doc.setFontSize(3.5);
+      doc.text(hashHex?'SHA256: '+hashHex.slice(0,10)+'..':'AGUARDE...', PAG.PW-27, PAG.PH-4.5,{align:'center'});
+    }
+  }catch(e){console.error('Badge error:',e);}
   
   try {
     const pdfBlob = doc.output('blob');
     const pdfBytes = await pdfBlob.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-    db.ref('doc_auth/' + docId).set({ filename, ts: Date.now(), hash: hashHex, ...metadata });
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),hash:hashHex,...metadata});
+    if(skipDownload) return { blob: pdfBlob, docId, hash: hashHex, filename };
+    const finalBlob = doc.output('blob');
+    try{
+      for(let i=1;i<=totalPages;i++){
+        doc.setPage(i);
+        doc.setFontSize(3.5);
+        doc.setTextColor(120,120,120);
+        doc.text('SHA256: '+hashHex.slice(0,10)+'..', PAG.PW-27, PAG.PH-4.5,{align:'center'});
+      }
+      const finalBlob2=doc.output('blob');
+      const finalBytes2=await finalBlob2.arrayBuffer();
+      const hashBuffer2=await crypto.subtle.digest('SHA-256', finalBytes2);
+      const hashArray2=Array.from(new Uint8Array(hashBuffer2));
+      const hashHex2=hashArray2.map(b=>b.toString(16).padStart(2,'0')).join('');
+      db.ref('doc_auth/'+docId).update({hash:hashHex2});
+      const url=URL.createObjectURL(finalBlob2);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }catch(e2){
+      const url=URL.createObjectURL(pdfBlob);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }
   } catch (e) {
     console.error('Sec error:', e);
-    db.ref('doc_auth/' + docId).set({ filename, ts: Date.now(), ...metadata });
+    db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),...metadata});
+    if(skipDownload){
+      const fb=doc.output('blob');
+      return{blob:fb,docId,hash:null,filename};
+    }
     doc.save(filename);
   }
 }
@@ -781,7 +842,7 @@ function massProgress(msg,pct){
     </div>`;
 }
 
-async function gerarDocs(func, emp, opts, onStep){
+async function gerarDocs(func, emp, opts, onStep, results){
   const {osTextIds, dataFmt, dataVal, local, treino, carga} = opts;
   const safeDataAdm = fmtData(func.dataAdm).replace(/\//g,'-');
   
@@ -792,16 +853,17 @@ async function gerarDocs(func, emp, opts, onStep){
       const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
       await massDrawOsPage(doc, func, emp, [tid]);
       const filename = `${func.nome.replace(/\s+/g,'_')} - ${texto.titulo.replace(/\s+/g,'_')} - ${safeDataAdm}.pdf`;
-      await saveSecurely(doc, filename, {funcionarioId: func.id, textoId: tid});
+      const r=await saveSecurely(doc, filename, {funcionarioId: func.id, textoId: tid}, true);
+      if(r&&results)results.push(r);
       if(onStep) onStep();
     }
   }
-  if(opts.docAdm){
-    if(!func.dataAdm) return;
+  if(opts.docAdm&&func.dataAdm){
     const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     await massDrawAdmPage(doc, func, emp, dataFmt, local, opts.conteudo||'');
     const filename = `${func.nome.replace(/\s+/g,'_')} - Ficha_Admissional - ${safeDataAdm}.pdf`;
-    await saveSecurely(doc, filename, {funcionarioId: func.id});
+    const r=await saveSecurely(doc, filename, {funcionarioId: func.id}, true);
+    if(r&&results)results.push(r);
     if(onStep) onStep();
   }
   if(opts.docEpi){
@@ -811,7 +873,8 @@ async function gerarDocs(func, emp, opts, onStep){
       const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
       await massDrawEpiPage(doc, func, emp, dataFmt, finalItems);
       const filename = `${func.nome.replace(/\s+/g,'_')} - Ficha_EPI - ${safeDataAdm}.pdf`;
-      await saveSecurely(doc, filename, {funcionarioId: func.id});
+      const r=await saveSecurely(doc, filename, {funcionarioId: func.id}, true);
+      if(r&&results)results.push(r);
       if(onStep) onStep();
     }
   }
@@ -819,20 +882,19 @@ async function gerarDocs(func, emp, opts, onStep){
 
 async function massGen(){
   console.log("MassGen iniciado...");
-  const eid=document.getElementById('m-e').value;
-  const cid=document.getElementById('m-c').value;
-  if(!eid){alert('Selecione uma empresa');return;}
-  const funcs=toArr(DATA.funcionarios).filter(f=>{
-    const matchEmp=String(f.empresaId||'').trim()===String(eid).trim();
-    const matchCargo=cid?String(f.funcao||'').trim()===String(cid).trim():true;
-    return matchEmp && matchCargo;
-  });
+  const empIds=getCheckedEmpresas();
+  const cargoIds=getCheckedCargos();
+  const hasEmpFilter=empIds.length>0&&empIds[0]!=='';
+  const hasCargoFilter=cargoIds.length>0&&cargoIds[0]!=='';
+  if(!hasEmpFilter&&!hasCargoFilter){alert('Selecione uma empresa ou um cargo');return;}
+  let funcs=toArr(DATA.funcionarios);
+  if(hasEmpFilter)funcs=funcs.filter(f=>empIds.includes(String(f.empresaId||'').trim()));
+  if(hasCargoFilter)funcs=funcs.filter(f=>cargoIds.includes(String(f.funcao||'').trim()));
   const checkedIds=getChecked('mChk');
   const selected=funcs.filter(f=>checkedIds.includes(f.id));
   if(!selected.length){alert('Nenhum colaborador selecionado');document.getElementById('mass-results').style.display='none';return;}
   console.log("Colaboradores selecionados:", selected.length);
  
-  const emp=resolveEmp(eid);
   const dataVal=document.getElementById('m-data').value;
   const dataFmt=fmtData(dataVal);
   const local=document.getElementById('m-local').value||'';
@@ -849,11 +911,12 @@ async function massGen(){
   const conteudo=document.getElementById('m-lista-cont')?.value||'';
  
   document.getElementById('mass-results').style.display='none';
+  const numEmpresas=new Set(selected.map(f=>f.empresaId||'unknown')).size;
   let totalSteps=0, step=0;
   if(docOS)totalSteps+=selected.length * osTextIds.length;
   if(docAdm)totalSteps+=selected.length;
   if(docEpi)totalSteps+=selected.length;
-  if(docLista)totalSteps++;
+  if(docLista)totalSteps+=numEmpresas;
   if(!totalSteps){alert('Nenhum documento a gerar');return;}
   console.log("Total passos:", totalSteps);
  
@@ -862,18 +925,41 @@ async function massGen(){
   const opts={docOS,docLista,docAdm,docEpi,osTextIds,dataFmt,dataVal,local,treino,carga,conteudo};
  
   spin(true);
+  const results=[];
   try{
-    for(const func of selected){
-      console.log("Gerando docs para:", func.nome);
-      await gerarDocs(func, emp, opts, stepCb);
+    const grouped={};
+    for(const f of selected){
+      const eid=f.empresaId||'unknown';
+      if(!grouped[eid])grouped[eid]=[];
+      grouped[eid].push(f);
     }
-    if(docLista){
-      console.log("Gerando Lista de Presença...");
-      const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      await massDrawListaPage(doc, selected, emp, {treino,carga,conteudo,dataFmt,local});
-      const filename = `LISTA_PRESENCA_${treino.replace(/\s+/g,'_')}_${dataFmt.replace(/\//g,'-')}.pdf`;
-      await saveSecurely(doc, filename, {empresaId: emp.id});
-      stepCb();
+    for(const [eid, employees] of Object.entries(grouped)){
+      const emp=resolveEmp(eid);
+      for(const func of employees){
+        console.log("Gerando docs para:", func.nome);
+        await gerarDocs(func, emp, opts, stepCb, results);
+      }
+      if(docLista){
+        console.log("Gerando Lista de Presença para", emp?.nome);
+        const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+        await massDrawListaPage(doc, employees, emp, {treino,carga,conteudo,dataFmt,local});
+        const filename = `LISTA_PRESENCA_${(emp?.nome||'').replace(/\s+/g,'_')}_${treino.replace(/\s+/g,'_')}_${dataFmt.replace(/\//g,'-')}.pdf`;
+        const r=await saveSecurely(doc, filename, {empresaId: emp?.id}, true);
+        if(r)results.push(r);
+        stepCb();
+      }
+    }
+    if(results.length){
+      const zip=new JSZip();
+      const folder=zip.folder(`Documentos_Gerados_${dataFmt.replace(/\//g,'-')}`);
+      results.forEach(r=>{if(r.blob)folder.file(r.filename,r.blob);});
+      const zipBlob=await zip.generateAsync({type:'blob'});
+      const url=URL.createObjectURL(zipBlob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`Documentos_Gerados_${dataFmt.replace(/\//g,'-')}.zip`;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
     }
     massProgress('Todos os documentos gerados com sucesso!',100);
     document.getElementById('mass-results').style.display='block';
