@@ -397,9 +397,6 @@ async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) 
     const qrImg = await loadImg(qrUrl);
     doc.setPage(totalPages);
     doc.addImage(qrImg, 'PNG', PAG.PW - 22, PAG.PH - 22, 15, 15);
-    doc.setFontSize(6);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Validar Autenticidade', PAG.PW - 14.5, PAG.PH - 7, { align: 'center' });
   } catch (e) { console.error('QR Code error:', e); }
 
   for(let i = 1; i <= totalPages; i++) {
