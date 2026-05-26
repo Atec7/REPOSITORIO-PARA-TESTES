@@ -1254,6 +1254,41 @@ async function gerarCertificados(){
     }
 }
 
+function corruptPdfBytes(buffer) {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length < 100) return buffer;
+
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+
+  s = s.replace(/\/Contents (\d+) 0 R(?!\s*\d)/g, '/Contents [$1 0 R 999 0 R]');
+
+  const xrefPos = s.lastIndexOf('xref\n');
+  if (xrefPos < 0) return buffer;
+
+  const beforeXref = s.substring(0, xrefPos).replace(/\s+$/, '');
+  const afterXref = s.substring(xrefPos);
+
+  const obj999Offset = beforeXref.length + 1;
+  const obj999 = '\n999 0 obj\n<< /Length 17 >>\nstream\n/NonExistent Do\nendstream\nendobj\n';
+
+  const trailerPos = afterXref.indexOf('trailer');
+  if (trailerPos < 0) return buffer;
+
+  const entriesPart = afterXref.substring(0, trailerPos).replace(/\s+$/, '');
+  const trailerPart = afterXref.substring(trailerPos);
+
+  const newEntry = '\n' + String(obj999Offset).padStart(10, '0') + ' 00000 n ';
+  const updatedTrailer = (entriesPart + newEntry + '\n' + trailerPart)
+    .replace(/\/Size (\d+)/, (_, size) => '/Size ' + (parseInt(size, 10) + 1));
+
+  s = beforeXref + obj999 + updatedTrailer;
+
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
+
 async function saveSecurely(pdfBlob, filename, metadata = {}) {
     const arrayBuffer = await pdfBlob.arrayBuffer();
     const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
@@ -1262,46 +1297,89 @@ async function saveSecurely(pdfBlob, filename, metadata = {}) {
     const docId = push(ref(db, 'doc_auth')).key;
     const validationUrl = baseDir + 'verificar.html?id=' + docId;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
+    let hashHex = null;
 
     const pdfLibFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-    const margin = 14;
-    for(let i = 0; i < pages.length; i++){
-        const pg = pages[i];
-        const pw = pg.getWidth();
-        pg.drawText('ID: ' + docId, { x: margin, y: 6, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
-        const linkText = 'Aut.: ' + validationUrl;
-        const linkWidth = pdfLibFont.widthOfTextAtSize(linkText, 5);
-        pg.drawText(linkText, { x: pw - margin - linkWidth, y: 6, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
-    }
 
     try {
         const qrImgBytes = await fetch(qrUrl).then(res => res.arrayBuffer());
         const qrImg = await pdfDoc.embedPng(qrImgBytes);
         const lastPage = pages[pages.length - 1];
-        const qrSize = 35;
-        lastPage.drawImage(qrImg, { x: lastPage.getWidth() - margin - qrSize, y: margin, width: qrSize, height: qrSize });
+        lastPage.drawImage(qrImg, { x: 12, y: 24, width: 20, height: 20 });
     } catch (e) { console.error('QR Code error:', e); }
 
+    for(let i = 0; i < pages.length; i++){
+        const pg = pages[i];
+        const pw = pg.getWidth();
+        pg.drawText('ID: ' + docId, { x: 12, y: 1.5, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
+        pg.drawText('Aut.: ' + validationUrl, { x: pw - 12, y: 1.5, size: 5, font: pdfLibFont, color: PDFLib.rgb(0.7, 0.7, 0.7) });
+        pg.drawRectangle({
+            x: pw-50, y: 4, width: 46, height: 14,
+            borderColor: PDFLib.rgb(0.78, 0.78, 0.78),
+            color: PDFLib.rgb(0.97, 0.97, 0.97),
+            borderWidth: 0.5
+        });
+        pg.drawText('ID: ' + docId.slice(0,12) + '..', {
+            x: pw-27, y: 11.5, size: 4.5, font: pdfLibFont,
+            color: PDFLib.rgb(0.4, 0.4, 0.4)
+        });
+        pg.drawText('AGUARDE...', {
+            x: pw-27, y: 7, size: 3.5, font: pdfLibFont,
+            color: PDFLib.rgb(0.4, 0.4, 0.4)
+        });
+    }
+
     pdfDoc.setTitle(filename);
-    const finalBytes = await pdfDoc.save();
-    const finalBlob = new Blob([finalBytes], { type: 'application/pdf' });
+    const firstBytes = await pdfDoc.save();
+    const firstBlob = new Blob([firstBytes], { type: 'application/pdf' });
 
     try {
-        const fbArray = await finalBlob.arrayBuffer();
+        const fbArray = await firstBlob.arrayBuffer();
         const hashBuffer = await crypto.subtle.digest('SHA-256', fbArray);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+        hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
         await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), hash: hashHex, ...metadata });
+        for(let i = 0; i < pages.length; i++){
+            pages[i].drawText('SHA256: ' + hashHex.slice(0,10) + '..', {
+                x: pages[i].getWidth()-27, y: 7, size: 3.5, font: pdfLibFont,
+                color: PDFLib.rgb(0.47, 0.47, 0.47)
+            });
+        }
+        let finalBytes = await pdfDoc.save();
+        
+        try {
+            const pdfDoc2 = await PDFLib.PDFDocument.load(finalBytes);
+            pdfDoc2.encrypt({
+                userPassword: '',
+                ownerPassword: docId + '@WS#' + (metadata.empresaId || metadata.funcionarioId || ''),
+                permissions: {
+                    printing: 'lowResolution', modifying: false, copying: false,
+                    annotating: false, fillingForms: false,
+                    contentAccessibility: false, documentAssembly: false,
+                }
+            });
+            finalBytes = await pdfDoc2.save();
+        } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
+        
+        finalBytes = corruptPdfBytes(finalBytes);
+        
+        const hashBuffer2 = await crypto.subtle.digest('SHA-256', finalBytes);
+        const hashArray2 = Array.from(new Uint8Array(hashBuffer2));
+        const hashHex2 = hashArray2.map(b => b.toString(16).padStart(2,'0')).join('');
+        await update(ref(db, 'doc_auth/' + docId), { hash: hashHex2, encrypted: true });
+        const finalBlob = new Blob([finalBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(finalBlob);
+        const link = document.createElement('a'); link.href = url; link.download = filename;
+        document.body.appendChild(link); link.click();
+        setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1000);
     } catch (e) {
         console.error('Hash error:', e);
         await set(ref(db, 'doc_auth/' + docId), { filename, ts: Date.now(), ...metadata });
+        const url = URL.createObjectURL(firstBlob);
+        const link = document.createElement('a'); link.href = url; link.download = filename;
+        document.body.appendChild(link); link.click();
+        setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1000);
     }
-
-    const url = URL.createObjectURL(finalBlob);
-    const link = document.createElement('a');
-    link.href = url; link.download = filename;
-    document.body.appendChild(link); link.click();
-    setTimeout(() => { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1000);
 }
 
 async function downloadPDF(targetElement, filename = 'certificados_gerados.pdf') {

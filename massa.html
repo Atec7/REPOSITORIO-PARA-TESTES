@@ -18,6 +18,7 @@
   --bd:#e4e4e7;--tp:#18181b;--ts:#71717a;--tm:#a1a1aa;
   --hi:#3f3f46;--hl:#f4f4f5;--dn:#dc2626;--wn:#d97706;--sc:#122419;
   --r:8px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --gold:#f59e0b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body,html{height:100%}
@@ -41,6 +42,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);display:flex;height:1
 .pt{font-size:21px;font-weight:700}.pd{font-size:12px;color:var(--ts);margin-top:2px}
 .card{background:var(--sf);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--bd);padding:20px;margin-bottom:16px}
 .ct{font-size:11px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+.step-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--hi);color:#fafafa;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step-title{font-size:14px;font-weight:700;color:var(--tp)}
+.step-desc{font-size:11px;color:var(--tm);margin-top:1px}
 .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
 .fg{margin-bottom:13px}
 label.fl{display:block;font-size:10px;font-weight:700;color:var(--ts);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
@@ -66,6 +71,7 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .mass-hint{font-size:9px;color:var(--tm);margin-top:4px;font-style:italic}
 .mass-hint span{color:var(--wn);font-weight:600}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .loader{position:fixed;inset:0;background:rgba(255,255,255,.93);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:999}
 .spinner{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--hi);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -73,13 +79,43 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .cait{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--hl);border:1px solid var(--bd);border-radius:6px;margin-bottom:5px;font-size:12px}
 .ib{background:var(--hl);border:1px solid var(--bd);border-radius:6px;padding:11px 13px;font-size:12px;color:var(--ts);margin-bottom:12px}
 .bdg{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;background:var(--hl);color:var(--ts);border:1px solid var(--bd)}
+
+/* ── STEP LAYOUT ── */
+.mass-steps{max-width:960px;margin:0 auto}
+.step-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.step-grid .fg{margin:0}
+.col-full{grid-column:1/-1}
+
+/* ── SUMMARY CARD ── */
+.summary-card{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:2px solid var(--bd);border-radius:12px;padding:18px 20px}
+.summary-card .ct{color:var(--ts);margin-bottom:10px}
+.summary-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.summary-stat{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center}
+.summary-stat .ss-num{font-size:22px;font-weight:700;color:var(--tp);font-family:'DM Mono',monospace}
+.summary-stat .ss-lbl{font-size:9px;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.summary-stat.ss-os .ss-num{color:#2563eb}
+.summary-stat.ss-lista .ss-num{color:#7c3aed}
+.summary-stat.ss-adm .ss-num{color:#0891b2}
+.summary-stat.ss-epi .ss-num{color:#16a34a}
+.summary-stat.ss-total .ss-num{color:var(--hi)}
+.summary-stat.ss-total{background:var(--hi);border-color:var(--hi)}
+.summary-stat.ss-total .ss-num{color:#fafafa}
+.summary-stat.ss-total .ss-lbl{color:#a1a1aa}
+.summary-empty{text-align:center;padding:24px;color:var(--tm);font-size:13px}
+
+/* ── PROGRESS DETAIL ── */
+.progress-detail{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--hl);border-radius:6px;border:1px solid var(--bd);font-size:12px}
+.progress-detail .pd-icon{width:28px;height:28px;border-radius:50%;background:var(--hi);color:#fafafa;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.progress-detail .pd-label{flex:1;font-weight:500;color:var(--tp)}
+.progress-detail .pd-sub{font-size:10px;color:var(--tm);margin-top:1px}
+
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
 </style>
 </head>
 <body>
-<div class="loader" id="loader"><div class="spinner"></div><div class="stxt">Gerando documento...</div></div>
+<div class="loader" id="loader"><div class="spinner"></div><div class="stxt" id="loader-txt">Gerando documento...</div></div>
 
 <div class="mass-shell">
   <div class="mass-topbar">
@@ -90,70 +126,149 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
   </div>
 
   <div class="mass-content">
-    <div class="ph"><div><div class="pt">Geração em Massa</div><div class="pd">Selecione colaboradores e documentos para gerar tudo de uma vez</div></div></div>
-    
-    <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
-      <div class="card" style="position:sticky;top:0">
-        <div class="ct"><i class="fa-solid fa-filter"></i> Filtros</div>
-        <div class="fg"><label class="fl">Empresa</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mEChk',true);fltMCargos()">Todos</button><button class="bxs bxd" onclick="selAll('mEChk',false);fltMCargos()">Nenhum</button></div><input id="m-e-src" class="fis" placeholder="Pesquisar empresa..." onkeyup="filterCheckList('m-e-list','m-e-src')"><div id="m-e-list" class="cl" style="max-height:120px"><div class="es">Carregando...</div></div></div>
-        <div class="fg"><label class="fl">Fun&ccedil;&atilde;o / Cargo</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mCgChk',true);fltM()">Todos</button><button class="bxs bxd" onclick="selAll('mCgChk',false);fltM()">Nenhum</button></div><input id="m-c-src" class="fis" placeholder="Pesquisar cargo..." onkeyup="filterCheckList('m-c-list','m-c-src')"><div id="m-c-list" class="cl" style="max-height:150px"><div class="es">Nenhum cargo</div></div></div>
-        <div class="fg"><label class="fl">Colaboradores</label><div style="display:flex;gap:4px;margin-bottom:5px"><button class="bxs bxn" onclick="selAll('mChk',true)">Todos</button><button class="bxs bxd" onclick="selAll('mChk',false)">Nenhum</button></div><input id="m-f-src" class="fis" placeholder="Pesquisar colaborador..." onkeyup="filterCheckList('m-f-list','m-f-src')"><div id="m-f-list" class="cl" style="max-height:260px"><div class="es">Carregando...</div></div></div>
-      </div>
+    <div class="ph"><div><div class="pt">Geração em Massa</div><div class="pd">Fluxo inteligente para gerar documentos de múltiplos colaboradores</div></div></div>
 
-      <div>
-        <div class="card">
-          <div class="ct"><i class="fa-solid fa-sliders"></i> Campos Opcionais</div>
-          <div class="g2">
-            <div class="fg" style="margin:0">
-              <label class="fl">Data do Documento</label>
-              <input type="date" id="m-data">
-              <div class="mass-hint">Aplicada a todos os documentos</div>
+    <div class="mass-steps">
+
+      <!-- ═══ STEP 1: COLABORADORES ═══ -->
+      <div class="card">
+        <div class="step-hdr">
+          <div class="step-num">1</div>
+          <div><div class="step-title">Selecionar Colaboradores</div><div class="step-desc">Filtre por empresa e cargo, depois marque os colaboradores desejados</div></div>
+        </div>
+        <div class="step-grid">
+          <div class="fg">
+            <label class="fl">Empresa <span style="font-weight:400;color:var(--tm)">(filtro)</span></label>
+            <div style="display:flex;gap:4px;margin-bottom:5px">
+              <button class="bxs bxn" onclick="selAll('mEChk',true);fltMCargos()">Todos</button>
+              <button class="bxs bxd" onclick="selAll('mEChk',false);fltMCargos()">Nenhum</button>
             </div>
-            <div class="fg" style="margin:0">
-              <label class="fl">Local</label>
-              <input id="m-local" placeholder="Cidade/UF">
-              <div class="mass-hint">Aplicada a todos os documentos</div>
-            </div>
+            <input id="m-e-src" class="fis" placeholder="Pesquisar empresa..." onkeyup="filterCheckList('m-e-list','m-e-src')">
+            <div id="m-e-list" class="cl" style="max-height:110px"><div class="es">Carregando...</div></div>
           </div>
-
-          <div id="m-section-lista" style="display:none">
-            <hr class="dv" style="margin:14px 0">
-            <div class="ct"><i class="fa-solid fa-users"></i> Dados da Lista de Presença</div>
-            <div class="g2">
-              <div class="fg"><label class="fl">Nome do Treinamento</label><input id="m-lista-treino" placeholder="Ex: NR-35 Treinamento"></div>
-              <div class="fg"><label class="fl">Carga Horária</label><input id="m-lista-carga" placeholder="Ex: 8h"></div>
+          <div class="fg">
+            <label class="fl">Função / Cargo <span style="font-weight:400;color:var(--tm)">(filtro)</span></label>
+            <div style="display:flex;gap:4px;margin-bottom:5px">
+              <button class="bxs bxn" onclick="selAll('mCgChk',true);fltM()">Todos</button>
+              <button class="bxs bxd" onclick="selAll('mCgChk',false);fltM()">Nenhum</button>
             </div>
-            <div class="g2">
-              <div class="fg"><label class="fl">Local</label><input id="m-lista-local" placeholder="Cidade/UF"></div>
-              <div class="fg"><label class="fl">Data</label><input type="date" id="m-lista-data"></div>
-            </div>
-            <div class="fg"><label class="fl">Conteúdo Programático</label><textarea id="m-lista-cont" placeholder="Conteúdo abordado..." style="min-height:70px"></textarea></div>
+            <input id="m-c-src" class="fis" placeholder="Pesquisar cargo..." onkeyup="filterCheckList('m-c-list','m-c-src')">
+            <div id="m-c-list" class="cl" style="max-height:120px"><div class="es">Nenhum cargo</div></div>
           </div>
-
-          <div id="m-section-epi" style="display:none">
-            <hr class="dv" style="margin:14px 0">
-            <div class="ct"><i class="fa-solid fa-helmet-safety"></i> Materiais EPI/EPC</div>
-            <div class="g2">
-              <div class="fg"><label class="fl">Data da Entrega</label><input type="date" id="m-epi-data"></div>
-              <div class="fg"><label class="fl">Local</label><input id="m-epi-local" placeholder="Cidade/UF"></div>
+          <div class="fg col-full">
+            <label class="fl">Colaboradores <span style="font-weight:400;color:var(--tm)">(marque quem deseja gerar)</span></label>
+            <div style="display:flex;gap:4px;margin-bottom:5px">
+              <button class="bxs bxn" onclick="selAll('mChk',true)">Todos</button>
+              <button class="bxs bxd" onclick="selAll('mChk',false)">Nenhum</button>
             </div>
-            <div class="fg"><label class="fl">Pesquisar Material</label><input id="m-epi-search" placeholder="Digite o nome ou C.A..." onkeyup="filterMassEpi()"></div>
-            <div style="display:grid;grid-template-columns:1fr 70px auto;gap:8px;align-items:end;margin-bottom:8px">
-              <div class="fg" style="margin:0"><label class="fl">Material</label><select id="m-epi-sel"><option value="">Selecione...</option></select></div>
-              <div class="fg" style="margin:0"><label class="fl">Qtd</label><input type="number" id="m-epi-qtd" value="1" min="1"></div>
-              <button class="btn bs" onclick="addMassEpi()" style="padding:8px 12px;font-size:11px"><i class="fa-solid fa-plus"></i></button>
-            </div>
-            <div id="m-epi-cart" style="min-height:40px;border:1px dashed var(--bd);padding:8px;border-radius:6px;font-size:12px;color:var(--tm)">Nenhum item adicionado</div>
+            <input id="m-f-src" class="fis" placeholder="Pesquisar colaborador..." onkeyup="filterCheckList('m-f-list','m-f-src')">
+            <div id="m-f-list" class="cl" style="max-height:150px"><div class="es">Carregando...</div></div>
           </div>
-
-          <hr class="dv">
-          <div class="fg"><label class="fl">Textos para OS <span style="font-weight:400;color:var(--tm)">(pr&eacute;-selecionados pelo cargo)</span></label><div class="sbar" style="margin-bottom:3px"><button class="bxs bxn" onclick="selAll('mOsChk',true)">Todos</button><button class="bxs bxd" onclick="selAll('mOsChk',false)">Nenhum</button></div><div id="m-os-textos" class="cl" style="max-height:150px"><div class="es">Selecione um cargo primeiro</div></div></div>
-
-          <button class="btn bp bf" onclick="massGen()" style="padding:14px;font-size:14px"><i class="fa-solid fa-bolt"></i> GERAR TODOS OS DOCUMENTOS</button>
-          <div id="mass-progress" style="margin-top:12px;display:none"></div>
-          <div id="mass-results" style="margin-top:10px;display:none"></div>
         </div>
       </div>
+
+      <!-- ═══ STEP 2: CONFIGURAR DOCUMENTOS ═══ -->
+      <div class="card">
+        <div class="step-hdr">
+          <div class="step-num">2</div>
+          <div><div class="step-title">Configurar Documentos</div><div class="step-desc">Defina campos comuns e selecione os textos e documentos a gerar</div></div>
+        </div>
+
+        <div class="step-grid">
+          <div class="fg">
+            <label class="fl">Data do Documento</label>
+            <input type="date" id="m-data">
+            <div class="mass-hint">Aplicada a todos</div>
+          </div>
+          <div class="fg">
+            <label class="fl">Local</label>
+            <input id="m-local" placeholder="Cidade/UF">
+            <div class="mass-hint">Aplicada a todos</div>
+          </div>
+        </div>
+
+        <hr class="dv" style="margin:14px 0">
+
+        <div class="fg">
+          <label class="fl">Textos para Ordem de Serviço <span style="font-weight:400;color:var(--tm)">(selecione os textos desejados)</span></label>
+          <div class="sbar" style="margin-bottom:3px">
+            <button class="bxs bxn" onclick="selAll('mOsChk',true)">Todos</button>
+            <button class="bxs bxd" onclick="selAll('mOsChk',false)">Nenhum</button>
+          </div>
+          <div id="m-os-textos" class="cl" style="max-height:130px"><div class="es">Selecione um cargo primeiro</div></div>
+        </div>
+
+        <hr class="dv" style="margin:14px 0">
+        <div class="ct"><i class="fa-solid fa-file-lines"></i> Tipos de Documento a Gerar</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
+            <input type="checkbox" id="m-doc-os" onchange="filterTextsByDocType()"> Ordem de Serviço
+          </label>
+          <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
+            <input type="checkbox" id="m-doc-adm" onchange="filterTextsByDocType()"> Ficha Admissional
+          </label>
+          <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
+            <input type="checkbox" id="m-doc-epi" onchange="filterTextsByDocType()"> Ficha EPI
+          </label>
+          <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
+            <input type="checkbox" id="m-doc-lista" onchange="filterTextsByDocType()"> Lista de Presença
+          </label>
+        </div>
+
+        <div id="m-section-lista" style="display:none">
+          <div class="ct"><i class="fa-solid fa-users"></i> Dados da Lista de Presença</div>
+          <div class="g2">
+            <div class="fg"><label class="fl">Nome do Treinamento</label><input id="m-lista-treino" placeholder="Ex: NR-35 Treinamento"></div>
+            <div class="fg"><label class="fl">Carga Horária</label><input id="m-lista-carga" placeholder="Ex: 8h"></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label class="fl">Local</label><input id="m-lista-local" placeholder="Cidade/UF"></div>
+            <div class="fg"><label class="fl">Data</label><input type="date" id="m-lista-data"></div>
+          </div>
+          <div class="fg"><label class="fl">Conteúdo Programático</label><textarea id="m-lista-cont" placeholder="Conteúdo abordado..." style="min-height:60px"></textarea></div>
+        </div>
+
+        <div id="m-section-epi" style="display:none">
+          <hr class="dv" style="margin:14px 0">
+          <div class="ct"><i class="fa-solid fa-helmet-safety"></i> Materiais EPI/EPC</div>
+          <div class="g2">
+            <div class="fg"><label class="fl">Data da Entrega</label><input type="date" id="m-epi-data"></div>
+            <div class="fg"><label class="fl">Local</label><input id="m-epi-local" placeholder="Cidade/UF"></div>
+          </div>
+          <div class="fg"><label class="fl">Pesquisar Material</label><input id="m-epi-search" placeholder="Digite o nome ou C.A..." onkeyup="filterMassEpi()"></div>
+          <div style="display:grid;grid-template-columns:1fr 70px auto;gap:8px;align-items:end;margin-bottom:8px">
+            <div class="fg" style="margin:0"><label class="fl">Material</label><select id="m-epi-sel"><option value="">Selecione...</option></select></div>
+            <div class="fg" style="margin:0"><label class="fl">Qtd</label><input type="number" id="m-epi-qtd" value="1" min="1"></div>
+            <button class="btn bs" onclick="addMassEpi()" style="padding:8px 12px;font-size:11px"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <div id="m-epi-cart" style="min-height:36px;border:1px dashed var(--bd);padding:6px;border-radius:6px;font-size:12px;color:var(--tm)">Nenhum item adicionado</div>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 3: REVISAR E GERAR ═══ -->
+      <div class="card">
+        <div class="step-hdr">
+          <div class="step-num">3</div>
+          <div><div class="step-title">Revisar e Gerar</div><div class="step-desc">Confira o resumo e clique em gerar — tudo será baixado em um único .zip</div></div>
+        </div>
+
+        <div id="mass-summary" class="summary-card">
+          <div class="ct"><i class="fa-solid fa-chart-simple"></i> Resumo da Geração</div>
+          <div id="mass-summary-body" class="summary-empty">
+            <i class="fa-solid fa-file-circle-plus" style="font-size:22px;display:block;margin-bottom:6px;color:var(--tm)"></i>
+            Selecione colaboradores e textos para ver o resumo
+          </div>
+        </div>
+
+        <hr class="dv" style="margin:14px 0">
+
+        <button class="btn bp bf" onclick="massGen()" style="padding:14px;font-size:14px">
+          <i class="fa-solid fa-bolt"></i> <span id="mass-gen-btn-text">GERAR TODOS OS DOCUMENTOS</span>
+        </button>
+        <div id="mass-progress" style="margin-top:12px;display:none"></div>
+        <div id="mass-results" style="margin-top:10px;display:none"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -204,11 +319,57 @@ function detectDocTypesFromTexts(textIds){
   const texts=textIds.map(id=>DATA.textos[id]).filter(Boolean);
   const cats=texts.map(t=>(t.categoria||'').toUpperCase());
   return{
-    docOS: texts.length>0,
-    docLista: cats.some(c=>c.includes('LISTA')||c.includes('PRESENÇA')||c.includes('TREINAMENTO')),
-    docAdm: cats.some(c=>c.includes('ADMISSIONAL')||c.includes('ADM.')),
-    docEpi: cats.some(c=>c.includes('EPI')||c.includes('NR-6')||c.includes('NR6'))
+    docOS: cats.some(c=>catMatch(c,['OS','ORDEM DE SERVIÇO','ORDEM DE SERVICO'])),
+    docLista: cats.some(c=>catMatch(c,['LISTA','PRESENÇA','PRESENCA','TREINAMENTO'])),
+    docAdm: cats.some(c=>catMatch(c,['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO'])),
+    docEpi: cats.some(c=>catMatch(c,['EPI','NR-6','NR6','EPC']))
   };
+}
+
+function docTypeCb(name){
+  const el=document.getElementById('m-doc-'+name);
+  if(!el)return false;
+  return el.checked;
+}
+
+let _syncingDocTypes=false;
+
+function autoCheckDocTypes(ids){
+  if(_syncingDocTypes)return;
+  const types=detectDocTypesFromTexts(ids);
+  for(const [id,key] of [['m-doc-os','docOS'],['m-doc-adm','docAdm'],['m-doc-epi','docEpi'],['m-doc-lista','docLista']]){
+    const el=document.getElementById(id);
+    if(el)el.checked=types[key];
+  }
+}
+
+function catMatch(cat,keys){return keys.some(k=>cat.includes(k));}
+function textCategoria(id){
+  const t=DATA.textos[id];
+  return (t?.categoria||'').toUpperCase();
+}
+
+function filterTextsByDocType(){
+  if(_syncingDocTypes)return;
+  _syncingDocTypes=true;
+  const os=docTypeCb('os'), adm=docTypeCb('adm'), epi=docTypeCb('epi'), lista=docTypeCb('lista');
+  const noType=!os&&!adm&&!epi&&!lista;
+  document.getElementsByName('mOsChk').forEach(cb=>{
+    if(noType){cb.checked=false;return;}
+    const cat=textCategoria(cb.value);
+    cb.checked=
+      (os&&catMatch(cat,['OS','ORDEM DE SERVIÇO','ORDEM DE SERVICO']))||
+      (adm&&catMatch(cat,['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO']))||
+      (epi&&catMatch(cat,['EPI','NR-6','NR6','EPC']))||
+      (lista&&catMatch(cat,['LISTA','PRESENÇA','PRESENCA','TREINAMENTO']));
+  });
+  _syncingDocTypes=false;
+  updateMassFieldsVisibility();
+}
+
+function onTextCheckChange(){
+  updateMassFieldsVisibility();
+  autoCheckDocTypes(getChecked('mOsChk'));
 }
 
 function updateMassFieldsVisibility(){
@@ -216,10 +377,53 @@ function updateMassFieldsVisibility(){
   const types=detectDocTypesFromTexts(ids);
   const listaEl=document.getElementById('m-section-lista');
   const epiEl=document.getElementById('m-section-epi');
-  if(listaEl)listaEl.style.display=types.docLista?'block':'none';
-  if(epiEl)epiEl.style.display=types.docEpi?'block':'none';
+  if(listaEl)listaEl.style.display=(types.docLista&&docTypeCb('lista'))?'block':'none';
+  if(epiEl)epiEl.style.display=(types.docEpi&&docTypeCb('epi'))?'block':'none';
+  updateMassSummary();
 }
-function renderAll(){populateSelects();populateMassEpiSel();fltMCargos();}
+function updateMassSummary(){
+  const el=document.getElementById('mass-summary-body');
+  if(!el)return;
+  const funcs=getSelectedFuncs();
+  const osIds=getChecked('mOsChk');
+  const empSet=new Set(funcs.map(f=>f.empresaId||'unknown').filter(Boolean));
+  let docOSCount=0, docListaCount=0, docAdmCount=0, docEpiCount=0, total=0;
+  if(docTypeCb('os') && osIds.length)docOSCount=funcs.length*osIds.length;
+  if(docTypeCb('adm'))docAdmCount=funcs.filter(f=>f.dataAdm).length;
+  if(docTypeCb('epi')){
+    funcs.forEach(f=>{const ep=resolveCargoEpis(f.funcao);if(ep.length||massEpiCart.length)docEpiCount++;});
+  }
+  if(docTypeCb('lista'))docListaCount=empSet.size;
+  total=docOSCount+docAdmCount+docEpiCount+docListaCount;
+  const btnTxt=document.getElementById('mass-gen-btn-text');
+  if(btnTxt)btnTxt.textContent=total?'GERAR '+total+' DOCUMENTO(S)':'GERAR TODOS OS DOCUMENTOS';
+  if(!total){
+    el.innerHTML=`<div class="summary-empty"><i class="fa-solid fa-file-circle-plus" style="font-size:22px;display:block;margin-bottom:6px;color:var(--tm)"></i>Selecione colaboradores e textos para ver o resumo</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="summary-stats">
+    <div class="summary-stat"><div class="ss-num">${funcs.length}</div><div class="ss-lbl">Colaboradores</div></div>
+    ${docTypeCb('os')?`<div class="summary-stat ss-os"><div class="ss-num">${docOSCount}</div><div class="ss-lbl">Ordens de Serviço</div></div>`:''}
+    ${docTypeCb('lista')?`<div class="summary-stat ss-lista"><div class="ss-num">${docListaCount}</div><div class="ss-lbl">Listas de Presença</div></div>`:''}
+    ${docTypeCb('adm')?`<div class="summary-stat ss-adm"><div class="ss-num">${docAdmCount}</div><div class="ss-lbl">Fichas Admissionais</div></div>`:''}
+    ${docTypeCb('epi')?`<div class="summary-stat ss-epi"><div class="ss-num">${docEpiCount}</div><div class="ss-lbl">Fichas EPI</div></div>`:''}
+    <div class="summary-stat ss-total"><div class="ss-num">${total}</div><div class="ss-lbl">Total de Documentos</div></div>
+  </div>`;
+}
+
+function getSelectedFuncs(){
+  const empIds=getCheckedEmpresas();
+  const cargoIds=getCheckedCargos();
+  const hasEmpFilter=empIds.length>0&&empIds[0]!=='';
+  const hasCargoFilter=cargoIds.length>0&&cargoIds[0]!=='';
+  let funcs=toArr(DATA.funcionarios);
+  if(hasEmpFilter)funcs=funcs.filter(f=>empIds.includes(String(f.empresaId||'').trim()));
+  if(hasCargoFilter)funcs=funcs.filter(f=>cargoIds.includes(String(f.funcao||'').trim()));
+  const checkedIds=getChecked('mChk');
+  return funcs.filter(f=>checkedIds.includes(f.id));
+}
+
+function renderAll(){populateSelects();populateMassEpiSel();fltMCargos();updateMassSummary();}
 function populateMassEpiSel(){
   const sel=document.getElementById('m-epi-sel');if(!sel)return;
   const cur=sel.value;
@@ -248,7 +452,11 @@ function fmtDataExtenso(d){
 }
 function toArr(obj){if(!obj)return[];return Object.entries(obj).map(([k,v])=>(typeof v==='object'&&v!==null)?{...v,id:v.id||k}:v);}
 function spin(on){document.getElementById('loader').style.display=on?'flex':'none';}
-function selAll(name,check){document.getElementsByName(name).forEach(cb=>cb.checked=check);if(name==='mOsChk')updateMassFieldsVisibility();}
+function selAll(name,check){
+  document.getElementsByName(name).forEach(cb=>cb.checked=check);
+  if(name==='mOsChk'){updateMassFieldsVisibility();}
+  else{updateMassSummary();}
+}
 function getChecked(name){return Array.from(document.getElementsByName(name)).filter(c=>c.checked).map(c=>c.value);}
 function resolveEmp(id){if(!id)return null;const s=String(id).trim();if(DATA.empresas[s])return DATA.empresas[s];return toArr(DATA.empresas).find(e=>String(e.id||'').trim()===s)||null;}
 function resolveCargo(id){if(!id)return null;const s=String(id).trim();if(DATA.cargos[s])return DATA.cargos[s];return toArr(DATA.cargos).find(c=>String(c.id||'').trim()===s)||null;}
@@ -274,8 +482,9 @@ function resolveCargoEpis(cargoId){
   list.forEach(item=>{
     const id=typeof item==='object'?item.id:item;
     const qtd=typeof item==='object'?(item.qtd||1):1;
+    const savedTipo=typeof item==='object'?item.tipo:null;
     const mat=DATA.materiais[id]||toArr(DATA.materiais).find(m=>(m.nome||'').toLowerCase().includes(id.toLowerCase()));
-    if(mat)items.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:mat.tipo||'EPI',qtd});
+    if(mat)items.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:savedTipo||mat.tipo||'EPI',qtd});
   });
   return items;
 }
@@ -334,7 +543,7 @@ function fltM(){
   let funcs=toArr(DATA.funcionarios);
   if(hasEmpFilter)funcs=funcs.filter(f=>empIds.includes(String(f.empresaId||'').trim()));
   if(hasCgFilter)funcs=funcs.filter(f=>cargoIds.includes(String(f.funcao||'').trim()));
-  el.innerHTML=funcs.length?funcs.map(f=>`<div class="ci"><input type="checkbox" name="mChk" value="${f.id}" id="ck_mChk_${f.id}"><label for="ck_mChk_${f.id}">${esc(f.nome)} <span>(${esc(resolveCargo(f.funcao)?.nome||f.funcao||'')})</span></label></div>`).join(''):'<div class="es">Nenhum colaborador encontrado</div>';
+  el.innerHTML=funcs.length?funcs.map(f=>`<div class="ci"><input type="checkbox" name="mChk" value="${f.id}" id="ck_mChk_${f.id}" onchange="updateMassSummary()"><label for="ck_mChk_${f.id}">${esc(f.nome)} <span>(${esc(resolveCargo(f.funcao)?.nome||f.funcao||'')})</span></label></div>`).join(''):'<div class="es">Nenhum colaborador encontrado</div>';
   document.getElementById('m-f-src').value='';
   fltMTextos(hasCgFilter?cargoIds:null);
 }
@@ -345,14 +554,22 @@ function fltMTextos(cids){
   if(!cids){
     textos=toArr(DATA.textos);
     if(!textos.length){el.innerHTML='<div class="es">Nenhum texto cadastrado</div>';updateMassFieldsVisibility();return;}
-  }else{
-    textos=toArr(DATA.textos).filter(t=>{
-      const vinculados = t.cargosVinculados || [];
-      return vinculados.some(c=>cids.includes(String(c).trim()));
-    });
-    if(!textos.length){el.innerHTML='<div class="es">Nenhum texto vinculado a este(s) cargo(s).</div>';updateMassFieldsVisibility();return;}
+    el.innerHTML=textos.map(t=>`<div class="ci"><input type="checkbox" name="mOsChk" value="${t.id}" id="ck_mOsChk_${t.id}" onchange="onTextCheckChange()"><label for="ck_mOsChk_${t.id}">${esc(t.titulo)} <span class="bdg">${esc(t.categoria||'')}</span></label></div>`).join('');
+    updateMassFieldsVisibility();return;
   }
-  el.innerHTML=textos.map(t=>`<div class="ci"><input type="checkbox" name="mOsChk" value="${t.id}" id="ck_mOsChk_${t.id}" checked onchange="updateMassFieldsVisibility()"><label for="ck_mOsChk_${t.id}">${esc(t.titulo)} <span class="bdg">${esc(t.categoria||'')}</span></label></div>`).join('');
+  const raw=toArr(DATA.textos);
+  textos=raw.filter(t=>{
+    let vinculados=t.cargosVinculados||[];
+    if(typeof vinculados==='string')vinculados=vinculados.split(',').map(s=>s.trim());
+    return vinculados.some(c=>cids.includes(String(c).trim()));
+  });
+  if(!textos.length){
+    el.innerHTML='<div class="es" style="padding:10px;font-size:11px;color:var(--wn)">Nenhum texto vinculado ao cargo. Mostrando todos:</div>'+raw.map(t=>`<div class="ci"><input type="checkbox" name="mOsChk" value="${t.id}" id="ck_mOsChk_${t.id}" onchange="onTextCheckChange()"><label for="ck_mOsChk_${t.id}">${esc(t.titulo)} <span class="bdg">${esc(t.categoria||'')}</span></label></div>`).join('');
+    updateMassFieldsVisibility();return;
+  }
+  const ids=textos.map(t=>t.id);
+  el.innerHTML=textos.map(t=>`<div class="ci"><input type="checkbox" name="mOsChk" value="${t.id}" id="ck_mOsChk_${t.id}" checked onchange="onTextCheckChange()"><label for="ck_mOsChk_${t.id}">${esc(t.titulo)} <span class="bdg">${esc(t.categoria||'')}</span></label></div>`).join('');
+  autoCheckDocTypes(ids);
   updateMassFieldsVisibility();
 }
 
@@ -378,6 +595,7 @@ function addMassEpi(){
 function renderMassEpi(){
   const el=document.getElementById('m-epi-cart');
   el.innerHTML=massEpiCart.length?massEpiCart.map((c,i)=>`<div class="cait" style="margin:0 0 4px 0;padding:6px 10px;font-size:11px"><span><strong>${esc(c.nome)}</strong> - Qtd: ${c.qtd}</span><button class="bxs bxd" onclick="remMassEpi(${i})" style="padding:2px 6px"><i class="fa-solid fa-xmark"></i></button></div>`).join(''):'<div style="color:var(--tm);text-align:center;padding:10px">Nenhum item adicionado</div>';
+  updateMassSummary();
 }
 
 function remMassEpi(i){
@@ -386,40 +604,134 @@ function remMassEpi(i){
 }
 
 // ── SECURITY ENGINE ─────────────────────────────────────────────────────
+function corruptPdfBytes(buffer) {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length < 100) return buffer;
+
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+
+  s = s.replace(/\/Contents (\d+) 0 R(?!\s*\d)/g, '/Contents [$1 0 R 999 0 R]');
+
+  const xrefPos = s.lastIndexOf('xref\n');
+  if (xrefPos < 0) return buffer;
+
+  const beforeXref = s.substring(0, xrefPos).replace(/\s+$/, '');
+  const afterXref = s.substring(xrefPos);
+
+  const obj999Offset = beforeXref.length + 1;
+  const obj999 = '\n999 0 obj\n<< /Length 17 >>\nstream\n/NonExistent Do\nendstream\nendobj\n';
+
+  const trailerPos = afterXref.indexOf('trailer');
+  if (trailerPos < 0) return buffer;
+
+  const entriesPart = afterXref.substring(0, trailerPos).replace(/\s+$/, '');
+  const trailerPart = afterXref.substring(trailerPos);
+
+  const newEntry = '\n' + String(obj999Offset).padStart(10, '0') + ' 00000 n ';
+  const updatedTrailer = (entriesPart + newEntry + '\n' + trailerPart)
+    .replace(/\/Size (\d+)/, (_, size) => '/Size ' + (parseInt(size, 10) + 1));
+
+  s = beforeXref + obj999 + updatedTrailer;
+
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
+
 async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) {
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
   const totalPages = doc.internal.getNumberOfPages();
   const docId = uid();
   const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
   const validationUrl = baseDir + 'verificar.html?id=' + docId;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
-  
+  let hashHex = null;
+
   try {
     const qrImg = await loadImg(qrUrl);
     doc.setPage(totalPages);
-    doc.addImage(qrImg, 'PNG', PAG.PW - 22, PAG.PH - 22, 15, 15);
+    doc.addImage(qrImg, 'PNG', 12, ph - 42, 15, 15);
   } catch (e) { console.error('QR Code error:', e); }
 
-  for(let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(5);
-    doc.setTextColor(180,180,180);
-    doc.text('ID: '+docId, PAG.PM, PAG.PH-1);
-    doc.text('Aut.: '+validationUrl, PAG.PW-PAG.PM, PAG.PH-1,{align:'right'});
-  }
-  
+  try {
+    for(let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(5);
+      doc.setTextColor(180,180,180);
+      doc.text('ID: '+docId, 12, ph-1);
+      doc.text('Aut.: '+validationUrl, pw-12, ph-1,{align:'right'});
+    }
+  }catch(e){console.error('Badge error:',e);}
+
   try {
     const pdfBlob = doc.output('blob');
     const pdfBytes = await pdfBlob.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
     db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),hash:hashHex,...metadata});
-    if(skipDownload) return { blob: pdfBlob, docId, hash: hashHex, filename };
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    const finalBlob = doc.output('blob');
+    try{
+      const finalBlob2=doc.output('blob');
+      let finalBytes2=await finalBlob2.arrayBuffer();
+      
+      try {
+        const _pdfLib = window.pdfLib || window.PDFLib;
+        if (_pdfLib) {
+          const pdfDoc2 = await _pdfLib.PDFDocument.load(finalBytes2);
+          pdfDoc2.encrypt({
+            userPassword: '',
+            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            permissions: {
+              printing: 'lowResolution', modifying: false, copying: false,
+              annotating: false, fillingForms: false,
+              contentAccessibility: false, documentAssembly: false,
+            }
+          });
+          finalBytes2 = await pdfDoc2.save();
+        }
+      } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
+      
+      finalBytes2 = corruptPdfBytes(finalBytes2);
+      
+      const hashBuffer2=await crypto.subtle.digest('SHA-256', finalBytes2);
+      const hashArray2=Array.from(new Uint8Array(hashBuffer2));
+      const hashHex2=hashArray2.map(b=>b.toString(16).padStart(2,'0')).join('');
+      db.ref('doc_auth/'+docId).update({hash:hashHex2, encrypted:true});
+      const finalBlob3 = new Blob([finalBytes2], { type: 'application/pdf' });
+      if(skipDownload) return { blob: finalBlob3, docId, hash: hashHex2, filename };
+      const url=URL.createObjectURL(finalBlob3);
+      const a=document.createElement('a');a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }catch(e2){
+      let pdfBytes2 = await pdfBlob.arrayBuffer();
+      try {
+        const _pdfLib = window.pdfLib || window.PDFLib;
+        if (_pdfLib) {
+          const pdfDoc2 = await _pdfLib.PDFDocument.load(pdfBytes2);
+          pdfDoc2.encrypt({
+            userPassword: '',
+            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            permissions: {
+              printing: 'lowResolution', modifying: false, copying: false,
+              annotating: false, fillingForms: false,
+              contentAccessibility: false, documentAssembly: false,
+            }
+          });
+          pdfBytes2 = await pdfDoc2.save();
+        }
+      } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
+      pdfBytes2 = corruptPdfBytes(pdfBytes2);
+      const fallbackBlob = new Blob([pdfBytes2], { type: 'application/pdf' });
+      if(skipDownload) return { blob: fallbackBlob, docId, hash: hashHex, filename };
+      const url=URL.createObjectURL(fallbackBlob);
+      const a=document.createElement('a');a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }
   } catch (e) {
     console.error('Sec error:', e);
     db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),...metadata});
@@ -790,10 +1102,13 @@ async function massDrawCoringaPage(doc,emp,texto,params){
   P_footer(doc,false,params.dataVal,params.dataValidade,emp?.nome);
 }
 
+let massGenDetail={func:'',docType:''};
+
 function massProgress(msg,pct){
   const el=document.getElementById('mass-progress');
   el.style.display='block';
   const cor=pct<100?'var(--hi)':'var(--sc)';
+  const detailHtml=massGenDetail.func?`<div class="progress-detail" style="margin-top:8px"><div class="pd-icon"><i class="fa-solid fa-file-pdf"></i></div><div><div class="pd-label">${esc(massGenDetail.func)}</div><div class="pd-sub">${esc(massGenDetail.docType)}</div></div></div>`:'';
   el.innerHTML=`
     <div class="ib" style="margin:0;padding:12px 14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -803,7 +1118,10 @@ function massProgress(msg,pct){
       <div style="height:6px;background:var(--bd);border-radius:3px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;transition:width .3s"></div>
       </div>
+      ${detailHtml}
     </div>`;
+  const loaderTxt=document.getElementById('loader-txt');
+  if(loaderTxt&&massGenDetail.func)loaderTxt.textContent='Gerando '+massGenDetail.docType+' para '+massGenDetail.func+'...';
 }
 
 async function gerarDocs(func, emp, opts, onStep, results){
@@ -814,6 +1132,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
     for(const tid of osTextIds){
       const texto = DATA.textos[tid];
       if(!texto) continue;
+      massGenDetail={func:func.nome||'', docType:'OS: '+((texto.titulo||'').substring(0,30))};
       const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
       await massDrawOsPage(doc, func, emp, [tid]);
       const filename = `${func.nome.replace(/\s+/g,'_')} - ${texto.titulo.replace(/\s+/g,'_')} - ${safeDataAdm}.pdf`;
@@ -823,6 +1142,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
     }
   }
   if(opts.docAdm&&func.dataAdm){
+    massGenDetail={func:func.nome||'', docType:'Ficha Admissional'};
     const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     await massDrawAdmPage(doc, func, emp, dataFmt, local, opts.conteudo||'');
     const filename = `${func.nome.replace(/\s+/g,'_')} - Ficha_Admissional - ${safeDataAdm}.pdf`;
@@ -834,6 +1154,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
     const cargoEpis = resolveCargoEpis(func.funcao);
     const finalItems = cargoEpis.length ? cargoEpis : massEpiCart;
     if(finalItems && finalItems.length){
+      massGenDetail={func:func.nome||'', docType:'Ficha EPI'};
       const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
       await massDrawEpiPage(doc, func, emp, dataFmt, finalItems);
       const filename = `${func.nome.replace(/\s+/g,'_')} - Ficha_EPI - ${safeDataAdm}.pdf`;
@@ -842,6 +1163,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
       if(onStep) onStep();
     }
   }
+  massGenDetail={func:'',docType:''};
 }
 
 async function massGen(){
@@ -864,11 +1186,10 @@ async function massGen(){
   const local=document.getElementById('m-local').value||'';
  
   const osTextIds=getChecked('mOsChk');
-  const docTypes=detectDocTypesFromTexts(osTextIds);
-  const docOS=docTypes.docOS;
-  const docLista=docTypes.docLista;
-  const docAdm=docTypes.docAdm;
-  const docEpi=docTypes.docEpi;
+  const docOS=docTypeCb('os') && osTextIds.length>0;
+  const docLista=docTypeCb('lista');
+  const docAdm=docTypeCb('adm');
+  const docEpi=docTypeCb('epi');
  
   const treino=document.getElementById('m-lista-treino')?.value||'Treinamento';
   const carga=document.getElementById('m-lista-carga')?.value||'';
@@ -884,7 +1205,7 @@ async function massGen(){
   if(!totalSteps){alert('Nenhum documento a gerar');return;}
   console.log("Total passos:", totalSteps);
  
-  const stepCb=()=>{step++;massProgress('Gerando... '+Math.round(step/totalSteps*100)+'%',Math.round(step/totalSteps*100));};
+  const stepCb=()=>{step++;const pct=Math.round(step/totalSteps*100);massProgress(pct<100?'Gerando documentos...':'Finalizado!',pct);};
  
   const opts={docOS,docLista,docAdm,docEpi,osTextIds,dataFmt,dataVal,local,treino,carga,conteudo};
  
@@ -901,10 +1222,14 @@ async function massGen(){
       const emp=resolveEmp(eid);
       for(const func of employees){
         console.log("Gerando docs para:", func.nome);
+        massGenDetail={func:func.nome, docType:'Processando...'};
+        massProgress(`Gerando documentos de ${func.nome}...`, Math.round(step/totalSteps*100));
         await gerarDocs(func, emp, opts, stepCb, results);
       }
       if(docLista){
         console.log("Gerando Lista de Presença para", emp?.nome);
+        massGenDetail={func:emp?.nome||'Empresa', docType:'Lista de Presença'};
+        massProgress(`Gerando Lista de Presença - ${treino}...`, Math.round(step/totalSteps*100));
         const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
         await massDrawListaPage(doc, employees, emp, {treino,carga,conteudo,dataFmt,local});
         const filename = `LISTA_PRESENCA_${(emp?.nome||'').replace(/\s+/g,'_')}_${treino.replace(/\s+/g,'_')}_${dataFmt.replace(/\//g,'-')}.pdf`;
@@ -927,7 +1252,7 @@ async function massGen(){
     }
     massProgress('Todos os documentos gerados com sucesso!',100);
     document.getElementById('mass-results').style.display='block';
-    document.getElementById('mass-results').innerHTML=`<div class="res"><i class="fa-solid fa-check-circle"></i> ${totalSteps} documento(s) gerado(s) com sucesso!</div>`;
+    document.getElementById('mass-results').innerHTML=`<div class="res"><i class="fa-solid fa-check-circle"></i> ${results.length} documento(s) gerado(s) com sucesso para ${selected.length} colaborador(es)!</div>`;
   }catch(e){
     console.error('Erro na geracao em massa:',e);
     alert('Erro detalhado: '+e.message);

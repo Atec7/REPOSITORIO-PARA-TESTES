@@ -936,6 +936,7 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
     <div style="display:flex;gap:8px;margin-bottom:6px">
       <input id="c-epi-search" placeholder="Pesquisar..." onkeyup="filterCargoEpiMat()" style="flex:2">
       <select id="c-epi-sel" style="flex:2"><option value="">Selecione...</option></select>
+      <select id="c-epi-tipo" style="width:100px;flex-shrink:0"><option value="EPI">EPI</option><option value="EPC">EPC</option><option value="UNIFORME">UNIFORME</option></select>
       <input type="number" id="c-epi-qtd" value="1" min="1" style="width:60px;flex-shrink:0" title="Quantidade por colaborador">
       <button class="btn bs" onclick="addCargoEpi()" style="flex-shrink:0;padding:8px 12px"><i class="fa-solid fa-plus"></i></button>
     </div>
@@ -1216,8 +1217,9 @@ function addCargoEpi(){
   const mat=DATA.materiais[opt.value];
   if(!mat)return;
   const qtd=parseInt(document.getElementById('c-epi-qtd').value)||1;
+  const tipo=document.getElementById('c-epi-tipo').value;
   const ex=CARGO_EPI_CART.find(c=>c.id===mat.id);
-  if(ex){ex.qtd+=qtd;}else{CARGO_EPI_CART.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:mat.tipo||'EPI',qtd});}
+  if(ex){ex.qtd+=qtd;ex.tipo=tipo;}else{CARGO_EPI_CART.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo, qtd});}
   renderCargoEpiCart();
 }
 function remCargoEpi(i){
@@ -1255,8 +1257,9 @@ function handleColabSelect(fid,name){
         epiItems=list.map(item=>{
           const id=typeof item==='object'?item.id:item;
           const qtd=typeof item==='object'?(item.qtd||1):1;
+          const savedTipo=typeof item==='object'?item.tipo:null;
           const mat=DATA.materiais[id]||toArr(DATA.materiais).find(m=>(m.nome||'').toLowerCase().includes(id.toLowerCase()));
-          return mat?{id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:mat.tipo||'EPI',qtd}:null;
+          return mat?{id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:savedTipo||mat.tipo||'EPI',qtd}:null;
         }).filter(Boolean);
         epiItems.forEach(item=>{
           const ex=CART.find(c=>c.id===item.id);
@@ -1405,7 +1408,7 @@ function getFormData(t){
   if(t==='funcionario')return{id:v('fid'),empresaId:v('i-f-ep'),nome:v('i-f-nm'),cpf:v('i-f-cp'),funcao:v('i-f-fn'),cbo:v('i-f-cb'),setor:v('i-f-st'),dataAdm:v('i-f-dt')};
   if(t==='texto'){const cargos=getChecked('tCgChk');return{id:v('tid'),titulo:v('i-t-ti'),conteudo:v('i-t-co'),categoria:v('i-t-ca'),cargosVinculados:cargos};}
   if(t==='material')return{id:v('mid'),nome:v('i-m-nm'),ca:v('i-m-ca'),tipo:document.getElementById('i-m-tp').value,unidade:v('i-m-un'),estoque:parseInt(v('i-m-es'))||0};
-  if(t==='cargo'){const epiData=CARGO_EPI_CART.map(c=>({id:c.id,qtd:c.qtd||1}));return{id:v('cid'),nome:v('i-c-nm'),cbo:v('i-c-cb'),epi:epiData};}
+  if(t==='cargo'){const epiData=CARGO_EPI_CART.map(c=>({id:c.id,qtd:c.qtd||1,tipo:c.tipo||'EPI'}));return{id:v('cid'),nome:v('i-c-nm'),cbo:v('i-c-cb'),epi:epiData};}
   return null;
 }
 function editEmp(x){v('eid',x.id);v('i-e-nm',x.nome||'');v('i-e-cj',x.cnpj||'');v('i-e-ender',x.endereco||'');v('i-e-lid',x.logoUrl||'');document.getElementById('i-e-logo').value='';openM('mdl-e');}
@@ -1417,9 +1420,10 @@ function editCargo(x){
     epiArr.forEach(item=>{
       const id=typeof item==='object'?item.id:item;
       const qtd=typeof item==='object'?(item.qtd||1):1;
+      const savedTipo=typeof item==='object'?item.tipo:null;
       const mat=DATA.materiais[id]||toArr(DATA.materiais).find(m=>(m.nome||'').toLowerCase().includes(id.toLowerCase()));
       if(mat&&!CARGO_EPI_CART.find(c=>c.id===mat.id)){
-        CARGO_EPI_CART.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:mat.tipo||'EPI',qtd});
+        CARGO_EPI_CART.push({id:mat.id,nome:mat.nome,ca:mat.ca||'',unidade:mat.unidade||'',tipo:savedTipo||mat.tipo||'EPI',qtd});
       }
     });
   }
@@ -1496,39 +1500,134 @@ async function resolveLogoEmp(emp){
 }
 
 // ── SECURITY ENGINE ─────────────────────────────────────────────────────
+function corruptPdfBytes(buffer) {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length < 100) return buffer;
+
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+
+  s = s.replace(/\/Contents (\d+) 0 R(?!\s*\d)/g, '/Contents [$1 0 R 999 0 R]');
+
+  const xrefPos = s.lastIndexOf('xref\n');
+  if (xrefPos < 0) return buffer;
+
+  const beforeXref = s.substring(0, xrefPos).replace(/\s+$/, '');
+  const afterXref = s.substring(xrefPos);
+
+  const obj999Offset = beforeXref.length + 1;
+  const obj999 = '\n999 0 obj\n<< /Length 17 >>\nstream\n/NonExistent Do\nendstream\nendobj\n';
+
+  const trailerPos = afterXref.indexOf('trailer');
+  if (trailerPos < 0) return buffer;
+
+  const entriesPart = afterXref.substring(0, trailerPos).replace(/\s+$/, '');
+  const trailerPart = afterXref.substring(trailerPos);
+
+  const newEntry = '\n' + String(obj999Offset).padStart(10, '0') + ' 00000 n ';
+  const updatedTrailer = (entriesPart + newEntry + '\n' + trailerPart)
+    .replace(/\/Size (\d+)/, (_, size) => '/Size ' + (parseInt(size, 10) + 1));
+
+  s = beforeXref + obj999 + updatedTrailer;
+
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
+
 async function saveSecurely(doc, filename, metadata = {}) {
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
   const totalPages = doc.internal.getNumberOfPages();
   const docId = uid();
   const baseDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
   const validationUrl = baseDir + 'verificar.html?id=' + docId;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(validationUrl)}`;
-  
+  let hashHex = null;
+
   try {
     const qrImg = await loadImg(qrUrl);
     doc.setPage(totalPages);
-    doc.addImage(qrImg, 'PNG', PAG.PW - 22, PAG.PH - 22, 15, 15);
+    doc.addImage(qrImg, 'PNG', pw - 32, ph - 42, 12, 12);
   } catch (e) { console.error('QR Code error:', e); }
 
-  for(let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(5);
-    doc.setTextColor(180,180,180);
-    doc.text('ID: '+docId, PAG.PM, PAG.PH-1);
-    doc.text('Aut.: '+validationUrl, PAG.PW-PAG.PM, PAG.PH-1,{align:'right'});
-  }
-  
+  try {
+    for(let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(5);
+      doc.setTextColor(180,180,180);
+      doc.text('ID: '+docId, pw-50, ph-15);
+      doc.text('Aut.: '+validationUrl, pw-12, ph-1,{align:'right'});
+    }
+  }catch(e){console.error('Badge error:',e);}
+
   try {
     const pdfBlob = doc.output('blob');
     const pdfBytes = await pdfBlob.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    hashHex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
     db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),hash:hashHex,...metadata});
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    const finalBlob = doc.output('blob');
+    try{
+      const finalBlob2=doc.output('blob');
+      let finalBytes2=await finalBlob2.arrayBuffer();
+      
+      try {
+        const _pdfLib = window.pdfLib || window.PDFLib;
+        if (_pdfLib) {
+          const pdfDoc2 = await _pdfLib.PDFDocument.load(finalBytes2);
+          pdfDoc2.encrypt({
+            userPassword: '',
+            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            permissions: {
+              printing: 'lowResolution', modifying: false, copying: false,
+              annotating: false, fillingForms: false,
+              contentAccessibility: false, documentAssembly: false,
+            }
+          });
+          finalBytes2 = await pdfDoc2.save();
+        }
+      } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
+      
+      finalBytes2 = corruptPdfBytes(finalBytes2);
+      
+      const hashBuffer2=await crypto.subtle.digest('SHA-256', finalBytes2);
+      const hashArray2=Array.from(new Uint8Array(hashBuffer2));
+      const hashHex2=hashArray2.map(b=>b.toString(16).padStart(2,'0')).join('');
+      db.ref('doc_auth/'+docId).update({hash:hashHex2, encrypted:true});
+      const finalBlob3 = new Blob([finalBytes2], { type: 'application/pdf' });
+      const url=URL.createObjectURL(finalBlob3);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }catch(e2){
+      let pdfBytes2 = await pdfBlob.arrayBuffer();
+      try {
+        const _pdfLib = window.pdfLib || window.PDFLib;
+        if (_pdfLib) {
+          const pdfDoc2 = await _pdfLib.PDFDocument.load(pdfBytes2);
+          pdfDoc2.encrypt({
+            userPassword: '',
+            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            permissions: {
+              printing: 'lowResolution', modifying: false, copying: false,
+              annotating: false, fillingForms: false,
+              contentAccessibility: false, documentAssembly: false,
+            }
+          });
+          pdfBytes2 = await pdfDoc2.save();
+        }
+      } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
+      pdfBytes2 = corruptPdfBytes(pdfBytes2);
+      const fallbackBlob = new Blob([pdfBytes2], { type: 'application/pdf' });
+      const url=URL.createObjectURL(fallbackBlob);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+    }
   } catch (e) {
     console.error('Sec error:', e);
     db.ref('doc_auth/'+docId).set({filename,ts:Date.now(),...metadata});
