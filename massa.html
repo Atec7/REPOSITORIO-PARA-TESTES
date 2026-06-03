@@ -205,10 +205,10 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
             <input type="checkbox" id="m-doc-os" onchange="filterTextsByDocType()"> Ordem de Serviço
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
-            <input type="checkbox" id="m-doc-adm" onchange="filterTextsByDocType()"> Ficha Admissional
+            <input type="checkbox" id="m-doc-adm" onchange="updateMassFieldsVisibility()"> Ficha Admissional
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
-            <input type="checkbox" id="m-doc-epi" onchange="filterTextsByDocType()"> Ficha EPI
+            <input type="checkbox" id="m-doc-epi" onchange="updateMassFieldsVisibility()"> Ficha EPI
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
             <input type="checkbox" id="m-doc-lista" onchange="filterTextsByDocType()"> Lista de Presença
@@ -352,15 +352,13 @@ function textCategoria(id){
 function filterTextsByDocType(){
   if(_syncingDocTypes)return;
   _syncingDocTypes=true;
-  const os=docTypeCb('os'), adm=docTypeCb('adm'), epi=docTypeCb('epi'), lista=docTypeCb('lista');
-  const noType=!os&&!adm&&!epi&&!lista;
+  const os=docTypeCb('os'), lista=docTypeCb('lista');
+  const noType=!os&&!lista;
   document.getElementsByName('mOsChk').forEach(cb=>{
     if(noType){cb.checked=false;return;}
     const cat=textCategoria(cb.value);
     cb.checked=
       (os&&catMatch(cat,['OS','ORDEM DE SERVIÇO','ORDEM DE SERVICO']))||
-      (adm&&catMatch(cat,['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO']))||
-      (epi&&catMatch(cat,['EPI','NR-6','NR6','EPC']))||
       (lista&&catMatch(cat,['LISTA','PRESENÇA','PRESENCA','TREINAMENTO']));
   });
   _syncingDocTypes=false;
@@ -373,12 +371,10 @@ function onTextCheckChange(){
 }
 
 function updateMassFieldsVisibility(){
-  const ids=getChecked('mOsChk');
-  const types=detectDocTypesFromTexts(ids);
   const listaEl=document.getElementById('m-section-lista');
   const epiEl=document.getElementById('m-section-epi');
-  if(listaEl)listaEl.style.display=(types.docLista&&docTypeCb('lista'))?'block':'none';
-  if(epiEl)epiEl.style.display=(types.docEpi&&docTypeCb('epi'))?'block':'none';
+  if(listaEl)listaEl.style.display=docTypeCb('lista')?'block':'none';
+  if(epiEl)epiEl.style.display=docTypeCb('epi')?'block':'none';
   updateMassSummary();
 }
 function updateMassSummary(){
@@ -386,9 +382,13 @@ function updateMassSummary(){
   if(!el)return;
   const funcs=getSelectedFuncs();
   const osIds=getChecked('mOsChk');
+  const osFiltered = osIds.filter(id => {
+    const cat = textCategoria(id);
+    return catMatch(cat, ['OS', 'ORDEM DE SERVIÇO', 'ORDEM DE SERVICO']);
+  });
   const empSet=new Set(funcs.map(f=>f.empresaId||'unknown').filter(Boolean));
   let docOSCount=0, docListaCount=0, docAdmCount=0, docEpiCount=0, total=0;
-  if(docTypeCb('os') && osIds.length)docOSCount=funcs.length*osIds.length;
+  if(docTypeCb('os') && osFiltered.length)docOSCount=funcs.length*osFiltered.length;
   if(docTypeCb('adm'))docAdmCount=funcs.filter(f=>f.dataAdm).length;
   if(docTypeCb('epi')){
     funcs.forEach(f=>{const ep=resolveCargoEpis(f.funcao);if(ep.length||massEpiCart.length)docEpiCount++;});
@@ -1129,7 +1129,11 @@ async function gerarDocs(func, emp, opts, onStep, results){
   const safeDataAdm = fmtData(func.dataAdm).replace(/\//g,'-');
   
   if(opts.docOS){
-    for(const tid of osTextIds){
+    const osFiltered = osTextIds.filter(id => {
+      const cat = textCategoria(id);
+      return catMatch(cat, ['OS', 'ORDEM DE SERVIÇO', 'ORDEM DE SERVICO']);
+    });
+    for(const tid of osFiltered){
       const texto = DATA.textos[tid];
       if(!texto) continue;
       massGenDetail={func:func.nome||'', docType:'OS: '+((texto.titulo||'').substring(0,30))};
@@ -1186,7 +1190,11 @@ async function massGen(){
   const local=document.getElementById('m-local').value||'';
  
   const osTextIds=getChecked('mOsChk');
-  const docOS=docTypeCb('os') && osTextIds.length>0;
+  const osTextsFiltered = osTextIds.filter(id => {
+    const cat = textCategoria(id);
+    return catMatch(cat, ['OS', 'ORDEM DE SERVIÇO', 'ORDEM DE SERVICO']);
+  });
+  const docOS=docTypeCb('os') && osTextsFiltered.length>0;
   const docLista=docTypeCb('lista');
   const docAdm=docTypeCb('adm');
   const docEpi=docTypeCb('epi');
@@ -1198,7 +1206,7 @@ async function massGen(){
   document.getElementById('mass-results').style.display='none';
   const numEmpresas=new Set(selected.map(f=>f.empresaId||'unknown')).size;
   let totalSteps=0, step=0;
-  if(docOS)totalSteps+=selected.length * osTextIds.length;
+  if(docOS)totalSteps+=selected.length * osTextsFiltered.length;
   if(docAdm)totalSteps+=selected.length;
   if(docEpi)totalSteps+=selected.length;
   if(docLista)totalSteps+=numEmpresas;
