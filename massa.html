@@ -205,10 +205,10 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
             <input type="checkbox" id="m-doc-os" onchange="filterTextsByDocType()"> Ordem de Serviço
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
-            <input type="checkbox" id="m-doc-adm" onchange="updateMassFieldsVisibility()"> Ficha Admissional
+            <input type="checkbox" id="m-doc-adm" onchange="filterTextsByDocType()"> Ficha Admissional
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
-            <input type="checkbox" id="m-doc-epi" onchange="updateMassFieldsVisibility()"> Ficha EPI
+            <input type="checkbox" id="m-doc-epi" onchange="filterTextsByDocType()"> Ficha EPI
           </label>
           <label class="ci" style="border:1px solid var(--bd);border-radius:6px;flex:1;min-width:130px;cursor:pointer">
             <input type="checkbox" id="m-doc-lista" onchange="filterTextsByDocType()"> Lista de Presença
@@ -336,11 +336,13 @@ let _syncingDocTypes=false;
 
 function autoCheckDocTypes(ids){
   if(_syncingDocTypes)return;
+  _syncingDocTypes=true;
   const types=detectDocTypesFromTexts(ids);
   for(const [id,key] of [['m-doc-os','docOS'],['m-doc-adm','docAdm'],['m-doc-epi','docEpi'],['m-doc-lista','docLista']]){
     const el=document.getElementById(id);
     if(el)el.checked=types[key];
   }
+  _syncingDocTypes=false;
 }
 
 function catMatch(cat,keys){return keys.some(k=>cat.includes(k));}
@@ -352,14 +354,16 @@ function textCategoria(id){
 function filterTextsByDocType(){
   if(_syncingDocTypes)return;
   _syncingDocTypes=true;
-  const os=docTypeCb('os'), lista=docTypeCb('lista');
-  const noType=!os&&!lista;
+  const os=docTypeCb('os'), lista=docTypeCb('lista'), adm=docTypeCb('adm'), epi=docTypeCb('epi');
+  const hasAny=os||lista||adm||epi;
   document.getElementsByName('mOsChk').forEach(cb=>{
-    if(noType){cb.checked=false;return;}
+    if(!hasAny){cb.checked=false;return;}
     const cat=textCategoria(cb.value);
     cb.checked=
       (os&&catMatch(cat,['OS','ORDEM DE SERVIÇO','ORDEM DE SERVICO']))||
-      (lista&&catMatch(cat,['LISTA','PRESENÇA','PRESENCA','TREINAMENTO']));
+      (lista&&catMatch(cat,['LISTA','PRESENÇA','PRESENCA','TREINAMENTO']))||
+      (adm&&catMatch(cat,['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO']))||
+      (epi&&catMatch(cat,['EPI','NR-6','NR6','EPC']));
   });
   _syncingDocTypes=false;
   updateMassFieldsVisibility();
@@ -1144,6 +1148,7 @@ function massProgress(msg,pct){
 function textoVinculadoAoCargo(texto, cargoId){
   let vinculados=texto.cargosVinculados||[];
   if(typeof vinculados==='string')vinculados=vinculados.split(',').map(s=>s.trim());
+  if(!Array.isArray(vinculados)){console.warn('cargosVinculados nao e array:',texto.id,vinculados);vinculados=[];}
   if(!vinculados.length)return true;
   return vinculados.some(c=>String(c).trim()===String(cargoId).trim());
 }
@@ -1152,6 +1157,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
   const {osTextIds, dataFmt, dataVal, local, treino, carga} = opts;
   const safeDataAdm = fmtData(func.dataAdm).replace(/\//g,'-');
   const funcCargo=String(func.funcao||'').trim();
+  const cargoNome=(resolveCargo(func.funcao)?.nome||func.funcao||'SEM CARGO');
   
   if(opts.docOS){
     const osFiltered = osTextIds.filter(id => {
@@ -1160,7 +1166,10 @@ async function gerarDocs(func, emp, opts, onStep, results){
     });
     for(const tid of osFiltered){
       const texto = DATA.textos[tid];
-      if(!texto||!textoVinculadoAoCargo(texto,funcCargo)) continue;
+      if(!texto){console.log('OS: texto nao encontrado',tid);continue;}
+      const vinculado=textoVinculadoAoCargo(texto,funcCargo);
+      console.log(`OS func="${func.nome}" cargo="${cargoNome}" texto="${texto.titulo}" vinculado=${vinculado} cargosVinculados=${JSON.stringify(texto.cargosVinculados)} funcCargo="${funcCargo}"`);
+      if(!vinculado) continue;
       massGenDetail={func:func.nome||'', docType:'OS: '+((texto.titulo||'').substring(0,30))};
       const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
       await massDrawOsPage(doc, func, emp, [tid]);
@@ -1175,7 +1184,12 @@ async function gerarDocs(func, emp, opts, onStep, results){
       const cat = textCategoria(id);
       return catMatch(cat, ['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO']);
     });
-    const admTextos = admTextIds.map(id=>DATA.textos[id]).filter(t=>t&&textoVinculadoAoCargo(t,funcCargo));
+    const admTextos = admTextIds.map(id=>DATA.textos[id]).filter(t=>{
+      if(!t)return false;
+      const v=textoVinculadoAoCargo(t,funcCargo);
+      console.log(`ADM func="${func.nome}" cargo="${cargoNome}" texto="${t.titulo}" vinculado=${v} cargosVinculados=${JSON.stringify(t.cargosVinculados)} funcCargo="${funcCargo}"`);
+      return v;
+    });
     const admConteudo = admTextos.map(t=>t.conteudo).filter(Boolean).join('\n\n');
     massGenDetail={func:func.nome||'', docType:'Ficha Admissional'};
     const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -1284,6 +1298,7 @@ async function massGen(){
       const emp=resolveEmp(eid);
       for(const func of employees){
         console.log("Gerando docs para:", func.nome);
+        console.log(`  emp="${emp?.nome}" funcId="${func.id}" cargo="${func.funcao}" cargoNome="${resolveCargo(func.funcao)?.nome||'?'}" dataAdm="${func.dataAdm}"`);
         massGenDetail={func:func.nome, docType:'Processando...'};
         massProgress(`Gerando documentos de ${func.nome}...`, Math.round(step/totalSteps*100));
         await gerarDocs(func, emp, opts, stepCb, results);
