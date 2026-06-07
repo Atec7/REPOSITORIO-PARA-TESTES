@@ -1124,9 +1124,17 @@ function massProgress(msg,pct){
   if(loaderTxt&&massGenDetail.func)loaderTxt.textContent='Gerando '+massGenDetail.docType+' para '+massGenDetail.func+'...';
 }
 
+function textoVinculadoAoCargo(texto, cargoId){
+  let vinculados=texto.cargosVinculados||[];
+  if(typeof vinculados==='string')vinculados=vinculados.split(',').map(s=>s.trim());
+  if(!vinculados.length)return true;
+  return vinculados.some(c=>String(c).trim()===String(cargoId).trim());
+}
+
 async function gerarDocs(func, emp, opts, onStep, results){
   const {osTextIds, dataFmt, dataVal, local, treino, carga} = opts;
   const safeDataAdm = fmtData(func.dataAdm).replace(/\//g,'-');
+  const funcCargo=String(func.funcao||'').trim();
   
   if(opts.docOS){
     const osFiltered = osTextIds.filter(id => {
@@ -1135,7 +1143,7 @@ async function gerarDocs(func, emp, opts, onStep, results){
     });
     for(const tid of osFiltered){
       const texto = DATA.textos[tid];
-      if(!texto) continue;
+      if(!texto||!textoVinculadoAoCargo(texto,funcCargo)) continue;
       massGenDetail={func:func.nome||'', docType:'OS: '+((texto.titulo||'').substring(0,30))};
       const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
       await massDrawOsPage(doc, func, emp, [tid]);
@@ -1146,9 +1154,15 @@ async function gerarDocs(func, emp, opts, onStep, results){
     }
   }
   if(opts.docAdm&&func.dataAdm){
+    const admTextIds = osTextIds.filter(id => {
+      const cat = textCategoria(id);
+      return catMatch(cat, ['ADMISSIONAL','ADM.','ADMISSÃO','ADMISSAO']);
+    });
+    const admTextos = admTextIds.map(id=>DATA.textos[id]).filter(t=>t&&textoVinculadoAoCargo(t,funcCargo));
+    const admConteudo = admTextos.map(t=>t.conteudo).filter(Boolean).join('\n\n');
     massGenDetail={func:func.nome||'', docType:'Ficha Admissional'};
     const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    await massDrawAdmPage(doc, func, emp, dataFmt, local, opts.conteudo||'');
+    await massDrawAdmPage(doc, func, emp, dataFmt, local, admConteudo);
     const filename = `${func.nome.replace(/\s+/g,'_')} - Ficha_Admissional - ${safeDataAdm}.pdf`;
     const r=await saveSecurely(doc, filename, {funcionarioId: func.id}, true);
     if(r&&results)results.push(r);
