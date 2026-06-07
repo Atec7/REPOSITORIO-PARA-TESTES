@@ -960,7 +960,7 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
   <div class="mt2">Texto / NR</div>
   <input type="hidden" id="tid">
   <div class="fg"><label class="fl">T&iacute;tulo</label><input id="i-t-ti"></div>
-  <div class="fg"><label class="fl">Categoria <span style="font-weight:400;color:var(--tm);text-transform:none;letter-spacing:0">(livre — ex: OS, NR-35, ADMISSIONAL...)</span></label><input id="i-t-ca" placeholder="Ex: OS, NR-06, ADMISSIONAL, OUTRO..."></div>
+  <div class="fg"><label class="fl">Categoria <span style="font-weight:400;color:var(--tm);text-transform:none;letter-spacing:0">(define o tipo do documento)</span></label><select id="i-t-ca" onchange="onTxtCatChange()"><option value="">Selecione...</option><option value="OS">OS — Ordem de Serviço</option><option value="ADMISSIONAL">ADMISSIONAL — Ficha Admissional</option><option value="LISTA">LISTA — Lista de Presença</option><option value="EPI">EPI — Ficha EPI/EPC</option><option value="NR-06">NR-06 (EPI)</option><option value="NR-35">NR-35 (Trabalho em Altura)</option><option value="NR-33">NR-33 (Espaço Confinado)</option><option value="NR-12">NR-12 (Segurança em Máquinas)</option><option value="NR-17">NR-17 (Ergonomia)</option><option value="NR-20">NR-20 (Inflamáveis)</option><option value="NR-23">NR-23 (Proteção contra Incêndios)</option><option value="NR-10">NR-10 (Segurança em Instalações Elétricas)</option><option value="PCMAT">PCMAT</option><option value="PCMSO">PCMSO</option><option value="LTCAT">LTCAT</option><option value="__outro__">Outro (digitar manualmente)</option></select><div id="i-t-ca-outro-wrap" style="display:none;margin-top:5px"><input id="i-t-ca-outro" placeholder="Digite a categoria personalizada"></div></div>
   <div class="fg"><label class="fl">Cargo(s) vinculado(s) <span style="font-weight:400;color:var(--tm);text-transform:none;letter-spacing:0">(usado automaticamente na geração em massa)</span></label><div class="sbar"><button class="bxs bxn" onclick="selAll('tCgChk',true)">Todos</button><button class="bxs bxd" onclick="selAll('tCgChk',false)">Nenhum</button></div><div id="i-t-cg-list" class="cl" style="max-height:150px"></div></div>
   <div class="fg"><label class="fl">Conte&uacute;do</label><textarea id="i-t-co" style="min-height:130px"></textarea></div>
   <div class="ma"><button class="btn bp" onclick="sv('texto')"><i class="fa-solid fa-save"></i> Salvar</button><button class="btn bg2" onclick="cls()">Cancelar</button></div>
@@ -1121,7 +1121,7 @@ function openM(id,mode){
     if(id==='mdl-e'){v('eid','');v('i-e-nm','');v('i-e-cj','');v('i-e-ender','');v('i-e-lid','');document.getElementById('i-e-logo').value='';const p=document.getElementById('prev-emp-logo');if(p)p.style.display='none';}
     if(id==='mdl-c'){v('cid','');v('i-c-nm','');v('i-c-cb','');CARGO_EPI_CART=[];renderCargoEpiCart();document.getElementById('c-epi-search').value='';filterCargoEpiMat();}
     if(id==='mdl-f'){v('fid','');v('i-f-nm','');v('i-f-cp','');v('i-f-fn','');v('i-f-cb','');v('i-f-st','');v('i-f-dt','');document.getElementById('i-f-ep').value='';}
-    if(id==='mdl-t'){v('tid','');v('i-t-ti','');v('i-t-ca','');v('i-t-co','');selAll('tCgChk',false);}
+    if(id==='mdl-t'){v('tid','');v('i-t-ti','');v('i-t-co','');setTxtCategoria('');selAll('tCgChk',false);}
     if(id==='mdl-m'){v('mid','');v('i-m-nm','');v('i-m-ca','');document.getElementById('i-m-tp').value='EPI';v('i-m-un','');v('i-m-es','0');}
   }
   document.getElementById(id).style.display='flex';
@@ -1406,7 +1406,7 @@ function del(path,id){if(!confirm('Confirma a exclus\u00e3o?'))return;db.ref(pat
 function getFormData(t){
   if(t==='empresa')return{id:v('eid'),nome:v('i-e-nm'),cnpj:v('i-e-cj'),endereco:v('i-e-ender'),logoUrl:v('i-e-lid')};
   if(t==='funcionario')return{id:v('fid'),empresaId:v('i-f-ep'),nome:v('i-f-nm'),cpf:v('i-f-cp'),funcao:v('i-f-fn'),cbo:v('i-f-cb'),setor:v('i-f-st'),dataAdm:v('i-f-dt')};
-  if(t==='texto'){const cargos=getChecked('tCgChk');return{id:v('tid'),titulo:v('i-t-ti'),conteudo:v('i-t-co'),categoria:v('i-t-ca'),cargosVinculados:cargos};}
+  if(t==='texto'){const cargos=getChecked('tCgChk');return{id:v('tid'),titulo:v('i-t-ti'),conteudo:v('i-t-co'),categoria:getTxtCategoria(),cargosVinculados:cargos};}
   if(t==='material')return{id:v('mid'),nome:v('i-m-nm'),ca:v('i-m-ca'),tipo:document.getElementById('i-m-tp').value,unidade:v('i-m-un'),estoque:parseInt(v('i-m-es'))||0};
   if(t==='cargo'){const epiData=CARGO_EPI_CART.map(c=>({id:c.id,qtd:c.qtd||1,tipo:c.tipo||'EPI'}));return{id:v('cid'),nome:v('i-c-nm'),cbo:v('i-c-cb'),epi:epiData};}
   return null;
@@ -1432,8 +1432,28 @@ function editCargo(x){
   openM('mdl-c');
 }
 function editFunc(x){v('fid',x.id);document.getElementById('i-f-ep').value=x.empresaId||'';v('i-f-nm',x.nome||'');v('i-f-cp',x.cpf||'');v('i-f-fn',x.funcao||'');v('i-f-cb',x.cbo||'');v('i-f-st',x.setor||'');v('i-f-dt',x.dataAdm||'');openM('mdl-f');}
+function setTxtCategoria(val){
+  const sel=document.getElementById('i-t-ca');
+  const outroWrap=document.getElementById('i-t-ca-outro-wrap');
+  const outro=document.getElementById('i-t-ca-outro');
+  const stdOptions=['OS','ADMISSIONAL','LISTA','EPI','NR-06','NR-35','NR-33','NR-12','NR-17','NR-20','NR-23','NR-10','PCMAT','PCMSO','LTCAT'];
+  if(stdOptions.includes(val)){sel.value=val;outroWrap.style.display='none';}
+  else if(val){sel.value='__outro__';outroWrap.style.display='block';outro.value=val;}
+  else{sel.value='';outroWrap.style.display='none';outro.value='';}
+}
+function onTxtCatChange(){
+  const sel=document.getElementById('i-t-ca');
+  const outroWrap=document.getElementById('i-t-ca-outro-wrap');
+  outroWrap.style.display=sel.value==='__outro__'?'block':'none';
+}
+function getTxtCategoria(){
+  const sel=document.getElementById('i-t-ca');
+  if(sel.value==='__outro__')return document.getElementById('i-t-ca-outro').value||'';
+  return sel.value;
+}
 function editText(x){
-  v('tid',x.id);v('i-t-ti',x.titulo||'');v('i-t-ca',x.categoria||'');v('i-t-co',x.conteudo||'');
+  v('tid',x.id);v('i-t-ti',x.titulo||'');v('i-t-co',x.conteudo||'');
+  setTxtCategoria(x.categoria||'');
   selAll('tCgChk',false);
   const ids=(x.cargosVinculados||[]).map(i=>String(i).trim());
   ids.forEach(id=>{const cb=document.getElementById('ck_tCg_'+id);if(cb)cb.checked=true;});
