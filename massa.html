@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{
   --sb:#1c1c1e;--sb-b:#2c2c2e;--bg:#f4f4f5;--sf:#fff;
@@ -632,28 +633,11 @@ function corruptPdfBytes(buffer) {
   let s = '';
   for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
 
-  s = s.replace(/\/Contents (\d+) 0 R(?!\s*\d)/g, '/Contents [$1 0 R 999 0 R]');
+  // 1) Metadados malformados (viewers ignoram, conversores tentam ler)
+  s = s.replace(/>>\s*startxref/, '/X-Converter /Nonexistent\n  /X-Version (999.999)\n  /XRefStm (corrupted)\n>>\nstartxref');
 
-  const xrefPos = s.lastIndexOf('xref\n');
-  if (xrefPos < 0) return buffer;
-
-  const beforeXref = s.substring(0, xrefPos).replace(/\s+$/, '');
-  const afterXref = s.substring(xrefPos);
-
-  const obj999Offset = beforeXref.length + 1;
-  const obj999 = '\n999 0 obj\n<< /Length 17 >>\nstream\n/NonExistent Do\nendstream\nendobj\n';
-
-  const trailerPos = afterXref.indexOf('trailer');
-  if (trailerPos < 0) return buffer;
-
-  const entriesPart = afterXref.substring(0, trailerPos).replace(/\s+$/, '');
-  const trailerPart = afterXref.substring(trailerPos);
-
-  const newEntry = '\n' + String(obj999Offset).padStart(10, '0') + ' 00000 n ';
-  const updatedTrailer = (entriesPart + newEntry + '\n' + trailerPart)
-    .replace(/\/Size (\d+)/, (_, size) => '/Size ' + (parseInt(size, 10) + 1));
-
-  s = beforeXref + obj999 + updatedTrailer;
+  // 2) /Prev falso no trailer apontando para offset inexistente
+  s = s.replace(/\/Size (\d+)/, '/Size $1\n  /Prev 99999999 ');
 
   const out = new Uint8Array(s.length);
   for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
@@ -697,14 +681,15 @@ async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) 
     try{
       const finalBlob2=doc.output('blob');
       let finalBytes2=await finalBlob2.arrayBuffer();
+      finalBytes2 = await rasterizePdfPages(finalBytes2);
       
       try {
         const _pdfLib = window.pdfLib || window.PDFLib;
         if (_pdfLib) {
           const pdfDoc2 = await _pdfLib.PDFDocument.load(finalBytes2);
           pdfDoc2.encrypt({
-            userPassword: '',
-            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            userPassword: '2026',
+            ownerPassword: '2026',
             permissions: {
               printing: 'lowResolution', modifying: false, copying: false,
               annotating: false, fillingForms: false,
@@ -714,8 +699,6 @@ async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) 
           finalBytes2 = await pdfDoc2.save();
         }
       } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
-      
-      finalBytes2 = corruptPdfBytes(finalBytes2);
       
       const hashBuffer2=await crypto.subtle.digest('SHA-256', finalBytes2);
       const hashArray2=Array.from(new Uint8Array(hashBuffer2));
@@ -729,13 +712,14 @@ async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) 
       setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
     }catch(e2){
       let pdfBytes2 = await pdfBlob.arrayBuffer();
+      pdfBytes2 = await rasterizePdfPages(pdfBytes2);
       try {
         const _pdfLib = window.pdfLib || window.PDFLib;
         if (_pdfLib) {
           const pdfDoc2 = await _pdfLib.PDFDocument.load(pdfBytes2);
           pdfDoc2.encrypt({
-            userPassword: '',
-            ownerPassword: docId + '@WS#' + (metadata.funcionarioId || metadata.empresaId || ''),
+            userPassword: '2026',
+            ownerPassword: '2026',
             permissions: {
               printing: 'lowResolution', modifying: false, copying: false,
               annotating: false, fillingForms: false,
@@ -745,7 +729,6 @@ async function saveSecurely(doc, filename, metadata = {}, skipDownload = false) 
           pdfBytes2 = await pdfDoc2.save();
         }
       } catch(encErr) { console.error('Erro ao criptografar:', encErr); }
-      pdfBytes2 = corruptPdfBytes(pdfBytes2);
       const fallbackBlob = new Blob([pdfBytes2], { type: 'application/pdf' });
       if(skipDownload) return { blob: fallbackBlob, docId, hash: hashHex, filename };
       const url=URL.createObjectURL(fallbackBlob);
@@ -1338,6 +1321,39 @@ async function massGen(){
   }
 }
 
+async function rasterizePdfPages(pdfBytes) {
+  const pdfjsLib = window.pdfjsLib;
+  if (!pdfjsLib) { console.warn('pdf.js not loaded, skipping rasterization'); return pdfBytes; }
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
+    if (pdf.numPages === 0) return pdfBytes;
+    const outPdf = await PDFLib.PDFDocument.create();
+    const scale = 2;
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+      const imgBytes = await blob.arrayBuffer();
+      const img = await outPdf.embedJpg(imgBytes);
+      const ptW = viewport.width / scale;
+      const ptH = viewport.height / scale;
+      const newPage = outPdf.addPage([ptW, ptH]);
+      newPage.drawImage(img, { x: 0, y: 0, width: ptW, height: ptH });
+    }
+    return await outPdf.save();
+  } catch (e) {
+    console.error('Rasterization error:', e);
+    return pdfBytes;
+  }
+}
  
 // ── START ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{initListeners();});

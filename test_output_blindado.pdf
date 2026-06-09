@@ -1,9 +1,14 @@
 %PDF-1.4
+%‚„œ”
 1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
+<< /Type /Catalog /Pages 2 0 R 
+  /X-Converter /Nonexistent
+  /X-Version (999.999)
+  /X-Checksum <00000000000000000000000000000000>
+>>
 endobj
 2 0 obj
-<< /Type /PageZ /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
 endobj
 3 0 obj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
@@ -19,17 +24,16 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 99999
-0000000000 99999 f 
-9999900009 00000 n 
-9999900058 00000 n 
-9999900115 00000 n 
-9999900266 00000 n 
-9999900358 00000 n 
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000266 00000 n 
+0000000358 00000 n 
 trailer
-  /XRefStm (corrupted)
-  /Prev 0
-<< /Size 6 /Root 1 0 R /Info 6 0 R >>
+<< /Size 6 /Root 1 0 R 
+  /Prev 99999999>>
 startxref
-447
+406
 %%EOF

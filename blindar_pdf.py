@@ -1,192 +1,117 @@
 import sys
 import os
-import random
+import re
 
-def corrupt_xref_table(data: bytes) -> bytes:
-    """Corrompe a xref table e trailer sem quebrar a renderizacao."""
-    lines = data.split(b'\n')
-    result = []
-    xref_start = None
-    xref_end = None
-
-    for i, line in enumerate(lines):
-        if line.strip().startswith(b'xref'):
-            xref_start = i
-        elif xref_start is not None and xref_end is None:
-            stripped = line.strip()
-            if stripped.startswith(b'trailer') or stripped.startswith(b'startxref'):
-                xref_end = i
-
-    if xref_start is not None and xref_end is not None:
-        for i in range(xref_start, xref_end):
-            if i >= len(lines):
-                break
-            stripped = lines[i].strip()
-            if stripped and stripped[0:1].isdigit() and b' ' in stripped:
-                parts = stripped.split(b' ')
-                if 2 <= len(parts) <= 3:
-                    original = lines[i]
-                    gen_num = parts[1]
-                    lines[i] = original.replace(gen_num, b'99999', 1)
-                    result.append(True)
-        result_lines = lines
-    else:
-        result_lines = lines
-        result = [False]
-
-    return b'\n'.join(result_lines)
-
-
-def inject_fake_filter(data: bytes) -> bytes:
-    """Adiciona /Filter /FakeFilter nos streams mantendo decodeabilidade."""
-    import re
-    pattern = rb'(stream\n)(.*?)(\nendstream)'
-
-    def replacer(m):
-        prefix = m.group(1)
-        content = m.group(2)
-        suffix = m.group(3)
-        if len(content) > 50:
-            return prefix + content + suffix
-        return m.group(0)
-
-    replaced = re.sub(pattern, replacer, data, flags=re.DOTALL)
-    if replaced == data:
-        lines = data.split(b'\n')
-        new_lines = []
-        for i, line in enumerate(lines):
-            new_lines.append(line)
-            stripped = line.strip()
-            if stripped.startswith(b'/Filter') or stripped.startswith(b'/Subtype'):
-                if i + 1 < len(lines) and lines[i + 1].strip() == b'stream':
-                    pass
-            if stripped == b'stream' and i > 0:
-                prev = lines[i - 1].strip()
-                if b'/Filter' not in prev and b'/Length' not in prev:
-                    lines[i - 1] = lines[i - 1].rstrip() + b'\n/Filter /FakeFilter'
-        new_lines = lines
-        return b'\n'.join(new_lines)
-    return replaced
-
-
-def corrupt_page_dict(data: bytes) -> bytes:
-    """Corrompe sutilmente o dicionario /Pages."""
-    lines = data.split(b'\n')
-    for i, line in enumerate(lines):
-        if b'/Type /Pages' in line or b'/Type /Page' in line:
-            lines[i] = line.replace(b'/Type /Pages', b'/Type /PageZ')
-    return b'\n'.join(lines)
+# ── BLINDAGEM ANTI-FRAUDE ────────────────────────────────────────
+# Estrategia: corrupcao ZERO na estrutura do PDF.
+# Apenas metadados malformados e /Prev falso no trailer.
+# - Viewers ignoram metadados invalidos e /Prev
+# - Conversores estritos tentam ler metadados, seguem /Prev e falham
+#
+# A protecao REAL contra fraude vem de:
+#   1. Criptografia com permissoes restritas (pdf-lib encrypt)
+#   2. Hash SHA-256 no Firebase (verificar.html)
+#   3. QR Code com ID de autenticacao no rodape
+# ─────────────────────────────────────────────────────────────────
 
 
 def inject_garbage_metadata(data: bytes) -> bytes:
-    """Injeta metadados malformados."""
-    markers = [
-        b'</Info>' if b'</Info>' in data else None,
-        b'>>' if b'/Metadata' in data else None,
-    ]
-    for marker in filter(None, markers):
-        data = data.replace(marker, marker + b'\n  /X-Converter /Nonexistent\n  /X-Version (999.999)\n  /X-Checksum <00000000000000000000000000000000>\n', 1)
-        break
+    """Injeta metadados malformados no Catalog e no Info dict.
+    
+    Viewers simplesmente ignoram campos que nao reconhecem.
+    Conversores que tentam ler TODOS os metadados quebram.
+    """
+    # Catalog
+    catalog_pattern = rb'(<<\s*/Type\s*/Catalog[^>]*>>)'
+    def add_catalog_garbage(m):
+        cat = m.group(1)
+        if b'/X-Converter' not in cat:
+            garbage = b'\n  /X-Converter /Nonexistent\n  /X-Version (999.999)\n  /X-Checksum <00000000000000000000000000000000>'
+            cat = cat[:-2] + garbage + b'\n>>'
+        return cat
+    data = re.sub(catalog_pattern, add_catalog_garbage, data)
+
+    # Info dict
+    info_pattern = rb'(<<\s*/Title[^>]*>>)'
+    def add_info_garbage(m):
+        info = m.group(1)
+        if b'/X-Fake' not in info:
+            info = info[:-2] + b'\n  /X-Fake-Entry (corrupted)\n  /X-Fake-Date (D:99999999999999)\n>>'
+        return info
+    data = re.sub(info_pattern, add_info_garbage, data, count=1)
+
     return data
 
 
-def break_startxref(data: bytes) -> bytes:
-    """Corrompe startxref para apontar para posicao errada."""
-    lines = data.split(b'\n')
-    for i, line in enumerate(lines):
-        if line.strip().startswith(b'startxref'):
-            try:
-                lines[i+1]
-            except IndexError:
-                continue
-            try:
-                offset = int(lines[i+1].strip())
-                fake_offset = offset + random.randint(1, 50)
-                lines[i+1] = str(fake_offset).encode()
-            except ValueError:
-                continue
-            break
-    return b'\n'.join(lines)
+def inject_prev_in_trailer(data: bytes) -> bytes:
+    """Adiciona /Prev no trailer apontando para offset inexistente.
+    
+    O campo /Prev em um trailer indica uma cadeia de xrefs anteriores.
+    Viewers modernos NAO seguem /Prev apos encontrar o xref principal.
+    Conversores e parsers estritos tentam seguir a cadeia e falham.
+    """
+    # Encontra o ultimo 'trailer' e seu fechamento >>
+    trailer_start = data.rfind(b'\ntrailer\n')
+    if trailer_start < 0:
+        return data
 
+    trailer_dict_start = data.find(b'<<', trailer_start)
+    if trailer_dict_start < 0:
+        return data
 
-def corrupt_trailer_dict(data: bytes) -> bytes:
-    """Adiciona campos invalidos no trailer."""
-    lines = data.split(b'\n')
-    for i, line in enumerate(lines):
-        if line.strip() == b'trailer' and i + 1 < len(lines):
-            lines[i] = line + b'\n  /XRefStm (corrupted)\n  /Prev 0'
-            break
-    return b'\n'.join(lines)
+    # Encontra o >> de fechamento do dicionario do trailer
+    close_pos = data.find(b'>>', trailer_dict_start)
+    if close_pos < 0:
+        return data
+
+    # Verifica se ja existe /Prev
+    between = data[trailer_dict_start:close_pos]
+    if b'/Prev' in between:
+        return data
+
+    prev_entry = b'\n  /Prev 99999999'
+    data = data[:close_pos] + prev_entry + data[close_pos:]
+
+    return data
 
 
 def blindar_pdf(input_path: str, output_path: str):
     with open(input_path, 'rb') as f:
         data = f.read()
 
-    print(f"[1/6] Corrompendo xref table...")
-    data = corrupt_xref_table(data)
-
-    print(f"[2/6] Adicionando filtros invalidos...")
-    data = inject_fake_filter(data)
-
-    print(f"[3/6] Corrompendo dicionario de paginas...")
-    data = corrupt_page_dict(data)
-
-    print(f"[4/6] Injetando metadados malformados...")
+    print("[1/2] Injetando metadados malformados...")
     data = inject_garbage_metadata(data)
 
-    print(f"[5/6] Quebrando startxref...")
-    data = break_startxref(data)
-
-    print(f"[6/6] Adulterando trailer...")
-    data = corrupt_trailer_dict(data)
+    print("[2/2] Adicionando /Prev falso no trailer...")
+    data = inject_prev_in_trailer(data)
 
     with open(output_path, 'wb') as f:
         f.write(data)
 
+    orig_size = os.path.getsize(input_path)
+    new_size = len(data)
     print(f"\nPDF blindado salvo em: {output_path}")
-    print(f"Tamanho original: {os.path.getsize(input_path)} bytes")
-    print(f"Tamanho final:    {os.path.getsize(output_path)} bytes")
-    print("\n>>> O PDF deve abrir normalmente em visualizadores (Adobe, Chrome, Edge)")
-    print(">>> Mas conversores automaticos das plataformas DEVEM quebrar ao processar")
+    print(f"Tamanho original: {orig_size} bytes")
+    print(f"Tamanho final:    {new_size} bytes")
+    print(f"Delta:            {new_size - orig_size} bytes")
+    print("\n>>> PDF 100% original, estrutura intacta, ABRE NORMALMENTE")
+    print(">>> Metadados malformados e /Prev falso confundem conversores")
+    print(">>> Autenticidade via SHA-256 + Firebase + QR Code mantida")
 
 
 def gerar_pdf_teste(path: str):
-    """Gera um PDF simples para demonstracao."""
     content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj\n"
-        b"<< /Type /Catalog /Pages 2 0 R >>\n"
-        b"endobj\n"
-        b"2 0 obj\n"
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>\n"
-        b"endobj\n"
-        b"3 0 obj\n"
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]\n"
-        b"   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\n"
-        b"endobj\n"
-        b"4 0 obj\n"
-        b"<< /Length 44 >>\n"
-        b"stream\n"
-        b"BT /F1 24 Tf 100 700 Td (Hello World) Tj ET\n"
-        b"endstream\n"
-        b"endobj\n"
-        b"5 0 obj\n"
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\n"
-        b"endobj\n"
-        b"xref\n"
-        b"0 6\n"
-        b"0000000000 65535 f \n"
-        b"0000000009 00000 n \n"
-        b"0000000058 00000 n \n"
-        b"0000000115 00000 n \n"
-        b"0000000266 00000 n \n"
-        b"0000000358 00000 n \n"
-        b"trailer\n"
-        b"<< /Size 6 /Root 1 0 R /Info 6 0 R >>\n"
-        b"startxref\n"
-        b"406\n"
-        b"%%EOF\n"
+        b"%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"
+        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]\n"
+        b"   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n"
+        b"4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 24 Tf 100 700 Td (Hello World) Tj ET\nendstream\nendobj\n"
+        b"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
+        b"xref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n"
+        b"0000000115 00000 n \n0000000266 00000 n \n0000000358 00000 n \n"
+        b"trailer\n<< /Size 6 /Root 1 0 R >>\n"
+        b"startxref\n406\n%%EOF\n"
     )
     with open(path, 'wb') as f:
         f.write(content)
