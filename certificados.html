@@ -1331,6 +1331,7 @@ async function saveSecurely(pdfBlob, filename, metadata = {}) {
         }
         let finalBytes = await pdfDoc.save();
         finalBytes = await rasterizePdfPages(finalBytes);
+        finalBytes = await addVerificationOverlay(finalBytes, docId, validationUrl);
         
         try {
             const pdfDoc2 = await PDFLib.PDFDocument.load(finalBytes);
@@ -2000,7 +2001,7 @@ async function rasterizePdfPages(pdfBytes) {
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
     if (pdf.numPages === 0) return pdfBytes;
     const outPdf = await PDFLib.PDFDocument.create();
-    const scale = 2;
+    const scale = 3;
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const viewport = page.getViewport({ scale });
@@ -2011,9 +2012,9 @@ async function rasterizePdfPages(pdfBytes) {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       await page.render({ canvasContext: ctx, viewport }).promise;
-      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
       const imgBytes = await blob.arrayBuffer();
-      const img = await outPdf.embedJpg(imgBytes);
+      const img = await outPdf.embedPng(imgBytes);
       const ptW = viewport.width / scale;
       const ptH = viewport.height / scale;
       const newPage = outPdf.addPage([ptW, ptH]);
@@ -2022,6 +2023,36 @@ async function rasterizePdfPages(pdfBytes) {
     return await outPdf.save();
   } catch (e) {
     console.error('Rasterization error:', e);
+    return pdfBytes;
+  }
+}
+
+async function addVerificationOverlay(pdfBytes, docId, validationUrl) {
+  try {
+    const PDFName = PDFLib.PDFName;
+    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    const pages = pdfDoc.getPages();
+    const action = pdfDoc.context.obj({
+      Type: PDFName.of('Action'),
+      S: PDFName.of('URI'),
+      URI: validationUrl,
+    });
+    const actionRef = pdfDoc.context.register(action);
+    for (const pg of pages) {
+      const pw = pg.getWidth();
+      const ph = pg.getHeight();
+      const linkAnnot = pdfDoc.context.obj({
+        Type: PDFName.of('Annot'),
+        Subtype: PDFName.of('Link'),
+        Rect: [0, 0, pw, ph],
+        Border: [0, 0, 0],
+        A: actionRef,
+      });
+      pg.node.addAnnot(pdfDoc.context.register(linkAnnot));
+    }
+    return await pdfDoc.save();
+  } catch (e) {
+    console.error('Overlay error:', e);
     return pdfBytes;
   }
 }
