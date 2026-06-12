@@ -1231,7 +1231,16 @@ function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
     else if(tg==='br'){y+=lh*0.6;}
     else{for(var c=n.firstChild;c;c=c.nextSibling)PB(c);}
   }
-  PB(body);return y;
+  var hasBlock=false;
+  if(body.nodeType===1){
+    for(var c=body.firstElementChild;c;c=c.nextElementSibling){
+      var ct=c.tagName.toLowerCase();
+      if(ct==='p'||ct==='div'||ct==='h2'||ct==='h3'||ct==='ul'||ct==='ol'||ct==='blockquote'||ct==='table'){hasBlock=true;break;}
+    }
+  }
+  if(hasBlock){for(var c=body.firstChild;c;c=c.nextSibling)PB(c);}
+  else{PB(body);}
+  return y;
 }
 
 // ── DC: RENDER TABELA IN PDF ───────────────────────────────────────
