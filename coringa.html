@@ -153,7 +153,7 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .dc-editor-toolbar button.active{background:var(--hi);color:#fafafa}
 .dc-editor-toolbar .dc-sep{width:1px;height:18px;background:var(--bd);margin:0 4px;flex-shrink:0}
 .dc-editor-wrap{display:flex;position:relative;border:1px solid var(--bd);border-radius:0 0 8px 8px;background:var(--sf);border-top:none}
-#dc-pb-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:visible}
+#dc-pb-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:hidden}
 .dc-pb-line{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--bd);display:flex;align-items:center;justify-content:center}
 .dc-pb-line.active{border-top-color:var(--gold);border-top-style:solid}
 .dc-pb-badge{position:absolute;background:var(--gold);color:#fff;font-size:9px;font-weight:700;padding:1px 12px;border-radius:9px;white-space:nowrap;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(245,158,11,.35);line-height:1.7;letter-spacing:.3px;transform:translateY(-50%)}
@@ -694,22 +694,26 @@ function dcUpdatePageIndicators(){
   const editor=document.getElementById('dc-editor-conteudo');
   const info=document.getElementById('dc-page-info');
   if(!overlay||!editor||!info)return;
-  const pageH=750;
-  const contentH=editor.scrollHeight;
-  const pages=Math.max(1,Math.ceil(contentH/pageH));
-  const scrollTop=editor.scrollTop;
-  const visibleH=editor.clientHeight;
-  const currentPage=Math.min(pages,Math.floor((scrollTop+visibleH/2)/pageH)+1);
-  const padTop=14;
-  let html='';
-  for(let i=1;i<pages;i++){
-    const pos=padTop+i*pageH-scrollTop;
-    if(pos<-30||pos>visibleH+30)continue;
-    const active=i===currentPage?'active':'';
-    html+='<div class="dc-pb-line '+active+'" style="top:'+pos+'px"><span class="dc-pb-badge">Pg '+(i+1)+'</span></div>';
-  }
-  overlay.innerHTML=html;
-  info.textContent='Pg. '+currentPage+'/'+pages;
+  requestAnimationFrame(()=>{
+    const pageH=750;
+    const contentH=Math.max(editor.scrollHeight,1);
+    const pages=Math.max(1,Math.ceil(contentH/pageH));
+    const scrollTop=editor.scrollTop;
+    const visibleH=editor.clientHeight;
+    const currentPage=Math.min(pages,Math.floor((scrollTop+visibleH/2)/pageH)+1);
+    const padTop=14;
+    let html='';
+    for(let i=1;i<pages;i++){
+      const pos=padTop+i*pageH-scrollTop;
+      if(pos<-30||pos>visibleH+30)continue;
+      const active=i===currentPage?'active':'';
+      html+='<div class="dc-pb-line '+active+'" style="top:'+pos+'px"><span class="dc-pb-badge">Pg '+(i+1)+'</span></div>';
+    }
+    if(overlay.innerHTML!==html||info.textContent!=='Pg. '+currentPage+'/'+pages){
+      overlay.innerHTML=html;
+      info.textContent='Pg. '+currentPage+'/'+pages;
+    }
+  });
 }
 function dcExcluirTexto(){
   const id=document.getElementById('dc-txt-id').value;
@@ -1249,7 +1253,7 @@ function dcGetStyle(el,prop){var s=el.getAttribute('style');if(!s)return null;va
 function dcCheckPage(doc,y,need,pageH,bottomM){if(y+need>pageH-bottomM){doc.addPage();return 22;}return y;}
 function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
   if(!html||html.trim()===''||html==='<br>')return y0;
-  html=html.replace(/white-space\s*:\s*(nowrap|pre|pre-wrap|pre-line)\s*;?/gi,'').replace(/overflow\s*:\s*(auto|scroll|hidden)\s*;?/gi,'').replace(/mso-[^;]+;?/gi,'');
+  html=html.replace(/white-space\s*:\s*(nowrap|pre|pre-wrap|pre-line)\s*;?/gi,'').replace(/overflow\s*:\s*(auto|scroll|hidden)\s*;?/gi,'');
   const p=new DOMParser();const dom=p.parseFromString('<div>'+html+'</div>','text/html');const body=dom.body.firstChild;
   if(!body)return y0;var y=y0,fs=8.5,fb='normal',fc=[60,60,60],lh=4.8;
   function SF(){doc.setFont('helvetica',fb);doc.setFontSize(fs);doc.setTextColor(...fc);}
