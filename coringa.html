@@ -152,13 +152,19 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .dc-editor-toolbar button:hover{background:var(--bd);color:var(--tp)}
 .dc-editor-toolbar button.active{background:var(--hi);color:#fafafa}
 .dc-editor-toolbar .dc-sep{width:1px;height:18px;background:var(--bd);margin:0 4px;flex-shrink:0}
+.dc-editor-wrap{display:flex;position:relative;border:1px solid var(--bd);border-radius:0 0 8px 8px;background:var(--sf);border-top:none}
+#dc-pb-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:visible}
+.dc-pb-line{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--bd);display:flex;align-items:center;justify-content:center}
+.dc-pb-line.active{border-top-color:var(--gold);border-top-style:solid}
+.dc-pb-badge{position:absolute;background:var(--gold);color:#fff;font-size:9px;font-weight:700;padding:1px 12px;border-radius:9px;white-space:nowrap;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(245,158,11,.35);line-height:1.7;letter-spacing:.3px;transform:translateY(-50%)}
+.dc-pb-line.active .dc-pb-badge{background:var(--gold);box-shadow:0 2px 10px rgba(245,158,11,.5)}
 #dc-editor-conteudo{
-  min-height:280px;padding:14px 16px;border:1px solid var(--bd);
-  border-radius:0 0 8px 8px;font-size:14px;line-height:1.7;
+  min-height:280px;padding:14px 16px;flex:1;border:none;border-radius:0;
+  font-size:14px;line-height:1.7;
   color:var(--tp);background:var(--sf);outline:none;overflow-y:auto;
-  font-family:'DM Sans',sans-serif;word-wrap:break-word;
+  font-family:'DM Sans',sans-serif;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;
 }
-#dc-editor-conteudo:focus{border-color:var(--hi);box-shadow:inset 0 0 0 2px rgba(63,63,70,.06)}
+.dc-editor-wrap:focus-within{border-color:var(--hi);box-shadow:inset 0 0 0 2px rgba(63,63,70,.06)}
 #dc-editor-conteudo img{max-width:100%;border-radius:4px;margin:4px 6px;display:inline-block}
 #dc-editor-conteudo table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px;font-family:'DM Sans',sans-serif;table-layout:fixed}
 #dc-editor-conteudo td,#dc-editor-conteudo th{border:1px solid #cbd5e1;padding:7px 10px;vertical-align:top;min-width:40px;word-wrap:break-word}
@@ -275,11 +281,15 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
               <button onclick="dcFormat('redo')" title="Refazer"><i class="fa-solid fa-rotate-right"></i></button>
             </div>
             <input type="file" id="dc-img-input" accept="image/*" style="display:none" onchange="dcInserirImagem(this)">
-            <div id="dc-editor-conteudo" class="dc-editor-placeholder" contenteditable="true" data-placeholder="Digite o conteúdo do documento aqui..."></div>
-            <div style="font-size:10px;color:var(--tm);margin-top:4px;display:flex;gap:14px;flex-wrap:wrap">
+            <div class="dc-editor-wrap">
+              <div id="dc-pb-overlay"></div>
+              <div id="dc-editor-conteudo" class="dc-editor-placeholder" contenteditable="true" data-placeholder="Digite o conteúdo do documento aqui..."></div>
+            </div>
+            <div style="font-size:10px;color:var(--tm);margin-top:4px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
               <span><i class="fa-solid fa-up-down-left-right"></i> Redimensione imagens/tabelas arrastando as bordas</span>
               <span><i class="fa-solid fa-paste"></i> Cole imagens (Ctrl+V)</span>
               <span><i class="fa-solid fa-arrow-down-to-line"></i> Arraste imagens do explorador</span>
+              <span id="dc-page-info" style="margin-left:auto;font-weight:600;background:var(--hl);padding:2px 8px;border-radius:4px;border:1px solid var(--bd);font-size:10px">Pg. 1</span>
             </div>
           </div>
         </div>
@@ -557,6 +567,7 @@ function dcCarregarTexto(){
   document.getElementById('dc-txt-id').value=txt.id||id;
   document.getElementById('dc-titulo-doc').value=txt.titulo||'';
   document.getElementById('dc-editor-conteudo').innerHTML=txt.conteudo||'';
+  setTimeout(dcUpdatePageIndicators,50);
 }
 function dcNovoTexto(){
   document.getElementById('dc-txt-id').value='';
@@ -564,12 +575,14 @@ function dcNovoTexto(){
   document.getElementById('dc-editor-conteudo').innerHTML='';
   const sel=document.getElementById('dc-carregar-texto');
   if(sel)sel.value='';
+  setTimeout(dcUpdatePageIndicators,50);
 }
 
 // ── DC: RICH TEXT EDITOR ──────────────────────────────────────────
 function dcFormat(cmd, val){
   document.execCommand(cmd, false, val||null);
   dcFocusEditor();
+  setTimeout(dcUpdatePageIndicators,50);
 }
 function dcFocusEditor(){
   const ed=document.getElementById('dc-editor-conteudo');
@@ -619,14 +632,24 @@ function dcInserirImagem(input){
         if(!blob)continue;
         const reader=new FileReader();
         reader.onload=function(ev){
-          const img='<img src="'+ev.target.result+'" alt="imagem" style="max-width:100%">';
-          document.execCommand('insertHTML',false,img);
+          document.execCommand('insertHTML',false,'<img src="'+ev.target.result+'" alt="imagem" style="max-width:100%">');
         };
         reader.readAsDataURL(blob);
-        break;
+        return;
       }
     }
+    const html=e.clipboardData.getData('text/html');
+    if(html&&html.trim()){e.preventDefault();document.execCommand('insertHTML',false,dcSanitizePaste(html));return;}
+    const txt=e.clipboardData.getData('text/plain');
+    if(txt){e.preventDefault();document.execCommand('insertText',false,txt);}
   });
+  function dcSanitizePaste(h){
+    return h.replace(/<meta[^>]*>/gi,'').replace(/<link[^>]*>/gi,'').replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<o:[^>]*>[\s\S]*?<\/o:[^>]*>/gi,'').replace(/<!--[\s\S]*?-->/gi,'')
+      .replace(/white-space\s*:\s*(nowrap|pre|pre-wrap|pre-line)\s*;?/gi,'')
+      .replace(/overflow\s*:\s*(auto|scroll|hidden)\s*;?/gi,'')
+      .replace(/word-break\s*:\s*keep-all\s*;?/gi,'')
+      .replace(/mso-[^;]+;?/gi,'').replace(/class\s*=\s*"[^"]*"/gi,'').replace(/lang\s*=\s*"[^"]*"/gi,'').replace(/dir\s*=\s*"[^"]*"/gi,'');
+  }
   ed.addEventListener('drop',function(e){
     e.preventDefault();
     const files=e.dataTransfer&&e.dataTransfer.files;
@@ -654,6 +677,9 @@ function dcInserirImagem(input){
   });
   ed.addEventListener('mouseup',dcAtualizarToolbar);
   ed.addEventListener('keyup',dcAtualizarToolbar);
+  ed.addEventListener('scroll',dcUpdatePageIndicators);
+  ed.addEventListener('input',dcUpdatePageIndicators);
+  setTimeout(dcUpdatePageIndicators,100);
 })();
 function dcAtualizarToolbar(){
   const btns=document.querySelectorAll('#dc-editor-tb button');
@@ -661,6 +687,29 @@ function dcAtualizarToolbar(){
   if(document.queryCommandState('bold')){const b=document.querySelector('#dc-editor-tb button[title*="Negrito"]');if(b)b.classList.add('active');}
   if(document.queryCommandState('italic')){const b=document.querySelector('#dc-editor-tb button[title*="Itálico"]');if(b)b.classList.add('active');}
   if(document.queryCommandState('underline')){const b=document.querySelector('#dc-editor-tb button[title*="Sublinhado"]');if(b)b.classList.add('active');}
+  dcUpdatePageIndicators();
+}
+function dcUpdatePageIndicators(){
+  const overlay=document.getElementById('dc-pb-overlay');
+  const editor=document.getElementById('dc-editor-conteudo');
+  const info=document.getElementById('dc-page-info');
+  if(!overlay||!editor||!info)return;
+  const pageH=750;
+  const contentH=editor.scrollHeight;
+  const pages=Math.max(1,Math.ceil(contentH/pageH));
+  const scrollTop=editor.scrollTop;
+  const visibleH=editor.clientHeight;
+  const currentPage=Math.min(pages,Math.floor((scrollTop+visibleH/2)/pageH)+1);
+  const padTop=14;
+  let html='';
+  for(let i=1;i<pages;i++){
+    const pos=padTop+i*pageH-scrollTop;
+    if(pos<-30||pos>visibleH+30)continue;
+    const active=i===currentPage?'active':'';
+    html+='<div class="dc-pb-line '+active+'" style="top:'+pos+'px"><span class="dc-pb-badge">Pg '+(i+1)+'</span></div>';
+  }
+  overlay.innerHTML=html;
+  info.textContent='Pg. '+currentPage+'/'+pages;
 }
 function dcExcluirTexto(){
   const id=document.getElementById('dc-txt-id').value;
@@ -1200,6 +1249,7 @@ function dcGetStyle(el,prop){var s=el.getAttribute('style');if(!s)return null;va
 function dcCheckPage(doc,y,need,pageH,bottomM){if(y+need>pageH-bottomM){doc.addPage();return 22;}return y;}
 function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
   if(!html||html.trim()===''||html==='<br>')return y0;
+  html=html.replace(/white-space\s*:\s*(nowrap|pre|pre-wrap|pre-line)\s*;?/gi,'').replace(/overflow\s*:\s*(auto|scroll|hidden)\s*;?/gi,'').replace(/mso-[^;]+;?/gi,'');
   const p=new DOMParser();const dom=p.parseFromString('<div>'+html+'</div>','text/html');const body=dom.body.firstChild;
   if(!body)return y0;var y=y0,fs=8.5,fb='normal',fc=[60,60,60],lh=4.8;
   function SF(){doc.setFont('helvetica',fb);doc.setFontSize(fs);doc.setTextColor(...fc);}
@@ -1214,7 +1264,8 @@ function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
     function CC(n){for(var c=n.firstChild;c;c=c.nextSibling)CL(c);}SF();CL(p);
     for(var i=0;i<seg.length;i++){var s=seg[i];if(s.x==='img'||s.x==='tbl'){FL();PB(s.n);continue;}if(s.t==='\n'){FL();continue;}
       doc.setFont('helvetica',s.b);doc.setFontSize(s.s);var addW=doc.getTextWidth(s.t);
-      if(ln&&lineW()+addW>maxW-ind-4)FL();ln+=s.t;st.push({t:s.t,b:s.b,s:s.s,c:s.c});}
+      if(ln&&lineW()+addW>maxW-ind-4)FL();
+      if(addW>maxW-ind-4){var lines=doc.splitTextToSize(s.t,maxW-ind-4);for(var w=0;w<lines.length;w++){if(ln)FL();ln=lines[w];st=[{t:lines[w],b:s.b,s:s.s,c:s.c}];FL();}}else{ln+=s.t;st.push({t:s.t,b:s.b,s:s.s,c:s.c});}}
     if(ln.trim())FL();
   }
   function PB(n){
