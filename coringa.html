@@ -152,6 +152,8 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .dc-editor-toolbar button:hover{background:var(--bd);color:var(--tp)}
 .dc-editor-toolbar button.active{background:var(--hi);color:#fafafa}
 .dc-editor-toolbar .dc-sep{width:1px;height:18px;background:var(--bd);margin:0 4px;flex-shrink:0}
+.dc-editor-toolbar input[type="color"]{width:26px;height:24px;padding:2px;border:1px solid transparent;border-radius:4px;cursor:pointer;background:transparent}
+.dc-editor-toolbar input[type="color"]:hover{border-color:var(--bd)}
 .dc-editor-wrap{display:flex;position:relative;border:1px solid var(--bd);border-radius:0 0 8px 8px;background:var(--sf);border-top:none}
 #dc-pb-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:hidden}
 .dc-pb-line{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--bd);display:flex;align-items:center;justify-content:center}
@@ -273,6 +275,8 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
               <button onclick="dcFormat('justifyLeft')" title="Alinhar à esquerda"><i class="fa-solid fa-align-left"></i></button>
               <button onclick="dcFormat('justifyCenter')" title="Centralizar"><i class="fa-solid fa-align-center"></i></button>
               <button onclick="dcFormat('justifyRight')" title="Alinhar à direita"><i class="fa-solid fa-align-right"></i></button>
+              <span class="dc-sep"></span>
+              <input type="color" id="dc-color-picker" title="Cor do Texto" oninput="dcFormat('foreColor',this.value)" value="#000000">
               <span class="dc-sep"></span>
               <button onclick="dcInserirTabela()" title="Inserir tabela"><i class="fa-solid fa-table"></i></button>
               <button onclick="document.getElementById('dc-img-input').click()" title="Inserir imagem"><i class="fa-solid fa-image"></i></button>
@@ -1253,6 +1257,19 @@ async function genDocCoringa(){
 // ── DC: RENDER HTML AS PDF ─────────────────────────────────────
 function dcPxToMm(v){return (parseFloat(v)||0)*0.264583;}
 function dcGetStyle(el,prop){var s=el.getAttribute('style');if(!s)return null;var m=s.match(new RegExp(prop+'\\s*:\\s*([^;]+)','i'));return m?m[1].trim():null;}
+function parseColor(val){
+  if(!val)return null;val=val.trim();
+  var m=val.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if(m)return[parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)];
+  m=val.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+  if(m)return[parseInt(m[1]+m[1],16),parseInt(m[2]+m[2],16),parseInt(m[3]+m[3],16)];
+  m=val.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+  if(m)return[+m[1],+m[2],+m[3]];
+  var named={red:[255,0,0],green:[0,128,0],blue:[0,0,255],black:[0,0,0],white:[255,255,255],gray:[128,128,128],grey:[128,128,128],yellow:[255,255,0],orange:[255,165,0],purple:[128,0,128],pink:[255,192,203],brown:[165,42,42],navy:[0,0,128],teal:[0,128,128],maroon:[128,0,0],darkred:[139,0,0],darkgreen:[0,100,0],darkblue:[0,0,139],gold:[255,215,0],silver:[192,192,192],lime:[0,255,0],aqua:[0,255,255],fuchsia:[255,0,255],indigo:[75,0,130],coral:[255,127,80],tomato:[255,99,71],salmon:[250,128,114],crimson:[220,20,60],hotpink:[255,105,180],deeppink:[255,20,147],violet:[238,130,238],magenta:[255,0,255],orchid:[218,112,214],plum:[221,160,221],thistle:[216,191,216],tan:[210,180,140],wheat:[245,222,179],beige:[245,245,220],ivory:[255,255,240],chocolate:[210,105,30],saddlebrown:[139,69,19],sienna:[160,82,45],peru:[205,133,63],darkorange:[255,140,0],darkgoldenrod:[184,134,11],goldenrod:[218,165,32],olive:[128,128,0],olivedrab:[107,142,35],yellowgreen:[154,205,50],lawngreen:[124,252,0],chartreuse:[127,255,0],greenyellow:[173,255,47],springgreen:[0,255,127],mediumspringgreen:[0,250,154],lightgreen:[144,238,144],palegreen:[152,251,152],darkseagreen:[143,188,143],forestgreen:[34,139,34],seagreen:[46,139,87],mediumseagreen:[60,179,113],turquoise:[64,224,208],mediumturquoise:[72,209,204],lightseagreen:[32,178,170],darkcyan:[0,139,139],cyan:[0,255,255],powderblue:[176,224,230],lightblue:[173,216,230],skyblue:[135,206,235],lightskyblue:[135,206,250],deepskyblue:[0,191,255],dodgerblue:[30,144,255],cornflowerblue:[100,149,237],royalblue:[65,105,225],mediumblue:[0,0,205],darkviolet:[148,0,211],darkorchid:[153,50,204],mediumorchid:[186,85,211],mediumpurple:[147,112,219],mediumslateblue:[123,104,238],slateblue:[106,90,205],darkslateblue:[72,61,139]};
+  var nv=val.toLowerCase();
+  if(named[nv])return named[nv];
+  return null;
+}
 function dcCheckPage(doc,y,need,pageH,bottomM){if(y+need>pageH-bottomM){doc.addPage();return 22;}return y;}
 function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
   if(!html||html.trim()===''||html==='<br>')return y0;
@@ -1267,7 +1284,7 @@ function dcRenderHtml(doc,html,x0,y0,maxW,pageH,bottomM){
   function WK(p,x,ind){var seg=[],ln='',st=[];
     function lineW(){var w=0;for(var i=0;i<st.length;i++){var si=st[i];if(!si.t.trim())continue;doc.setFont('helvetica',si.b);doc.setFontSize(si.s);w+=doc.getTextWidth(si.t);}return w;}
     function FL(){if(!ln.trim()){y+=lh*0.6;return;}CHK(lh);var cx=x+ind;for(var i=0;i<st.length;i++){var si=st[i];if(!si.t.trim())continue;doc.setFont('helvetica',si.b);doc.setFontSize(si.s);doc.setTextColor(...si.c);doc.text(si.t,cx,y);cx+=doc.getTextWidth(si.t);}SF();y+=lh;ln='';st=[];}
-    function CL(n){if(n.nodeType===3){var t=n.textContent.replace(/\s+/g,' ');if(t.trim())seg.push({t:t,b:fb,s:fs,c:fc});}else if(n.nodeType===1){var tg=n.tagName.toLowerCase();if(tg==='b'||tg==='strong'){var o=fb;fb='bold';CC(n);fb=o;}else if(tg==='i'||tg==='em'){var o=fb;fb='italic';CC(n);fb=o;}else if(tg==='u'||tg==='s'||tg==='del'){CC(n);}else if(tg==='span'||tg==='a'){var sv=n.getAttribute('style'),o=fb;if(sv){if(/font-weight\s*:\s*(bold|700|800)/i.test(sv))fb='bold';if(/font-style\s*:\s*italic/i.test(sv))fb='italic';}CC(n);fb=o;}else if(tg==='br'){seg.push({t:'\n'});}else if(tg==='img'){seg.push({x:'img',n:n});}else if(tg==='table'){seg.push({x:'tbl',n:n});}else CC(n);}}
+    function CL(n){if(n.nodeType===3){var t=n.textContent.replace(/\s+/g,' ');if(t.trim())seg.push({t:t,b:fb,s:fs,c:fc});}else if(n.nodeType===1){var tg=n.tagName.toLowerCase();if(tg==='b'||tg==='strong'){var o=fb;fb='bold';CC(n);fb=o;}else if(tg==='i'||tg==='em'){var o=fb;fb='italic';CC(n);fb=o;}else if(tg==='u'||tg==='s'||tg==='del'){CC(n);}else if(tg==='span'||tg==='a'){var sv=n.getAttribute('style'),o=fb,oc=fc;if(sv){if(/font-weight\s*:\s*(bold|700|800)/i.test(sv))fb='bold';if(/font-style\s*:\s*italic/i.test(sv))fb='italic';var cm=sv.match(/color\s*:\s*([^;]+)/i);if(cm){var p=parseColor(cm[1].trim());if(p)fc=p;}}CC(n);fb=o;fc=oc;}else if(tg==='font'){var clr=n.getAttribute('color'),oc=fc;if(clr){var p=parseColor(clr);if(p)fc=p;}CC(n);fc=oc;}else if(tg==='br'){seg.push({t:'\n'});}else if(tg==='img'){seg.push({x:'img',n:n});}else if(tg==='table'){seg.push({x:'tbl',n:n});}else CC(n);}}
     function CC(n){for(var c=n.firstChild;c;c=c.nextSibling)CL(c);}SF();CL(p);
     for(var i=0;i<seg.length;i++){var s=seg[i];if(s.x==='img'||s.x==='tbl'){FL();PB(s.n);continue;}if(s.t==='\n'){FL();continue;}
       doc.setFont('helvetica',s.b);doc.setFontSize(s.s);var addW=doc.getTextWidth(s.t);
