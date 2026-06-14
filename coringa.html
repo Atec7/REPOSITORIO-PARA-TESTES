@@ -1186,6 +1186,26 @@ async function genDocCoringa(){
       doc.setPage(paginasGeradas);
     }
 
+    setStatus('Finalizando...');await yieldToBrowser();
+    doc.addPage();contentY=H-70;
+    const incluirAssPrestadora=document.getElementById('dc-ass-esp').checked;
+    doc.setDrawColor(...C.bdr);doc.setLineWidth(0.18);doc.line(m,contentY,PAG.PW-m,contentY);contentY+=6;
+    if(incluirAssPrestadora){
+      P_signatures(doc,contentY+14,
+        {nome:prestadora.nome||'EMPRESA CONTRATADA',cargo:'Representante Legal'},
+        {nome:RESP.nome,cargo:'Engenheiro Civil\nEngenheiro de Seguran\u00e7a do Trabalho\nEngenheiro Ambiental e Saneamento B\u00e1sico\n'+RESP.registro},
+        assData,false
+      );
+    }else{
+      const bw=70;doc.setDrawColor(...C.sub);doc.setLineWidth(0.3);
+      doc.line(PAG.PW-m-bw,contentY+14,PAG.PW-m,contentY+14);
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...C.dark);
+      doc.text(RESP.nome,PAG.PW-m-bw/2,contentY+18,{align:'center'});
+      doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(...C.sub);
+      doc.text('Engenheiro Civil | Engenheiro de Seguran\u00e7a do Trabalho\nEngenheiro Ambiental e Saneamento B\u00e1sico | CREA: '+RESP.registro,PAG.PW-m-bw/2,contentY+22,{align:'center'});
+    }
+    P_footer(doc,false,dataVal,dataValidade,prestadora.nome);
+
     setStatus('Adicionando tabelas...');await yieldToBrowser();
     const fmtImg=d=>d.includes('image/jpeg')||d.includes('jpg')?'JPEG':'PNG';
     DC_TABELAS.forEach(tb=>{
@@ -1217,26 +1237,6 @@ async function genDocCoringa(){
       else{batch.forEach((f,i)=>{const c=i%2,r=Math.floor(i/2);pImg(f,m+c*(iw+gh),st+r*(ih+gv));});}
       P_footer(doc,false,dataVal,dataValidade,prestadora.nome,'');
     }
-
-    setStatus('Finalizando...');await yieldToBrowser();
-    doc.addPage();contentY=H-70;
-    const incluirAssPrestadora=document.getElementById('dc-ass-esp').checked;
-    doc.setDrawColor(...C.bdr);doc.setLineWidth(0.18);doc.line(m,contentY,PAG.PW-m,contentY);contentY+=6;
-    if(incluirAssPrestadora){
-      P_signatures(doc,contentY+14,
-        {nome:prestadora.nome||'EMPRESA CONTRATADA',cargo:'Representante Legal'},
-        {nome:RESP.nome,cargo:'Engenheiro Civil\nEngenheiro de Seguran\u00e7a do Trabalho\nEngenheiro Ambiental e Saneamento B\u00e1sico\n'+RESP.registro},
-        assData,false
-      );
-    }else{
-      const bw=70;doc.setDrawColor(...C.sub);doc.setLineWidth(0.3);
-      doc.line(PAG.PW-m-bw,contentY+14,PAG.PW-m,contentY+14);
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...C.dark);
-      doc.text(RESP.nome,PAG.PW-m-bw/2,contentY+18,{align:'center'});
-      doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(...C.sub);
-      doc.text('Engenheiro Civil | Engenheiro de Seguran\u00e7a do Trabalho\nEngenheiro Ambiental e Saneamento B\u00e1sico | CREA: '+RESP.registro,PAG.PW-m-bw/2,contentY+22,{align:'center'});
-    }
-    P_footer(doc,false,dataVal,dataValidade,prestadora.nome);
 
     setStatus('Criptografando PDF (pode levar alguns segundos)...');await yieldToBrowser();
     const nomeDoc=(texto.titulo||'documento').replace(/[^\w\u0080-\uFFFF]/g,'_').replace(/_+/g,'_');
