@@ -424,6 +424,9 @@ function spin(on){document.getElementById('loader').style.display=on?'flex':'non
 function cleanForPdf(str){
   return(str||'').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,' ').split('\n').map(l=>l.replace(/ {2,}/g,' ').trimEnd()).join('\n').trim();
 }
+function dcCleanTitle(titulo){
+  return (titulo||'').replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();
+}
 function resolveEmp(id){if(!id)return null;const s=String(id).trim();if(DATA.empresas[s])return DATA.empresas[s];return toArr(DATA.empresas).find(e=>String(e.id||'').trim()===s)||null;}
 function cls(){document.querySelectorAll('.modal').forEach(e=>e.style.display='none');}
 function showResult(id,msg){const el=document.getElementById(id);if(!el)return;el.style.display='block';el.innerHTML='<div class="res"><i class="fa-solid fa-check-circle"></i> '+msg+'</div>';}
@@ -1034,7 +1037,7 @@ async function genDocCoringa(){
     const prestadora=DATA.empresas[pid];
     if(!contratante||!prestadora){alert('Dados n\u00e3o encontrados');spin(false);return;}
 
-    const texto={titulo:tituloDoc,conteudo:''};
+    const texto={titulo:dcCleanTitle(tituloDoc),conteudo:''};
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const m=PAG.PM,uw=PAG.UW,W=PAG.PW,H=PAG.PH;
     const centroW=W/2;
