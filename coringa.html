@@ -71,7 +71,6 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
   max-width:920px;margin:0 auto;
   background:var(--sf);
   border-radius:20px;
-  overflow:hidden;
   box-shadow:0 8px 40px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.06);
   border:1px solid var(--bd);
 }
@@ -116,7 +115,7 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .coringa-body{padding:24px;display:flex;flex-direction:column;gap:18px}
 .coringa-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .coringa-row:has(.coringa-full){grid-template-columns:1fr}
-.coringa-card{background:var(--hl);border-radius:12px;padding:16px;border:1px solid var(--bd)}
+.coringa-card{background:var(--hl);border-radius:12px;padding:16px;border:1px solid var(--bd);overflow:visible}
 .coringa-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:12px;font-weight:600;color:var(--tp);text-transform:uppercase;letter-spacing:.5px}
 .coringa-step{background:linear-gradient(145deg,#fbbf24 0%,#f59e0b 100%);color:#1c1c1e;font-size:10px;font-weight:700;padding:4px 8px;border-radius:5px;font-family:'DM Mono',monospace}
 .coringa-card select{padding:10px 12px;border-radius:8px}
@@ -142,7 +141,8 @@ hr.dv{border:none;border-top:1px solid var(--bd);margin:18px 0}
 .dc-editor-toolbar{
   display:flex;flex-wrap:wrap;align-items:center;gap:2px;
   padding:6px 8px;background:var(--hl);border:1px solid var(--bd);
-  border-radius:8px 8px 0 0;border-bottom:none;position:sticky;top:0;z-index:10;
+  border-radius:8px 8px 0 0;border-bottom:none;
+  position:-webkit-sticky;position:sticky;top:0;z-index:100;
 }
 .dc-editor-toolbar button{
   width:30px;height:28px;border:none;background:transparent;border-radius:4px;
