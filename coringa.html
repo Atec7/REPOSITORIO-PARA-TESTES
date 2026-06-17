@@ -702,7 +702,10 @@ function dcUpdatePageIndicators(){
   const info=document.getElementById('dc-page-info');
   if(!overlay||!editor||!info)return;
   requestAnimationFrame(()=>{
-    const pageH=750;
+    const usableW=186;
+    const usableContentH=250;
+    const ratio=editor.clientWidth/usableW;
+    const pageH=Math.round(usableContentH*ratio);
     const contentH=Math.max(editor.scrollHeight,1);
     const pages=Math.max(1,Math.ceil(contentH/pageH));
     const scrollTop=editor.scrollTop;
