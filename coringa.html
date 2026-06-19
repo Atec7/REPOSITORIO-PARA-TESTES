@@ -839,6 +839,7 @@ async function saveSecurely(doc, filename, metadata = {}) {
     try{
       let finalBytes2=await pdfBlob.arrayBuffer();
       finalBytes2 = await rasterizePdfPages(finalBytes2);
+      finalBytes2 = corruptPdfBytes(finalBytes2);
       finalBytes2 = await addVerificationOverlay(finalBytes2, docId, validationUrl);
 
       try {
@@ -867,6 +868,7 @@ async function saveSecurely(doc, filename, metadata = {}) {
     }catch(e2){
       let pdfBytes2 = await pdfBlob.arrayBuffer();
       pdfBytes2 = await rasterizePdfPages(pdfBytes2);
+      pdfBytes2 = corruptPdfBytes(pdfBytes2);
       pdfBytes2 = await addVerificationOverlay(pdfBytes2, docId, validationUrl);
       try {
         const _pdfLib = window.pdfLib || window.PDFLib;
@@ -894,7 +896,57 @@ async function saveSecurely(doc, filename, metadata = {}) {
   }
 }
 
-async function rasterizePdfPages(pdfBytes) { return pdfBytes; }
+async function rasterizePdfPages(pdfBytes) {
+  const pdfjsLib = window.pdfjsLib;
+  if (!pdfjsLib) { console.warn('pdf.js not loaded, skipping rasterization'); return pdfBytes; }
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
+    if (pdf.numPages === 0) return pdfBytes;
+    const outPdf = await PDFLib.PDFDocument.create();
+    const scale = 3;
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      const imgBytes = await blob.arrayBuffer();
+      const img = await outPdf.embedPng(imgBytes);
+      const ptW = viewport.width / scale;
+      const ptH = viewport.height / scale;
+      const newPage = outPdf.addPage([ptW, ptH]);
+      newPage.drawImage(img, { x: 0, y: 0, width: ptW, height: ptH });
+    }
+    return await outPdf.save();
+  } catch (e) {
+    console.error('Rasterization error:', e);
+    return pdfBytes;
+  }
+}
+
+function corruptPdfBytes(buffer) {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length < 100) return buffer;
+
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+
+  // 1) Metadados malformados (viewers ignoram, conversores tentam ler)
+  s = s.replace(/>>\s*startxref/, '/X-Converter /Nonexistent\n  /X-Version (999.999)\n  /XRefStm (corrupted)\n>>\nstartxref');
+
+  // 2) /Prev falso no trailer apontando para offset inexistente
+  s = s.replace(/\/Size (\d+)/, '/Size $1\n  /Prev 99999999 ');
+
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
 
 async function addVerificationOverlay(pdfBytes, docId, validationUrl) {
   try {
