@@ -897,7 +897,7 @@ function _updateHeaderFull(headerId,slotName,prestadora,contratante,duasLogos,ti
    PAGE OVERFLOW ENGINE
    Splits editor content into A4-height pages.
    Max content height = 1006 px (a4-h 1123 - header 83 - footer 34)
-   Uses marker-based cursor preservation (<span id="__caret__">)
+   Uses character-offset-based cursor preservation
 ═══════════════════════════════════════════════════════════════ */
 let _dcUpdatingOverflow=false;
 let _dcOverflowTimer=null;
@@ -959,21 +959,54 @@ function _attachEditableListeners(ed){
     if(_dcOverflowTimer)clearTimeout(_dcOverflowTimer);
     _dcOverflowTimer=setTimeout(dcUpdateOverflow,200);
   });
+  _trackEditorFocus(ed);
+}
+
+function dcSaveCursorOffset(){
+  const sel=document.getSelection();
+  if(!sel||!sel.rangeCount||!sel.anchorNode)return-1;
+  const eds=document.querySelectorAll('.dc-content-editable');
+  let charOffset=0;
+  for(const ed of eds){
+    const walker=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT,null,false);
+    let node;
+    while((node=walker.nextNode())!==null){
+      if(node===sel.anchorNode){charOffset+=sel.anchorOffset;return charOffset;}
+      charOffset+=(node.textContent||'').length;
+    }
+  }
+  return-1;
+}
+
+function dcRestoreCursorOffset(charOffset){
+  if(charOffset<0)return;
+  const sel=document.getSelection();
+  const eds=document.querySelectorAll('.dc-content-editable');
+  if(!eds.length)return;
+  let accumulated=0;
+  for(const ed of eds){
+    const walker=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT,null,false);
+    let node;
+    while((node=walker.nextNode())!==null){
+      const len=(node.textContent||'').length;
+      if(accumulated+len>charOffset){
+        const off=charOffset-accumulated;
+        try{const r=document.createRange();r.setStart(node,Math.min(off,len));r.collapse(true);sel.removeAllRanges();sel.addRange(r);ed.focus();return;}catch(e){}
+      }
+      accumulated+=len;
+    }
+    if(accumulated>=charOffset){
+      try{const r=document.createRange();r.selectNodeContents(ed);r.collapse(false);sel.removeAllRanges();sel.addRange(r);ed.focus();return;}catch(e){}
+    }
+  }
 }
 
 function dcUpdateOverflow(){
   if(_dcUpdatingOverflow)return;
   _dcUpdatingOverflow=true;
   try{
-    // ── 1. Save cursor with marker ──
-    const sel=document.getSelection();
-    let hadMarker=false;
-    if(sel&&sel.rangeCount){
-      const r=sel.getRangeAt(0);
-      const m=document.createElement('span');
-      m.id='__caret__';
-      try{r.insertNode(m);hadMarker=true;}catch(e){}
-    }
+    // ── 1. Save cursor as character offset ──
+    const cursorOffset=dcSaveCursorOffset();
 
     // ── 2. Collect all content ──
     const allHTML=dcCollectAllHTML();
@@ -988,7 +1021,6 @@ function dcUpdateOverflow(){
     }
     const isEmpty=!blocks.length||(blocks.length===1&&(blocks[0]==='<p><br></p>'||blocks[0]==='<br>'));
     if(isEmpty){
-      // Reset to single empty page
       const p3ed=document.getElementById('dc-editor-host');
       if(p3ed)p3ed.innerHTML='<p><br></p>';
       document.getElementById('dc-preview-pages').innerHTML='';
@@ -1021,17 +1053,16 @@ function dcUpdateOverflow(){
 
     // ── 5. Update page 3 (has header) ──
     const p3ed=document.getElementById('dc-editor-host');
-    if(p3ed&&p3ed.innerHTML!==pageHTMLs[0])p3ed.innerHTML=pageHTMLs[0];
+    if(p3ed) p3ed.innerHTML=pageHTMLs[0];
     _setTxt('content-footer-text',_footerTxt_pg(3));
     _setTxt('dc-content-page-num','Pg. 3');
 
     // ── 6. Sync pages 4+ (no header) ──
     const container=document.getElementById('dc-preview-pages');
-    if(!container)return;
     const needed=totalPages-1;
-    let extras=Array.from(container.children);
+    let extras=container?Array.from(container.children):[];
     while(extras.length>needed){extras.pop().remove();}
-    while(extras.length<needed){
+    while(extras.length<needed&&container){
       const idx=extras.length;
       const pg=dcBuildContentPage(4+idx,pageHTMLs[1+idx]||'<p><br></p>',false);
       container.appendChild(pg);
@@ -1041,29 +1072,20 @@ function dcUpdateOverflow(){
       const pgNum=4+i;
       const ed=w.querySelector('.dc-content-editable');
       const html=pageHTMLs[i+1]||'<p><br></p>';
-      if(ed&&ed.innerHTML!==html)ed.innerHTML=html;
+      if(ed)ed.innerHTML=html;
       const pn=w.querySelector('.dc-pg-number');
       if(pn)pn.textContent='Pg. '+pgNum;
       const ft=w.querySelector('.dc-pg-footer-text');
       if(ft)ft.textContent=_footerTxt_pg(pgNum);
     });
 
-    // ── 7. Restore cursor from marker ──
-    if(hadMarker){
-      const mk=document.getElementById('__caret__');
-      if(mk){
-        try{
-          const r2=document.createRange();
-          r2.setStartBefore(mk);
-          r2.collapse(true);
-          sel.removeAllRanges();sel.addRange(r2);
-          mk.remove();
-          if(mk.parentNode)mk.parentNode.normalize();
-          // Ensure focus on the page containing the marker
-          const p=mk.closest('.dc-content-editable');
-          if(p&&!p.contains(sel.anchorNode))p.focus();
-        }catch(e){}
-      }
+    // ── 7. Restore cursor from offset ──
+    dcRestoreCursorOffset(cursorOffset);
+
+    // Ensure _dcLastEditor points to a live element
+    if(!_dcLastEditor||!document.body.contains(_dcLastEditor)){
+      const fe=document.querySelector('.dc-content-editable');
+      if(fe)_dcLastEditor=fe;
     }
 
     _setTxt('sb-pages',totalPages);
@@ -1178,6 +1200,19 @@ function dcAtualizarToolbar(){
 /* ═══════════════════════════════════════════════════════════════
    EDITOR FORMAT
 ═══════════════════════════════════════════════════════════════ */
+let _dcLastEditor=null;
+
+function _trackEditorFocus(ed){
+  ed.addEventListener('focus',function(){_dcLastEditor=ed;});
+}
+
+function _getActiveEditor(){
+  const ae=document.activeElement;
+  if(ae&&ae.closest('.dc-content-editable'))return ae.closest('.dc-content-editable');
+  if(_dcLastEditor&&document.body.contains(_dcLastEditor))return _dcLastEditor;
+  return document.querySelector('.dc-content-editable')||null;
+}
+
 function dcFormat(cmd,val){
   const ed=_getActiveEditor();
   if(!ed)return;
