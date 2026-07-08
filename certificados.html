@@ -1679,21 +1679,23 @@ async function gerarCertificados(){
     try {
         await update(ref(db), updates);
 
-        const expiracaoGeral = selectedCoursesWithDates
-            .map(c => calcExpiracao(c.dataFim, c.curso.validade))
-            .filter(Boolean)
-            .sort()
-            [0] || null;
+        const historyData = new Date().toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const historyTs = Date.now();
+        const funcIds = selecionadosAlunos.map(a => a.id);
 
-        push(ref(db, 'historico'), {
-            nome: `Certificados - ${certCount} emitido(s)`,
-            data: new Date().toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            ts: Date.now(),
-            empresaId: empresaId,
-            funcionarioIds: selecionadosAlunos.map(a => a.id),
-            expiracao: expiracaoGeral,
-            tipo: 'certificado',
-            categoria: 'Documento'
+        selectedCoursesWithDates.forEach(courseDateItem => {
+            const exp = calcExpiracao(courseDateItem.dataFim, courseDateItem.curso.validade);
+            push(ref(db, 'historico'), {
+                nome: `Certificado - ${courseDateItem.curso.nome}`,
+                data: historyData,
+                ts: historyTs,
+                empresaId: empresaId,
+                funcionarioIds: funcIds,
+                expiracao: exp,
+                tipo: 'certificado',
+                certificadoCursoId: courseDateItem.curso.id,
+                qtd: selecionadosAlunos.length
+            });
         });
 
         alert(`clique em "OK" Para liberar a visualização de ${certCount} certificado(s). Clique em "Baixar PDF".`);
