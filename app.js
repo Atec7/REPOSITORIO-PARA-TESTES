@@ -3,7 +3,7 @@ var DB_BASE_URL = 'https://babearia-jhosuan-default-rtdb.firebaseio.com';
 
 // Versão atual do app. Ao publicar uma nova versão, atualize ESTE valor,
 // o VERSION em sw.js e o "version" em version.json (devem ser iguais).
-var APP_VERSION = '1.0.0';
+var APP_VERSION = '1.1.0';
 
 // ===== UTILITIES =====
 var currentUser = null;
@@ -2162,24 +2162,40 @@ function showUpdateModal(serverV) {
 
 function applyUpdate() {
   var btn = $('updateNowBtn');
+  var restoreBtn = function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar agora'; }
+  };
   if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
 
-  if ('serviceWorker' in navigator) {
-    var reloaded = false;
-    var forceReload = function() {
-      if (reloaded) return;
-      reloaded = true;
+  var reloaded = false;
+  var forceReload = function() {
+    if (reloaded) return;
+    reloaded = true;
+    if ('caches' in window) {
+      caches.keys().then(function(keys) {
+        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+      }).catch(function() {}).then(function() {
+        window.location.reload();
+      });
+    } else {
       window.location.reload();
-    };
+    }
+  };
+
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('controllerchange', forceReload);
     navigator.serviceWorker.getRegistration().then(function(reg) {
       if (!reg) { forceReload(); return; }
       reg.update().catch(function() {});
-      setTimeout(forceReload, 4000);
-    }).catch(forceReload);
+      setTimeout(forceReload, 3000);
+    }).catch(function() {
+      setTimeout(forceReload, 3000);
+    });
   } else {
     window.location.reload();
   }
+
+  setTimeout(restoreBtn, 10000);
 }
 
 // ===== INSTALAÇÃO (PWA) =====

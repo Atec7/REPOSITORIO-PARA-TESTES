@@ -4,7 +4,7 @@
 // Ao publicar uma nova versão, altere VERSION (mesmo valor de version.json
 // e de APP_VERSION em app.js). O cache é versionado para forçar recarga.
 // =====================================================================
-var VERSION = '1.0.0';
+var VERSION = '1.1.0';
 var CACHE = 'ups-system-' + VERSION;
 var SHELL = [
   './',
@@ -81,18 +81,18 @@ self.addEventListener('fetch', function(e) {
   // version.json nunca entra em cache (precisa ser sempre fresco)
   if (url.pathname.indexOf('version.json') !== -1) return;
 
-  // Assets locais (estáticos do app): cache-first com atualização em segundo plano
+  // Assets locais (estáticos do app): rede primeiro, cache como fallback.
+  // Assim, em linha, a recarga sempre traz a versão mais recente; offline usa o cache.
   if (isSameOrigin) {
     e.respondWith(
-      caches.match(req).then(function(cached) {
-        var network = fetch(req).then(function(res) {
-          if (res && res.ok) {
-            var copy = res.clone();
-            caches.open(CACHE).then(function(cache) { cache.put(req, copy); });
-          }
-          return res;
-        }).catch(function() { return cached; });
-        return cached || network;
+      fetch(req).then(function(res) {
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function(cache) { cache.put(req, copy); });
+        }
+        return res;
+      }).catch(function() {
+        return caches.match(req);
       })
     );
     return;
